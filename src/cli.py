@@ -30,11 +30,12 @@ def list_encodings():
 @cloup.option("--image", required=True)
 @cloup.option("--grayscale", type=cloup.BOOL, default=True, show_default=True)
 @cloup.option("--n-shots", type=int)
-def encode(**kwargs):
-    if kwargs.get("data") and kwargs.get("map"):
-        data_path, map_path = kwargs.get("data"), kwargs.get("map")
+@cloup.option("-v", "--verbose", is_flag=True)
+def encode(**params):
+    if params.get("data") and params.get("map"):
+        data_path, map_path = params.get("data"), params.get("map")
     else:
-        encoding_path = kwargs.get("encoding")
+        encoding_path = params.get("encoding")
 
         data_path = f"{encoding_path}/data.py"
         map_path = f"{encoding_path}/map.py"
@@ -42,19 +43,19 @@ def encode(**kwargs):
     data_function = getattr(main.import_module("data", data_path), "data")
     map_function = getattr(main.import_module("map", map_path), "map")
 
-    image = Image.open(kwargs.get("image"))
-    if kwargs.get("grayscale"):
+    image = Image.open(params.get("image"))
+    if params.get("grayscale"):
         image = np.asarray(ImageOps.grayscale(image))
     else:
         image = np.asarray(image)
 
     image = image / 255.0
 
-    circuit = main.encode(data_function, map_function, image)
+    circuit = main.encode(data_function, map_function, image, params)
 
-    if (kwargs.get("n_shots") or 0) > 0:
-        result = main.simulate(circuit, kwargs.get("n_shots"))
-        print(result.get_counts(circuit))
+    if (params.get("n_shots") or 0) > 0:
+        result = main.simulate(circuit, params.get("n_shots"))
+        print(dict(sorted(result.get_counts(circuit).items())))
 
 
 if __name__ == '__main__':

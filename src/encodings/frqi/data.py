@@ -3,9 +3,9 @@ import numpy as np
 from qiskit.quantum_info import Statevector
 
 
-def data(u: int, v: int, image: np.ndarray) -> Statevector:
-    R = np.ceil(np.log2(np.max(image.shape))).astype(int)
-
+def data(u: int, v: int, R: int, image: np.ndarray) -> Statevector:
     m = u * image.shape[0] + v
+    data_vector = np.zeros(2**(2*R))
+    data_vector[m] = 1
 
-    return Statevector([int(b) for b in reversed(f"{m:0{2*R}b}")])
+    return Statevector(data_vector)

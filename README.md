@@ -1,5 +1,12 @@
 # optiq-geqie
 
+### Installation
+
+```bash
+pip install -r requirements/requirements.in
+```
+
+
 ### Example usage
 
 ```bash
