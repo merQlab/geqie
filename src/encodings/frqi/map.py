@@ -1,9 +1,13 @@
 import numpy as np
 
-from qiskit.quantum_info import Statevector
+from qiskit.quantum_info import Operator
 
 
-def map(u: int, v: int, R: int, image: np.ndarray) -> Statevector:
-    p = image[u, v]
+def map(u: int, v: int, R: int, image: np.ndarray) -> Operator:
+    p = image[u, v] * np.pi / 2
+    map_operator = [
+        [np.cos(p), -np.sin(p)],
+        [np.sin(p), np.cos(p)],
+    ]
 
-    return Statevector([np.cos(np.pi/2*p), np.sin(np.pi/2*p)])
+    return Operator(map_operator)
