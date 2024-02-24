@@ -4,13 +4,13 @@ from typing import Callable, Dict
 
 import numpy as np
 
-from qiskit import Aer, transpile
+from qiskit import Aer
 from qiskit.circuit import QuantumCircuit
 from qiskit.extensions import Initialize
 from qiskit.quantum_info import Operator, Statevector
 from qiskit.result import Result
 
-import src.utils as utils
+from geqie.utils.print import tabulate_complex
 
 
 def encode(
@@ -20,6 +20,8 @@ def encode(
     image: np.ndarray,
     ctx: Dict = {}
 ) -> QuantumCircuit:
+    verbosity_level = ctx.get("verbose", 0)
+
     R = np.ceil(np.log2(np.max(image.shape))).astype(int)
 
     products, data_vectors, map_operators = [], [], []
@@ -31,7 +33,7 @@ def encode(
         data_vectors.append(data_vector)
         map_operators.append(map_operator)
 
-        if ctx.get("verbose", 0) > 1:
+        if verbosity_level > 2:
             print(f"{u=}, {v=}")
             print(f"{data_vector=}")
             print(f"{map_operator=}")
@@ -40,14 +42,14 @@ def encode(
 
     G = np.sum(products, axis=0)
     U, _ = np.linalg.qr(G)
-    if ctx.get("verbose"):
-        print(f"G=\n{utils.tabulate_complex(G)}")
-        print(f"U=\n{utils.tabulate_complex(U)}")
+    if verbosity_level > 1:
+        print(f"G=\n{tabulate_complex(G)}")
+        print(f"U=\n{tabulate_complex(U)}")
     
     U_op = Operator(U)
     n_qubits = U_op.num_qubits
     init_state = init_function(n_qubits)
-    if ctx.get("verbose"):
+    if verbosity_level > 1:
         print(f"{init_state=}")
 
     circuit = QuantumCircuit(n_qubits)
@@ -56,7 +58,8 @@ def encode(
     circuit.append(U_op, range(n_qubits))
     circuit.measure_all()
 
-    print(circuit.draw())
+    if verbosity_level > 0:
+        print(circuit.draw())
 
     return circuit
 

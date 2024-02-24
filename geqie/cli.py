@@ -12,7 +12,7 @@ from PIL import Image, ImageOps
 
 import numpy as np
 
-import main
+import geqie.main as main
 
 
 ENCODINGS_PATH = Path(__file__).parent / "encodings"
@@ -84,7 +84,7 @@ def encoding_options(func):
     )
     @cloup.option("--image", required=True, help="Path to the image file")
     @cloup.option("--grayscale", type=cloup.BOOL, default=True, show_default=True, help="Indication wether the image is grayscale")
-    @cloup.option("-v", "--verbose", count=True, default=0, help="Increase verbosity (can be used multiple times, up to '-vv')")
+    @cloup.option("-v", "--verbose", count=True, default=0, help="Increase verbosity (can be used multiple times, up to '-vvv')")
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         return func(*args, **kwargs)
