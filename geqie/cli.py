@@ -2,7 +2,6 @@ import importlib
 import importlib.util
 import sys
 import functools
-from collections import namedtuple
 from pathlib import Path
 from typing import Callable, Dict, NamedTuple
 
@@ -13,7 +12,6 @@ from PIL import Image, ImageOps
 import numpy as np
 
 import geqie.main as main
-
 
 ENCODINGS_PATH = Path(__file__).parent / "encodings"
 
