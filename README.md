@@ -11,6 +11,7 @@
     - [Command `geqie list-encodings`](#command-geqie-list-encodings)
     - [Command `geqie encode`](#command-geqie-encode)
     - [Command `geqie simulate`](#command-geqie-simulate)
+- [Related research](#related-research)
 
 ## Installation
 
@@ -86,3 +87,7 @@ Other options:
 ```bash
 geqie simulate --encoding frqi --image assets/test_image.png --n-shots 1024
 ```
+
+## Related research
+
+- [ICCS 2024 Poster](https://www.researchgate.net/publication/383184874_General_Quantum_Image_Representation_Model_and_Framework)
