@@ -1,4 +1,6 @@
 cloup
+ipykernel
+pillow
 qiskit
 qiskit-aer
 tabulate
