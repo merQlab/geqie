@@ -4,11 +4,11 @@ from typing import Callable, Dict
 
 import numpy as np
 
-from qiskit import Aer
 from qiskit.circuit import QuantumCircuit
 from qiskit.extensions import Initialize
 from qiskit.quantum_info import Operator, Statevector
 from qiskit.result import Result
+from qiskit_aer import Aer
 
 from geqie.utils.print import tabulate_complex
 
