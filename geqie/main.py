@@ -5,7 +5,6 @@ from typing import Callable, Dict
 import numpy as np
 
 from qiskit.circuit import QuantumCircuit
-from qiskit.extensions import Initialize
 from qiskit.quantum_info import Operator, Statevector
 from qiskit.result import Result
 from qiskit_aer import Aer
@@ -54,7 +53,7 @@ def encode(
 
     circuit = QuantumCircuit(n_qubits)
     if not np.all(init_state.data == 1):
-        circuit.append(Initialize(init_state, normalize=True), range(n_qubits))
+        circuit.initialize(init_state, range(n_qubits), normalize=True)
     circuit.append(U_op, range(n_qubits))
     circuit.measure_all()
 
