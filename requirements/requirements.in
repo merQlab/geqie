@@ -1,6 +1,5 @@
 cloup
-ipykernel
 pillow
-qiskit
+qiskit>1.0.0
 qiskit-aer
 tabulate
