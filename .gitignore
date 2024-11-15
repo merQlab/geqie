@@ -2,6 +2,9 @@
 !.gitignore
 
 __pycache__
+venv
+examples/requirements/test.py
+assets
 
 build
 *.egg-info
