@@ -1,8 +1,9 @@
+# Here is minimum working formula in .py code:
+
 import numpy as np
 from PIL import Image, ImageOps
 
 import matplotlib.pyplot as plt
-import seaborn as sns
 
 import geqie
 from geqie.encodings import frqi
