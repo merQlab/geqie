@@ -23,7 +23,7 @@ def encode(
 ) -> QuantumCircuit:
     verbosity_level = ctx.get("verbose", 0)
 
-    R = np.ceil(np.log2(np.max(image.shape))).astype(int)
+    R = np.ceil(np.log2(np.max((image.shape[0], image.shape[1])))).astype(int)
 
     products, data_vectors, map_operators = [], [], []
     for u, v in itertools.product(range(image.shape[0]), range(image.shape[1])):

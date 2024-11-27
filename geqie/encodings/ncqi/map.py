@@ -23,12 +23,7 @@ def map(u: int, v: int, R: int, image: np.ndarray) -> Operator:
         elif channel == 2:
             map_operator[channel] = np.kron(x_gate, identity_gate)
 
-        if pixel_value_as_binary_array[0] == 1:
-            map_operator[channel] = x_gate
-        else:
-            map_operator[channel] = identity_gate
-
-        for bit in pixel_value_as_binary_array[1:8]:
+        for bit in pixel_value_as_binary_array[0:8]:
             if bit == 1:
                 map_operator[channel] = np.kron(x_gate, map_operator[channel])
             else:
