@@ -73,19 +73,25 @@ Custom encoding plugins:
   --map TEXT
 
 Other options:
-  --encoding TEXT      Name of the encoding from 'encodings' directory
-  --image TEXT         Path to the image file  [required]
-  --grayscale BOOLEAN  Indication wether the image is grayscale  [default: True]
-  -v, --verbose        Increase verbosity (can be used multiple times, up to
-                       '-vvv')
-  --n-shots INTEGER    Number of simulation shots
-  --help               Show this message and exit.
+  --encoding TEXT                 Name of the encoding from 'encodings'
+                                  directory
+  --image TEXT                    Path to the image file  [required]
+  --grayscale BOOLEAN             Indication wether the image is grayscale
+                                  [default: True]
+  -v, --verbose                   Increase verbosity (can be used multiple
+                                  times, up to '-vvv')
+  --n-shots INTEGER               Number of simulation shots
+  --return-qiskit-result BOOLEAN  Return results directly from qiskit  [default:
+                                  False]
+  --return-padded-counts BOOLEAN  Return state counts including zero-count
+                                  states  [default: False]
+  --help                          Show this message and exit.
 ```
 
 **Example**
 
 ```bash
-geqie simulate --encoding frqi --image assets/test_image.png --n-shots 1024
+geqie simulate --encoding frqi --image assets/test_image.png --n-shots 1024 --return-padded-counts true
 ```
 
 ## Related research

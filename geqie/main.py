@@ -19,7 +19,7 @@ def encode(
     data_function: Callable[[int, int, int, np.ndarray], Statevector], 
     map_function: Callable[[int, int, int, np.ndarray], Operator], 
     image: np.ndarray,
-    ctx: Dict = {}
+    ctx: Dict = {},
 ) -> QuantumCircuit:
     verbosity_level = ctx.get("verbose", 0)
 
@@ -65,14 +65,23 @@ def encode(
     return circuit
 
 
-def simulate(circuit: QuantumCircuit, n_shots: int, return_qiskit_result: bool = False) -> Dict[str, int] | Result:
+def simulate(
+    circuit: QuantumCircuit, 
+    n_shots: int, 
+    return_qiskit_result: bool = False, 
+    return_padded_counts: bool = False,
+) -> Dict[str, int] | Result:
     simulator = Aer.get_backend('aer_simulator')
+
     result = simulator.run(circuit, shots=n_shots, memory=True).result()
     if return_qiskit_result:
         return result
 
     counts = result.get_counts(circuit)
-    return counts
-    counts_padded = {f"{n:0{circuit.num_qubits}b}": 0 for n in range(2**circuit.num_qubits)}
-    counts_padded = {**counts_padded, **counts}
-    return counts_padded
+
+    if return_padded_counts:
+        counts_padded = {f"{n:0{circuit.num_qubits}b}": 0 for n in range(2**circuit.num_qubits)}
+        counts_padded = {**counts_padded, **counts}
+        return counts_padded
+    else:
+        return counts

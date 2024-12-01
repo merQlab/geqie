@@ -97,14 +97,24 @@ def encode(**params):
     return main.encode(e.init_function, e.data_function, e.map_function, image, params)
 
 
+def simulate_options(func):
+    @cloup.option("--n-shots", type=int, help="Number of simulation shots")
+    @cloup.option("--return-qiskit-result", type=cloup.BOOL, default=False, show_default=True, help="Return results directly from qiskit")
+    @cloup.option("--return-padded-counts", type=cloup.BOOL, default=False, show_default=True, help="Return state counts including zero-count states")
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        return func(*args, **kwargs)
+    return wrapper
+
+
 @cli.command()
 @encoding_options
-@cloup.option("--n-shots", type=int, help="Number of simulation shots")
+@simulate_options
 @cloup.pass_context
 def simulate(ctx: cloup.Context, **params):
     circuit = ctx.invoke(encode, **params)
-    n_shots = params.get("n_shots")
-    print(main.simulate(circuit, n_shots))
+    cli_params = {name: value for name, value in params.items() if name in ["n_shots", "return_qiskit_result", "return_padded_counts"]}
+    print(main.simulate(circuit, **cli_params))
 
 
 if __name__ == '__main__':
