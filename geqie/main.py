@@ -21,7 +21,7 @@ def encode(
     image: np.ndarray,
     ctx: Dict = {},
 ) -> QuantumCircuit:
-    verbosity_level = ctx.get("verbose", 0)
+    verbosity_level = -1 # ctx.get("verbose", 0)
 
     R = np.ceil(np.log2(np.max((image.shape[0], image.shape[1])))).astype(int)
 
@@ -54,10 +54,10 @@ def encode(
         print(f"{init_state=}")
 
     circuit = QuantumCircuit(n_qubits)
-    if not np.all(init_state.data == 1):
-        circuit.initialize(init_state, range(n_qubits-data_vectors[0].num_qubits-1, n_qubits), normalize=True)
+    # if not np.all(init_state.data == 1):
+    circuit.initialize(init_state, range(n_qubits - data_vectors[0].num_qubits - 1, n_qubits), normalize=True)
     circuit.append(U_op, range(n_qubits))
-    circuit.measure_all()
+    # circuit.measure_all()
 
     if verbosity_level > 0:
         print(circuit.draw())
