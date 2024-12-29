@@ -55,7 +55,7 @@ def encode(
 
     circuit = QuantumCircuit(n_qubits)
     if not np.all(init_state.data == 1):
-        circuit.initialize(init_state, range(n_qubits-data_vectors[0].num_qubits-1, n_qubits), normalize=True)
+        circuit.initialize(init_state, range(n_qubits-data_vectors[0].num_qubits - 1, n_qubits), normalize=True)
     circuit.append(U_op, range(n_qubits))
     circuit.measure_all()
 
@@ -81,7 +81,6 @@ def simulate(
 
     if return_padded_counts:
         counts_padded = {f"{n:0{circuit.num_qubits}b}": 0 for n in range(2**circuit.num_qubits)}
-        counts_padded = {**counts_padded, **counts}
-        return counts_padded
+        return {**counts_padded, **counts}
     else:
         return counts
