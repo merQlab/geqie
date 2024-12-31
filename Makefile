@@ -7,7 +7,7 @@ install-requirements-dev:
 install-requirements-uv:
 	uv pip install -r requirements/requirements.in
 
-install-requirements-dev-uv:
+install-requirements-uv-dev:
 	uv pip install -r requirements/requirements_dev.in
 
 
