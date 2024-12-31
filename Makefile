@@ -11,5 +11,11 @@ install-requirements-uv-dev:
 	uv pip install -r requirements/requirements_dev.in
 
 
+install-requirements-ci:
+	pip install -U uv
+	uv pip install -r requirements/requirements_dev.in --system
+
 test:
 	pytest tests -W ignore::DeprecationWarning
+
+
