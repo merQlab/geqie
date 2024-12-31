@@ -4,7 +4,7 @@ from qiskit.quantum_info import Operator
 
 
 def map(u: int, v: int, R: int, image: np.ndarray) -> Operator:
-    p = image[u, v] * np.pi / (2 * 255.0)
+    p = image[u, v] / 255.0 * (np.pi / 2)
     map_operator = [
         [np.cos(p), -np.sin(p)],
         [np.sin(p),  np.cos(p)],

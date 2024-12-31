@@ -53,11 +53,9 @@ def _get_encoding_functions(params: Dict):
 def _parse_image(params):
     image = Image.open(params.get("image"))
     if params.get("grayscale"):
-        image = np.asarray(ImageOps.grayscale(image))
+        return np.asarray(ImageOps.grayscale(image))
     else:
-        image = np.asarray(image)
-    image = image / 255.0
-    return image
+        return np.asarray(image)
 
 
 @cloup.group()

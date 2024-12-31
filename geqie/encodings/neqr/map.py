@@ -2,26 +2,29 @@ import numpy as np
 
 from qiskit.quantum_info import Operator
 
-identity_gate = np.array([[1, 0], [0, 1]])
-x_gate = np.array([[0, 1], [1, 0]])
+I_GATE = np.eye(2)
+X_GATE = np.array([
+    [0, 1], 
+    [1, 0]
+])
 
 
 def map(u: int, v: int, R: int, image: np.ndarray) -> Operator:
     p = image[u, v]
-    # Convert value to string to the binary form, cut '0b', and padd with 0 example: '0001 1101':
+    # Convert value to binary string, without '0b' and padded with 0s, e.g.: '0001 1101':
     pixel_value_as_binary_string = bin(p)[2:].zfill(8)
     # Convert to logic array:
     pixel_value_as_binary_array = [int(bit) for bit in pixel_value_as_binary_string][::-1]
 
     if pixel_value_as_binary_array[0] == 1:
-        map_operator = x_gate
+        map_operator = X_GATE
     else:
-        map_operator = identity_gate
+        map_operator = I_GATE
 
     for bit in pixel_value_as_binary_array[1:8]:
         if bit == 1:
-            map_operator = np.kron(x_gate, map_operator)
+            map_operator = np.kron(X_GATE, map_operator)
         else:
-            map_operator = np.kron(identity_gate, map_operator)
+            map_operator = np.kron(I_GATE, map_operator)
 
     return Operator(map_operator)
