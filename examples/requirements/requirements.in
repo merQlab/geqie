@@ -1,4 +1,4 @@
 -r ../../requirements/requirements.in
 
 ipykernel
-seaborn
+pylatexenc
