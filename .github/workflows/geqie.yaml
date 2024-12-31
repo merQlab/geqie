@@ -26,6 +26,7 @@ jobs:
     - name: Install dependencies
       run: |
         pip install -U uv
+        uv venv optiq-geqie
         uv pip install flake8 pytest
         make install-dependencies-uv-dev
     - name: Lint with flake8
