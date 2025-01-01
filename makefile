@@ -3,7 +3,7 @@ image=./assets/test_image.png
 
 frqci :
 	echo "FRQCI encoding"
-	./piaskownica/bin/geqie simulate --image $(image) --encoding frqci 
+	./piaskownica/bin/geqie simulate --image $(image) --grayscale false --encoding frqci  
 
 frqi :
 	echo "FRQI encoding"
