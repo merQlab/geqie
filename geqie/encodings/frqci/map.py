@@ -8,11 +8,6 @@ def map(u: int, v: int, R: int, image: np.ndarray) -> Operator:
     green = image[u, v, 1]
     blue  = image[u, v, 2]
     
-    #  File "/home/krzysztof/Dokumenty/github-repos/geqie/geqie/encodings/frqci/map.py", line 7, in map
-    # red   = image[u, v, 0]
-    #         ~~~~~^^^^^^^^^
-    # IndexError: too many indices for array: array is 2-dimensional, but 3 were indexed
-        
     pi = np.pi;
     red_coeff = 2**16;
     green_coeff = 2**8;
