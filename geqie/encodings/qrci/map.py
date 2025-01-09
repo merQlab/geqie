@@ -1,39 +1,46 @@
 import numpy as np
-
 from qiskit.quantum_info import Operator
 
 
+KET_BRA_0 = np.array([[1, 0], [0, 0]])
+KET_BRA_1 = np.array([[0, 0], [0, 1]])
 I_GATE = np.eye(2)
 X_GATE = np.array([
     [0, 1], 
     [1, 0]
 ])
 
+# Precompute label operators to avoid recalculating them in the loop
+LABEL_OPERATORS = [
+    np.kron(k1, np.kron(k2, k3))
+    for k1 in (KET_BRA_0, KET_BRA_1)
+    for k2 in (KET_BRA_0, KET_BRA_1)
+    for k3 in (KET_BRA_0, KET_BRA_1)
+]
+
+def get_channel_gate(bit_value: str) -> np.ndarray:
+    """Returns the appropriate gate for the given bit value."""
+    return X_GATE if bit_value == '1' else I_GATE
 
 def map(u: int, v: int, R: int, image: np.ndarray) -> Operator:
-    map_operator = [None, None, None]
+    u_v_pixel_operator = np.zeros((2**6, 2**6))
 
-    for channel in range(3):
-        # Red channel:
-        p = image[u, v, channel]
-        # Convert value to string to the binary form, cut '0b', and padd with 0 example: '0001 1101':
-        pixel_value_as_binary_string = bin(p)[2:].zfill(8)
-        # Convert to logic array:
-        pixel_value_as_binary_array = [int(bit) for bit in pixel_value_as_binary_string][::-1]
+    R_bits = bin(image[u, v, 0])[2:].zfill(8)
+    G_bits = bin(image[u, v, 1])[2:].zfill(8)
+    B_bits = bin(image[u, v, 2])[2:].zfill(8)
 
-        if channel == 0:
-            map_operator[channel] = np.kron(I_GATE, I_GATE)
-        elif channel == 1:
-            map_operator[channel] = np.kron(I_GATE, X_GATE)
-        elif channel == 2:
-            map_operator[channel] = np.kron(X_GATE, I_GATE)
+    for bit in range(8):
+        label_operator = LABEL_OPERATORS[bit]
 
-        for bit in pixel_value_as_binary_array[0:8]:
-            if bit == 1:
-                map_operator[channel] = np.kron(X_GATE, map_operator[channel])
-            else:
-                map_operator[channel] = np.kron(I_GATE, map_operator[channel])
+        # Get gates for each channel based on the bit value
+        R_channel_gate = get_channel_gate(R_bits[bit])
+        G_channel_gate = get_channel_gate(G_bits[bit])
+        B_channel_gate = get_channel_gate(B_bits[bit])
 
-    map_operator = map_operator[0] + map_operator[1] + map_operator[2]
+        # Combine the channel gates
+        RGB_operator = np.kron(R_channel_gate, np.kron(G_channel_gate, B_channel_gate))
 
-    return Operator(map_operator)
+        # Update the pixel operator
+        u_v_pixel_operator += np.kron(label_operator, RGB_operator)
+
+    return Operator(u_v_pixel_operator)
