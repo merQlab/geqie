@@ -62,10 +62,7 @@ def encode(
         print(f"{init_state=}")
 
     circuit = QuantumCircuit(n_qubits)
-    if not np.all(init_state.data == 1):
-        circuit.initialize(init_state, range(n_qubits-data_vectors[0].num_qubits-1, n_qubits), normalize=True)
-    else:
-        circuit.initialize(init_state, range(n_qubits), normalize=True)
+    circuit.initialize(init_state, range(n_qubits), normalize=True)
     circuit.append(U_op, range(n_qubits))
     circuit.measure_all()
 
