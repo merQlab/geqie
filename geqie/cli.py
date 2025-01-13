@@ -1,7 +1,9 @@
+import functools
 import importlib
 import importlib.util
+import json
 import sys
-import functools
+
 from pathlib import Path
 from typing import Callable, Dict, NamedTuple
 
@@ -112,7 +114,7 @@ def simulate_options(func):
 def simulate(ctx: cloup.Context, **params):
     circuit = ctx.invoke(encode, **params)
     cli_params = {name: value for name, value in params.items() if name in ["n_shots", "return_qiskit_result", "return_padded_counts"]}
-    print(main.simulate(circuit, **cli_params))
+    print(json.dumps(main.simulate(circuit, **cli_params)))
 
 
 if __name__ == '__main__':
