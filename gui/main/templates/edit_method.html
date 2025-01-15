@@ -1,0 +1,146 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Methods</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="{% static 'geqie/js/edit_method_scripts.js' %}" defer></script>
+    <link href="{% static 'geqie/css/styles.css' %}" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <h4 class="card-title text-center mb-4">Manage Methods</h4>
+                        <!-- Main -->
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="add-method-tab" data-bs-toggle="tab" data-bs-target="#addMethod" type="button" role="tab" aria-controls="addMethod" aria-selected="true">
+                                    Add method
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="edit-method-tab" data-bs-toggle="tab" data-bs-target="#editMethod" type="button" role="tab" aria-controls="editMethod" aria-selected="false">
+                                    Edit method
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="test-method-tab" data-bs-toggle="tab" data-bs-target="#testMethod" type="button" role="tab" aria-controls="testMethod" aria-selected="false">
+                                    Test method
+                                </button>
+                            </li>
+                        </ul>
+                
+                        <div class="tab-content mt-3" id="mainTabContent">
+                            <!-- Add -->
+                            <div class="tab-pane fade show active" id="addMethod" role="tabpanel" aria-labelledby="add-method-tab">
+                                <input type="text" id="methodName" name="methodName" class="form-control" placeholder="Name method">
+
+                                <ul class="nav nav-tabs mt-3" role="tablist">
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link active" id="init-tab-add" data-bs-toggle="tab" data-bs-target="#init-add" type="button" role="tab" aria-controls="init-add" aria-selected="true">Init</button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" id="map-tab-add" data-bs-toggle="tab" data-bs-target="#map-add" type="button" role="tab" aria-controls="map-add" aria-selected="false">Map</button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" id="data-tab-add" data-bs-toggle="tab" data-bs-target="#data-add" type="button" role="tab" aria-controls="data-add" aria-selected="false">Data</button>
+                                    </li>
+                                </ul>
+            
+                                <div class="tab-content" id="myTabContent">
+                                    <div class="tab-pane fade show active" id="init-add" role="tabpanel" aria-labelledby="init-tab-add">
+                                        <textarea class="form-control" id="addInitContent" rows="5"></textarea>
+                                    </div>
+                                    <div class="tab-pane fade" id="map-add" role="tabpanel" aria-labelledby="map-tab-add">
+                                        <textarea class="form-control" id="addMapContent" rows="5"></textarea>
+                                    </div>
+                                    <div class="tab-pane fade" id="data-add" role="tabpanel" aria-labelledby="data-tab-add">
+                                        <textarea class="form-control" id="addDataContent" rows="5"></textarea>
+                                    </div>
+                                </div>
+                                
+                                <div class="text-center my-3">
+                                    <button type="button" class="btn btn-custom" id="addNewMethod">Add</button>
+                                </div>
+                            </div>
+                
+                            <!-- Edit -->
+                            <div class="tab-pane fade" id="editMethod" role="tabpanel" aria-labelledby="edit-method-tab">
+                                <form>
+                                    <div class="mb-3">
+                                        <label for="methodSelect" class="form-label">Select Method:</label>
+                                        <select class="form-select" id="methodSelect">
+                                            <option value="" selected>-- Select method --</option>
+                                            {% for method in methods %}
+                                            <option value="{{ method.id }}">
+                                                {{ method.name }}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                
+                                    <div class="mb-3">
+                                        <label for="submethodSelect" class="form-label">Select Submethod:</label>
+                                        <select class="form-select" id="submethodSelect">
+                                            <option value="" selected>-- Select submethod --</option>
+                                            {% for method in methods %}
+                                                {% for submethod in method.sub_methods.all %}
+                                                <option value="{{ submethod.id }}" data-method-id="{{ method.id }}" data-init="{{ submethod.init }}" data-map="{{ submethod.map }}" data-data="{{ submethod.data }}">
+                                                    {{ submethod.name }}
+                                                </option>
+                                                {% endfor %}
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                
+                                    <ul class="nav nav-tabs" role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link active" id="init-tab" data-bs-toggle="tab" data-bs-target="#init" type="button" role="tab" aria-controls="init" aria-selected="true">Init</button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link" id="map-tab" data-bs-toggle="tab" data-bs-target="#map" type="button" role="tab" aria-controls="map" aria-selected="false">Map</button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link" id="data-tab" data-bs-toggle="tab" data-bs-target="#data" type="button" role="tab" aria-controls="data" aria-selected="false">Data</button>
+                                        </li>
+                                    </ul>
+                
+                                    <div class="tab-content" id="myTabContent">
+                                        <div class="tab-pane fade show active" id="init" role="tabpanel" aria-labelledby="init-tab">
+                                            <textarea class="form-control" id="initContent" rows="5"></textarea>
+                                        </div>
+                                        <div class="tab-pane fade" id="map" role="tabpanel" aria-labelledby="map-tab">
+                                            <textarea class="form-control" id="mapContent" rows="5"></textarea>
+                                        </div>
+                                        <div class="tab-pane fade" id="data" role="tabpanel" aria-labelledby="data-tab">
+                                            <textarea class="form-control" id="dataContent" rows="5"></textarea>
+                                        </div>
+                                    </div>
+                
+                                    <div class="text-center my-3">
+                                        <button type="button" class="btn btn-custom" id="save">Save</button>
+                                        <button type="button" class="btn btn-custom" id="saveAsNew">Save as new method</button>
+                                    </div>
+                                </form>
+                            </div>
+                
+                            <!-- Test -->
+                            <div class="tab-pane fade" id="testMethod" role="tabpanel" aria-labelledby="test-method-tab">
+                                <div class="text-center my-3">
+                                    <button type="button" class="btn btn-custom" id="startTest">Start</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
