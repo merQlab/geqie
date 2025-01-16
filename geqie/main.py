@@ -54,10 +54,11 @@ def encode(
         print(f"{init_state=}")
 
     circuit = QuantumCircuit(n_qubits)
-    # if not np.all(init_state.data == 1):
-    circuit.initialize(init_state, range(n_qubits - data_vectors[0].num_qubits - 1, n_qubits), normalize=True)
+    circuit.initialize(init_state, range(n_qubits), normalize=True)
     circuit.append(U_op, range(n_qubits))
-    # circuit.measure_all()
+    # II...IH last Hadamard gate, before measurement:
+    circuit.h(0)
+    circuit.measure_all()
 
     if verbosity_level > 0:
         print(circuit.draw())
