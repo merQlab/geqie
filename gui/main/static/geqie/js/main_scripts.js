@@ -20,8 +20,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+window.addEventListener('pageshow', (event) => {
+    if (event.persisted) {
+        window.location.reload();
+    }
+});
+
 let fileHandles = null;
-let selectedFolderPath = null;
+//let selectedFolderPath = null;
 let resultFolderPath = null;
 let selectedMethod = null;
 
@@ -54,6 +60,7 @@ document.getElementById('startExperiment').addEventListener('click', async () =>
         alert("Please select a folder with photos first!");
         return;
     }
+
     if (!resultFolderPath) {
         alert("Please select result path!");
         return;
@@ -82,10 +89,17 @@ document.getElementById('startExperiment').addEventListener('click', async () =>
         });
 
         if (response.ok) {
-            alert("Folder path sent successfully!");
+            const data = await response.json();
+            if (data.encodings) {
+                alert("Encodings received: " + data.encodings.join(", "));
+            } else {
+                alert("Folder path sent successfully, but no encodings received!");
+            }
         } else {
-            alert("Failed to start experiment");
+            const errorData = await response.json();
+            alert("Failed to start experiment: " + errorData.error);
         }
+        
     } catch (error) {
         console.error("Error start experiment:", error);
     }

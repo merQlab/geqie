@@ -52,9 +52,25 @@ document.getElementById('testMethod').addEventListener('click', async () => {
     } catch (error) {
         console.error("Folder selection cancelled:", error);
     }
+    
 });
 
 document.getElementById('addNewMethod').addEventListener('click', async () => {
+    const response = await fetch(updateListUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+
+    if (response.ok) {
+        const data = await response.json();
+        alert(data.message);
+    } else {
+        const error = await response.json();
+        alert(`Error: ${error.error}`);
+    }
+    
     const name = document.getElementById('methodName');
     if (name === "") {
         alert("Method name is empty!");
