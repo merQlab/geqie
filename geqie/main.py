@@ -21,7 +21,7 @@ def encode(
     image: np.ndarray,
     ctx: Dict = {},
 ) -> QuantumCircuit:
-    verbosity_level = ctx.get("verbose", 0)
+    verbosity_level = -1 # ctx.get("verbose", 0)
 
     R = np.ceil(np.log2(np.max((image.shape[0], image.shape[1])))).astype(int)
 
@@ -56,6 +56,8 @@ def encode(
     circuit = QuantumCircuit(n_qubits)
     circuit.initialize(init_state, range(n_qubits), normalize=True)
     circuit.append(U_op, range(n_qubits))
+    # II...IH last Hadamard gate, before measurement:
+    circuit.h(0)
     circuit.measure_all()
 
     if verbosity_level > 0:
