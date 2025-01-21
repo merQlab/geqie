@@ -1,7 +1,9 @@
+import functools
 import importlib
 import importlib.util
+import json
 import sys
-import functools
+
 from pathlib import Path
 from typing import Callable, Dict, NamedTuple
 
@@ -50,14 +52,19 @@ def _get_encoding_functions(params: Dict):
     return EncodingFunctions(init_function, data_function, map_function)
 
 
+def _get_retrive_functions(params: Dict):
+    encoding_path = params.get("encoding")
+    retrieve_path = f"{encoding_path}/retrieve.py"
+    retrieve_function = getattr(_import_module("retrieve", retrieve_path), "retrieve")
+    return retrieve_function
+
+
 def _parse_image(params):
     image = Image.open(params.get("image"))
     if params.get("grayscale"):
-        image = np.asarray(ImageOps.grayscale(image))
+        return np.asarray(ImageOps.grayscale(image))
     else:
-        image = np.asarray(image)
-    image = image / 255.0
-    return image
+        return np.asarray(image)
 
 
 @cloup.group()
@@ -89,6 +96,15 @@ def encoding_options(func):
     return wrapper
 
 
+def retrieving_options(func):
+    @cloup.option("--encoding", required=True, type=str, help="Name of the encoding from 'encodings' directory")   
+    @cloup.option("--result", required=True, type=str, help="Result from simulation")   
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        return func(*args, **kwargs)
+    return wrapper
+
+
 @cli.command()
 @encoding_options
 def encode(**params):
@@ -114,7 +130,20 @@ def simulate_options(func):
 def simulate(ctx: cloup.Context, **params):
     circuit = ctx.invoke(encode, **params)
     cli_params = {name: value for name, value in params.items() if name in ["n_shots", "return_qiskit_result", "return_padded_counts"]}
-    print(main.simulate(circuit, **cli_params))
+    print(json.dumps(main.simulate(circuit, **cli_params)))
+
+
+@cli.command()
+@retrieving_options
+def retrieve(**params):
+    print('Retrieve CLI')
+    # print(f'Params: {params}')
+    print(f'Params.get("result"): {params.get("result")}')
+
+    retrieve_fun = _get_retrive_functions(params)
+    # print(f'e: {e}')
+    print(retrieve_fun(params.get("result")))
+    # return retrieve_fun, params
 
 
 if __name__ == '__main__':

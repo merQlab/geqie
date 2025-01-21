@@ -2,8 +2,13 @@ import numpy as np
 
 from qiskit.quantum_info import Operator
 
-identity_gate = np.array([[1, 0], [0, 1]])
-x_gate = np.array([[0, 1], [1, 0]])
+
+I_GATE = np.eye(2)
+X_GATE = np.array([
+    [0, 1], 
+    [1, 0]
+])
+
 
 def map(u: int, v: int, R: int, image: np.ndarray) -> Operator:
     map_operator = [None, None, None]
@@ -17,17 +22,17 @@ def map(u: int, v: int, R: int, image: np.ndarray) -> Operator:
         pixel_value_as_binary_array = [int(bit) for bit in pixel_value_as_binary_string][::-1]
 
         if channel == 0:
-            map_operator[channel] = np.kron(identity_gate, identity_gate)
+            map_operator[channel] = np.kron(I_GATE, I_GATE)
         elif channel == 1:
-            map_operator[channel] = np.kron(identity_gate, x_gate)
+            map_operator[channel] = np.kron(I_GATE, X_GATE)
         elif channel == 2:
-            map_operator[channel] = np.kron(x_gate, identity_gate)
+            map_operator[channel] = np.kron(X_GATE, I_GATE)
 
         for bit in pixel_value_as_binary_array[0:8]:
             if bit == 1:
-                map_operator[channel] = np.kron(x_gate, map_operator[channel])
+                map_operator[channel] = np.kron(X_GATE, map_operator[channel])
             else:
-                map_operator[channel] = np.kron(identity_gate, map_operator[channel])
+                map_operator[channel] = np.kron(I_GATE, map_operator[channel])
 
     map_operator = map_operator[0] + map_operator[1] + map_operator[2]
 
