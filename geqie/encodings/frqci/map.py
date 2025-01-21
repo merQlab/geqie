@@ -4,10 +4,15 @@ from qiskit.quantum_info import Operator
 
 def map(u: int, v: int, R: int, image: np.ndarray) -> Operator:
     ''' FRQCI mapping function '''
+    image = image.astype(int)
     red   = image[u, v, 0]
     green = image[u, v, 1]
     blue  = image[u, v, 2]
-    
+    #print (f"{red=}");
+    #print (f"{green=}");
+    #print (f"{blue=}");
+
+
     pi = np.pi;
     red_coeff = 2**16;
     green_coeff = 2**8;
