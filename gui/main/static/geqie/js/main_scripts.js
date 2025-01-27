@@ -6,10 +6,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const item = event.target.closest('.sub-item');
         if (!item) return;
 
-        if (item.id.startsWith('submethod-')) {
-            const subMethodName = item.textContent.trim();
-            const methodName = item.getAttribute('methodname');
-            selectedSubMethod.textContent = methodName + ' - ' + subMethodName || 'No method selected';
+        // if (item.id.startsWith('submethod-')) {
+        //     const subMethodName = item.textContent.trim();
+        //     const methodName = item.getAttribute('methodname');
+        //     selectedSubMethod.textContent = methodName + ' - ' + subMethodName || 'No method selected';
+        // }
+        if (item.id.startsWith('method-')) {
+            const methodName = item.textContent.trim();
+            selectedSubMethod.textContent = methodName;
         }
 
         if (item.id.startsWith('subcomputer-')) {
@@ -30,19 +34,19 @@ let fileHandles = null;
 //let selectedFolderPath = null;
 let resultFolderPath = null;
 let selectedMethod = null;
+let formData = new FormData();
 
-document.getElementById('selectFolder').addEventListener('click', async () => {
-    try {
-        fileHandles = await window.showOpenFilePicker({
-            multiple: true,
-            types: [{
-                description: 'Images',
-                accept: {'image/*': ['.jpg', '.jpeg', '.png', '.gif']}
-            }]
-        });
-    } catch (error) {
-        console.error("Folder selection cancelled:", error);
-    }
+document.getElementById('selectImage').addEventListener('click', () => {
+    document.getElementById('imageFile').click();
+});
+
+document.getElementById('imageFile').addEventListener('change', async () => {
+    formData = new FormData();
+    const imageFile = document.getElementById('imageFile').files[0];
+
+    if (!imageFile) return;
+
+    formData.append('image', imageFile);
 });
 
 document.getElementById('resultFolder').addEventListener('click', async () => {
@@ -56,51 +60,66 @@ document.getElementById('resultFolder').addEventListener('click', async () => {
 });
 
 document.getElementById('startExperiment').addEventListener('click', async () => {
-    if (fileHandles === null) {
-        alert("Please select a folder with photos first!");
-        return;
-    }
+    // if (fileHandles === null) {
+    //     alert("Please select a folder with photos first!");
+    //     return;
+    // }
 
-    if (!resultFolderPath) {
-        alert("Please select result path!");
-        return;
-    }
+    // if (!resultFolderPath) {
+    //     alert("Please select result path!");
+    //     return;
+    // }
 
-    var selectedMethod = document.getElementById("selected-submethod");
-    if (selectedMethod.textContent === "No method") {
-        alert("Please select method!");
-        return;
-    }
+    // var selectedMethod = document.getElementById("selected-submethod");
+    // if (selectedMethod.textContent === "No method") {
+    //     alert("Please select method!");
+    //     return;
+    // }
 
-    var selectedComputer = document.getElementById("selected-computer");
-    if (selectedComputer.textContent === "No computer") {
-        alert("Please select computer!");
-        return;
-    }
+    // var selectedComputer = document.getElementById("selected-computer");
+    // if (selectedComputer.textContent === "No computer") {
+    //     alert("Please select computer!");
+    //     return;
+    // }
+    formData.append('result_folder', resultFolderPath);
+    const selectedMethod = document.getElementById('selected-submethod').textContent.trim();
+    formData.append('selected_method', selectedMethod);
+    const shots = document.getElementById('shots').value;
+    formData.append('shots', shots);
 
     try {
         const response = await fetch(startExperimentUrl, {
             method: "POST",
+            body: formData,
             headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": "{{ csrf_token }}"
+                "X-CSRFToken": "{{ csrf_token }}", 
             },
-            body: JSON.stringify({ folder: selectedFolderPath }),
         });
 
         if (response.ok) {
             const data = await response.json();
-            if (data.encodings) {
-                alert("Encodings received: " + data.encodings.join(", "));
+            const resultsList = document.getElementById("results-list");
+
+            //resultsList.innerHTML = "";
+
+            if (data && Object.keys(data).length > 0) {
+                for (const [fileName, result] of Object.entries(data)) {
+                    const listItem = document.createElement("li");
+                    listItem.className = "list-group-item";
+                    listItem.textContent = `File: ${fileName}, Result: ${JSON.stringify(result)}`;
+                    resultsList.appendChild(listItem);
+                }
             } else {
-                alert("Folder path sent successfully, but no encodings received!");
+                const noResultsItem = document.createElement("li");
+                noResultsItem.className = "list-group-item text-muted";
+                noResultsItem.textContent = "No results";
+                resultsList.appendChild(noResultsItem);
             }
         } else {
             const errorData = await response.json();
             alert("Failed to start experiment: " + errorData.error);
         }
-        
     } catch (error) {
-        console.error("Error start experiment:", error);
+        console.error("Error starting experiment:", error);
     }
 });

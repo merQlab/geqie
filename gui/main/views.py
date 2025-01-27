@@ -2,8 +2,13 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from .models import QuantumMethod, QuantumComputer
 from django.views.decorators.csrf import csrf_exempt
+from django.core.files.storage import default_storage
+from django.conf import settings
 import json
 import subprocess
+import os
+import time
+import uuid
 
 def home(request):
     return render(request, 'home.html')
@@ -16,20 +21,61 @@ def experiment_config(request):
 
 @csrf_exempt
 def start_experiment(request):
-    if request.method == "POST":
+    if request.method == "POST" and request.FILES:
+        results = {}
         try:
-            data = json.loads(request.body)
-            folder_path = data.get('folder')
+            selected_method = request.POST.get('selected_method')
+            shots = request.POST.get('shots')
 
-            if not folder_path:
-                return JsonResponse({"error": "No folder path provided"}, status=400)
+            for key, uploaded_file in request.FILES.items():
 
-            print("Received folder path:", folder_path)
+                unique_filename = f"{uuid.uuid4()}_{uploaded_file.name}"
+                file_path = os.path.join(settings.MEDIA_ROOT, unique_filename)
 
-            return JsonResponse({"message": "Folder path received successfully!"}, status=200)
-        except json.JSONDecodeError:
-            return JsonResponse({"error": "Invalid JSON format"}, status=400)
-    return JsonResponse({"error": "Invalid request method"}, status=405)
+                with default_storage.open(file_path, 'wb+') as destination:
+                    for chunk in uploaded_file.chunks():
+                        destination.write(chunk)
+
+                print(f"File saved at: {file_path}")
+
+                command = [
+                    "geqie.exe",
+                    "simulate",
+                    "--encoding", selected_method,
+                    "--image", file_path,
+                    "--n-shots", shots,
+                    "--return-padded-counts", "true"
+                ]
+                print(f"Executing command: {' '.join(command)}")
+
+                try:
+                    result = subprocess.run(command, capture_output=True, text=True, check=True)
+                    print(f"Command output: {result.stdout}")
+
+                    output = json.loads(result.stdout.strip())
+                    results[uploaded_file.name] = output
+                    os.remove(file_path)
+
+                except subprocess.CalledProcessError as e:
+                    print(f"Command failed with return code {e.returncode}. Stderr: {e.stderr}") 
+                    return JsonResponse({"success": False, "error": f"Command failed: {e}"}, status=500)
+
+                except json.JSONDecodeError as e:
+                    print(f"JSON decoding error: {e}") 
+                    return JsonResponse({"success": False, "error": "Invalid JSON returned by the command."}, status=500)
+
+            print("Returning results.")
+            return JsonResponse(results, safe=False)
+
+        except FileNotFoundError as e:
+            print(f"FileNotFoundError: {e}")
+            return JsonResponse({"success": False, "error": "geqie.exe not found. Make sure it is in the system PATH."}, status=500)
+
+        except Exception as e:
+            print(f"Unexpected error: {e}")
+            return JsonResponse({"success": False, "error": f"Unexpected error: {e}"}, status=500)
+
+    return JsonResponse({"success": False, "error": "Invalid request."}, status=400)
 
 @csrf_exempt
 def update_list(request):
