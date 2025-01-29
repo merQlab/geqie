@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-5d^frof^@!qferbrxi$218ke0!&4p4j*=dex(d+xeoufnf-k8o
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -129,4 +129,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CRISPY_TEMPLATE_PACK = 'bootstrap5'
 
 MEDIA_URL = '/greyscale/'
-MEDIA_ROOT = os.path.join('C:\\Users\\Admin\\Desktop\\geqie\\assets\\test_images\\', 'grayscale')
+MEDIA_ROOT = os.path.join(BASE_DIR)

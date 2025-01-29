@@ -7,6 +7,7 @@ from django.conf import settings
 import json
 import subprocess
 import os
+import shutil
 import time
 import uuid
 
@@ -30,7 +31,7 @@ def start_experiment(request):
             for key, uploaded_file in request.FILES.items():
 
                 unique_filename = f"{uuid.uuid4()}_{uploaded_file.name}"
-                file_path = os.path.join(settings.MEDIA_ROOT, unique_filename)
+                file_path = os.path.join('assets', 'test_images', 'grayscale', unique_filename)
 
                 with default_storage.open(file_path, 'wb+') as destination:
                     for chunk in uploaded_file.chunks():
@@ -39,7 +40,7 @@ def start_experiment(request):
                 print(f"File saved at: {file_path}")
 
                 command = [
-                    "geqie.exe",
+                    "geqie",
                     "simulate",
                     "--encoding", selected_method,
                     "--image", file_path,
@@ -69,7 +70,7 @@ def start_experiment(request):
 
         except FileNotFoundError as e:
             print(f"FileNotFoundError: {e}")
-            return JsonResponse({"success": False, "error": "geqie.exe not found. Make sure it is in the system PATH."}, status=500)
+            return JsonResponse({"success": False, "error": "geqie not found. Make sure it is in the system PATH."}, status=500)
 
         except Exception as e:
             print(f"Unexpected error: {e}")
@@ -81,13 +82,16 @@ def start_experiment(request):
 def update_list(request):
     if request.method == "POST":
         try:
-            print("Running geqie.exe list-encodings...")
+            print("Running geqie list-encodings...")
             result = subprocess.run(
-                ["geqie.exe", "list-encodings"],
+                ["geqie", "list-encodings"],
                 capture_output=True,
                 text=True,
                 check=True
             )
+
+            print(f"Command output: {result.stdout}")
+            
             raw_output = result.stdout.strip()
             cleaned_output = raw_output.lstrip("[").rstrip("]").replace("'", "").split(", ")
 
