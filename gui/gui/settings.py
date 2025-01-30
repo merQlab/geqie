@@ -128,5 +128,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CRISPY_TEMPLATE_PACK = 'bootstrap5'
 
-MEDIA_URL = '/greyscale/'
-MEDIA_ROOT = os.path.join(BASE_DIR)
+MEDIA_URL = '/grayscale/'
+
+#docker MEDIA_ROOT = os.path.join(BASE_DIR, 'assets', 'test_images')
+MEDIA_ROOT = os.path.join(BASE_DIR, '..', 'assets', 'test_images')
+
+#docker ENCODINGS_DIR = os.path.abspath(os.path.join(BASE_DIR, "encodings"))
+ENCODINGS_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "geqie", "encodings"))

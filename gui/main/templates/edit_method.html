@@ -80,23 +80,9 @@
                                         <select class="form-select" id="methodSelect">
                                             <option value="" selected>-- Select method --</option>
                                             {% for method in methods %}
-                                            <option value="{{ method.id }}">
+                                            <option value="{{ method.name }}">
                                                 {{ method.name }}
                                             </option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                
-                                    <div class="mb-3">
-                                        <label for="submethodSelect" class="form-label">Select Submethod:</label>
-                                        <select class="form-select" id="submethodSelect">
-                                            <option value="" selected>-- Select submethod --</option>
-                                            {% for method in methods %}
-                                                {% for submethod in method.sub_methods.all %}
-                                                <option value="{{ submethod.id }}" data-method-id="{{ method.id }}" data-init="{{ submethod.init }}" data-map="{{ submethod.map }}" data-data="{{ submethod.data }}">
-                                                    {{ submethod.name }}
-                                                </option>
-                                                {% endfor %}
                                             {% endfor %}
                                         </select>
                                     </div>

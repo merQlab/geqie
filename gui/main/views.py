@@ -1,5 +1,7 @@
 from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
+
+from gui.settings import ENCODINGS_DIR
 from .models import QuantumMethod, QuantumComputer
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import default_storage
@@ -7,8 +9,6 @@ from django.conf import settings
 import json
 import subprocess
 import os
-import shutil
-import time
 import uuid
 
 def home(request):
@@ -31,7 +31,7 @@ def start_experiment(request):
             for key, uploaded_file in request.FILES.items():
 
                 unique_filename = f"{uuid.uuid4()}_{uploaded_file.name}"
-                file_path = os.path.join('assets', 'test_images', 'grayscale', unique_filename)
+                file_path = os.path.join(settings.MEDIA_ROOT, unique_filename)
 
                 with default_storage.open(file_path, 'wb+') as destination:
                     for chunk in uploaded_file.chunks():
@@ -67,10 +67,6 @@ def start_experiment(request):
 
             print("Returning results.")
             return JsonResponse(results, safe=False)
-
-        except FileNotFoundError as e:
-            print(f"FileNotFoundError: {e}")
-            return JsonResponse({"success": False, "error": "geqie not found. Make sure it is in the system PATH."}, status=500)
 
         except Exception as e:
             print(f"Unexpected error: {e}")
@@ -118,3 +114,33 @@ def add_method(request):
     methods = QuantumMethod.objects.all()
     return render(request, 'add_method.html', {'methods': methods})
 
+def list_methods():
+    methods = []
+    if os.path.exists(ENCODINGS_DIR):
+        for method_name in os.listdir(ENCODINGS_DIR):
+            method_path = os.path.join(ENCODINGS_DIR, method_name)
+            if os.path.isdir(method_path):
+                methods.append({"name": method_name})
+    return methods
+
+def read_method_files(request, method_name):
+    method_path = os.path.join(ENCODINGS_DIR, method_name)
+    if not os.path.exists(method_path):
+        return JsonResponse({"error": "Method not found"}, status=404)
+
+    files = ["init.py", "map.py", "data.py"]
+    file_contents = {}
+
+    for file in files:
+        file_path = os.path.join(method_path, file)
+        if os.path.exists(file_path):
+            with open(file_path, "r", encoding="utf-8") as f:
+                file_contents[file.replace(".py", "")] = f.read()
+        else:
+            file_contents[file.replace(".py", "")] = "File not found."
+
+    return JsonResponse(file_contents)
+
+def edit_method_view(request):
+    methods = list_methods()
+    return render(request, "edit_method.html", {"methods": methods})

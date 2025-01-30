@@ -1,44 +1,28 @@
 const methodSelect = document.getElementById('methodSelect');
-const submethodSelect = document.getElementById('submethodSelect');
 const initContent = document.getElementById('initContent');
 const mapContent = document.getElementById('mapContent');
 const dataContent = document.getElementById('dataContent');
 
-methodSelect.addEventListener('change', function () {
-    const selectedMethodId = this.value;
-
-    Array.from(submethodSelect.options).forEach(option => {
-        if (!option.value) {
-            option.style.display = '';
-        } else if (option.dataset.methodId === selectedMethodId) {
-            option.style.display = '';
-        } else {
-            option.style.display = 'none';
+document.addEventListener("DOMContentLoaded", function () {
+    methodSelect.addEventListener("change", function () {
+        const methodName = methodSelect.value;
+        if (!methodName) {
+            initContent.value = "";
+            mapContent.value = "";
+            dataContent.value = "";
+            return;
         }
+
+        fetch(`/get-method/${methodName}/`)
+            .then(response => response.json())
+            .then(data => {
+                initContent.value = data.init || "No content found.";
+                mapContent.value = data.map || "No content found.";
+                dataContent.value = data.data || "No content found.";
+            })
+            .catch(error => console.error("Error fetching method data:", error));
     });
-
-    submethodSelect.value = '';
-    resetDetails();
 });
-
-submethodSelect.addEventListener('change', function ()  {
-    const selectedOption = this.options[this.selectedIndex];
-    if (selectedOption) {
-        const init = selectedOption.getAttribute('data-init');
-        const map = selectedOption.getAttribute('data-map');
-        const data = selectedOption.getAttribute('data-data');
-
-        initContent.value = init || '';
-        mapContent.value = map || '';
-        dataContent.value = data || '';
-    }
-});
-
-function resetDetails() {
-    initContent.value = '';
-    mapContent.value = '';
-    dataContent.value = '';
-}
 
 document.getElementById('testMethod').addEventListener('click', async () => {
     try {
