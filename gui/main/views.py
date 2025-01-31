@@ -15,7 +15,7 @@ def home(request):
     return render(request, 'home.html')
 
 def experiment_config(request):
-    methods = QuantumMethod.objects.all()
+    methods = list_methods()
     computers = QuantumComputer.objects.all()
     
     return render(request, 'experiment_config.html', {'methods': methods, 'computers': computers})
@@ -74,40 +74,8 @@ def start_experiment(request):
 
     return JsonResponse({"success": False, "error": "Invalid request."}, status=400)
 
-@csrf_exempt
-def update_list(request):
-    if request.method == "POST":
-        try:
-            print("Running geqie list-encodings...")
-            result = subprocess.run(
-                ["geqie", "list-encodings"],
-                capture_output=True,
-                text=True,
-                check=True
-            )
-
-            print(f"Command output: {result.stdout}")
-            
-            raw_output = result.stdout.strip()
-            cleaned_output = raw_output.lstrip("[").rstrip("]").replace("'", "").split(", ")
-
-            for encoding in cleaned_output:
-                encoding = encoding.strip()
-                QuantumMethod.objects.get_or_create(name=encoding)
-
-            print("Encodings successfully added to QuantumMethod")
-            return JsonResponse({"success": True, "message": "Encodings updated successfully!"})
-        except FileNotFoundError:
-            return JsonResponse({"success": False, "error": "geqie.exe not found. Make sure it is in the system PATH."}, status=500)
-        except subprocess.CalledProcessError as e:
-            return JsonResponse({"success": False, "error": f"Command failed: {e}"}, status=500)
-        except Exception as e:
-            return JsonResponse({"success": False, "error": f"Unexpected error: {e}"}, status=500)
-    else:
-        return JsonResponse({"success": False, "error": "Invalid request method."}, status=405)
-
 def edit_method(request):
-    methods = QuantumMethod.objects.all()
+    methods =  list_methods()
     return render(request, 'edit_method.html', {'methods': methods})
 
 def add_method(request):
@@ -141,6 +109,34 @@ def read_method_files(request, method_name):
 
     return JsonResponse(file_contents)
 
-def edit_method_view(request):
-    methods = list_methods()
-    return render(request, "edit_method.html", {"methods": methods})
+# @csrf_exempt
+# def update_list(request):
+#     if request.method == "POST":
+#         try:
+#             print("Running geqie list-encodings...")
+#             result = subprocess.run(
+#                 ["geqie", "list-encodings"],
+#                 capture_output=True,
+#                 text=True,
+#                 check=True
+#             )
+
+#             print(f"Command output: {result.stdout}")
+            
+#             raw_output = result.stdout.strip()
+#             cleaned_output = raw_output.lstrip("[").rstrip("]").replace("'", "").split(", ")
+
+#             for encoding in cleaned_output:
+#                 encoding = encoding.strip()
+#                 QuantumMethod.objects.get_or_create(name=encoding)
+
+#             print("Encodings successfully added to QuantumMethod")
+#             return JsonResponse({"success": True, "message": "Encodings updated successfully!"})
+#         except FileNotFoundError:
+#             return JsonResponse({"success": False, "error": "geqie.exe not found. Make sure it is in the system PATH."}, status=500)
+#         except subprocess.CalledProcessError as e:
+#             return JsonResponse({"success": False, "error": f"Command failed: {e}"}, status=500)
+#         except Exception as e:
+#             return JsonResponse({"success": False, "error": f"Unexpected error: {e}"}, status=500)
+#     else:
+#         return JsonResponse({"success": False, "error": "Invalid request method."}, status=405)

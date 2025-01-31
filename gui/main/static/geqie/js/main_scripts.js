@@ -6,11 +6,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const item = event.target.closest('.sub-item');
         if (!item) return;
 
-        // if (item.id.startsWith('submethod-')) {
-        //     const subMethodName = item.textContent.trim();
-        //     const methodName = item.getAttribute('methodname');
-        //     selectedSubMethod.textContent = methodName + ' - ' + subMethodName || 'No method selected';
-        // }
         if (item.id.startsWith('method-')) {
             const methodName = item.textContent.trim();
             selectedSubMethod.textContent = methodName;
@@ -24,16 +19,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-window.addEventListener('pageshow', (event) => {
-    if (event.persisted) {
-        window.location.reload();
-    }
-});
-
 let fileHandles = null;
-//let selectedFolderPath = null;
 let resultFolderPath = null;
-let selectedMethod = null;
 let formData = new FormData();
 
 document.getElementById('selectImage').addEventListener('click', () => {
@@ -60,29 +47,28 @@ document.getElementById('resultFolder').addEventListener('click', async () => {
 });
 
 document.getElementById('startExperiment').addEventListener('click', async () => {
-    // if (fileHandles === null) {
-    //     alert("Please select a folder with photos first!");
-    //     return;
-    // }
+    let isEmpty = true;
+    for (let entry of formData.entries()) {
+        isEmpty = false;
+        break;
+    }
+    if (isEmpty) {
+        alert("Please select photos first!");
+        return;
+    }
 
-    // if (!resultFolderPath) {
-    //     alert("Please select result path!");
-    //     return;
-    // }
+    if (!resultFolderPath) {
+        alert("Please select result path!");
+        return;
+    }
 
-    // var selectedMethod = document.getElementById("selected-submethod");
-    // if (selectedMethod.textContent === "No method") {
-    //     alert("Please select method!");
-    //     return;
-    // }
-
-    // var selectedComputer = document.getElementById("selected-computer");
-    // if (selectedComputer.textContent === "No computer") {
-    //     alert("Please select computer!");
-    //     return;
-    // }
-    formData.append('result_folder', resultFolderPath);
     const selectedMethod = document.getElementById('selected-submethod').textContent.trim();
+    if (selectedMethod === 'No method') {
+        alert("Please select method!");
+        return;
+    }
+
+    formData.append('result_folder', resultFolderPath);
     formData.append('selected_method', selectedMethod);
     const shots = document.getElementById('shots').value;
     formData.append('shots', shots);

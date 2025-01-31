@@ -22,15 +22,6 @@
                                 <li class="list-group-item list-group-item-action sub-item" id="method-{{ method.id }}" methodname="{{ method.name }}" title="{{ method.description }}">
                                     <details>
                                         <summary>{{ method.name }}</summary>
-                                        <ul class="list-group mt-2">
-                                            {% for submethod in method.sub_methods.all %}
-                                                <li class="list-group-item list-group-item-action" id="submethod-{{ submethod.id }}"  title="{{ submethod.description }}">
-                                                    {{ submethod.name }}
-                                                </li>
-                                            {% empty %}
-                                            <!-- <li class="list-group-item text-muted">No submethods available</li> -->
-                                            {% endfor %}
-                                        </ul>
                                     </details>
                                 </li>
                             {% empty %}
@@ -90,7 +81,7 @@
                         </div>
                         <div class="my-3 number-container">
                             <label class="number-label" for="number-input">Number of shots:</label>
-                            <input class="number-input" type="number" id="shots" min="1" value="1">
+                            <input class="number-input" type="number" id="shots" min="1" value="1024">
                         </div>
                         <button class="btn btn-success" type="submit" id="startExperiment">Start experiment</button>
                         <script>

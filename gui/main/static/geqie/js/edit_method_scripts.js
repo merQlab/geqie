@@ -36,7 +36,6 @@ document.getElementById('testMethod').addEventListener('click', async () => {
     } catch (error) {
         console.error("Folder selection cancelled:", error);
     }
-    
 });
 
 document.getElementById('addNewMethod').addEventListener('click', async () => {

@@ -54,22 +54,19 @@
             
                                 <div class="tab-content" id="myTabContent">
                                     <div class="tab-pane fade show active" id="init-add" role="tabpanel" aria-labelledby="init-tab-add">
-                                        <textarea class="form-control" id="addInitContent" rows="5"></textarea>
+                                        <textarea class="form-control" id="addInitContent" rows="10"></textarea>
                                     </div>
                                     <div class="tab-pane fade" id="map-add" role="tabpanel" aria-labelledby="map-tab-add">
-                                        <textarea class="form-control" id="addMapContent" rows="5"></textarea>
+                                        <textarea class="form-control" id="addMapContent" rows="10"></textarea>
                                     </div>
                                     <div class="tab-pane fade" id="data-add" role="tabpanel" aria-labelledby="data-tab-add">
-                                        <textarea class="form-control" id="addDataContent" rows="5"></textarea>
+                                        <textarea class="form-control" id="addDataContent" rows="10"></textarea>
                                     </div>
                                 </div>
                                 
                                 <div class="text-center my-3">
-                                    <button type="button" class="btn btn-custom" id="addNewMethod">Add</button>
+                                    <button type="button" class="btn btn-primary" id="addNewMethod">Add</button>
                                 </div>
-                                <script>
-                                    const updateListUrl = "{% url 'update_list' %}";
-                                </script>
                             </div>
                 
                             <!-- Edit -->
@@ -101,19 +98,19 @@
                 
                                     <div class="tab-content" id="myTabContent">
                                         <div class="tab-pane fade show active" id="init" role="tabpanel" aria-labelledby="init-tab">
-                                            <textarea class="form-control" id="initContent" rows="5"></textarea>
+                                            <textarea class="form-control" id="initContent" rows="10"></textarea>
                                         </div>
                                         <div class="tab-pane fade" id="map" role="tabpanel" aria-labelledby="map-tab">
-                                            <textarea class="form-control" id="mapContent" rows="5"></textarea>
+                                            <textarea class="form-control" id="mapContent" rows="10"></textarea>
                                         </div>
                                         <div class="tab-pane fade" id="data" role="tabpanel" aria-labelledby="data-tab">
-                                            <textarea class="form-control" id="dataContent" rows="5"></textarea>
+                                            <textarea class="form-control" id="dataContent" rows="10"></textarea>
                                         </div>
                                     </div>
                 
                                     <div class="text-center my-3">
-                                        <button type="button" class="btn btn-custom" id="save">Save</button>
-                                        <button type="button" class="btn btn-custom" id="saveAsNew">Save as new method</button>
+                                        <button type="button" class="btn btn-primary id="save">Save</button>
+                                        <button type="button" class="btn btn-primary" id="saveAsNew">Save as new method</button>
                                     </div>
                                 </form>
                             </div>
@@ -121,7 +118,7 @@
                             <!-- Test -->
                             <div class="tab-pane fade" id="testMethod" role="tabpanel" aria-labelledby="test-method-tab">
                                 <div class="text-center my-3">
-                                    <button type="button" class="btn btn-custom" id="startTest">Start</button>
+                                    <button type="button" class="btn btn-primary" id="startTest">Start</button>
                                 </div>
                             </div>
                         </div>
