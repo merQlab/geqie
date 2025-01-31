@@ -109,6 +109,44 @@ def read_method_files(request, method_name):
 
     return JsonResponse(file_contents)
 
+@csrf_exempt
+def save_method_files(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            method_name = data.get("method_name")
+            init_content = data.get("init")
+            map_content = data.get("map")
+            data_content = data.get("data")
+            is_new = data.get("is_new", False)
+            save_name = data.get("save_name")
+
+            if not method_name:
+                return JsonResponse({"error": "No method name provided"}, status=400)
+
+            method_path = os.path.join(ENCODINGS_DIR, method_name)
+
+            if is_new and not os.path.exists(os.path.join(ENCODINGS_DIR, save_name)):
+                method_path = os.path.join(ENCODINGS_DIR, save_name)
+                os.makedirs(method_path)
+
+            files = {
+                "init.py": init_content,
+                "map.py": map_content,
+                "data.py": data_content,
+            }
+
+            for filename, content in files.items():
+                with open(os.path.join(method_path, filename), "w", encoding="utf-8") as f:
+                    f.write(content)
+
+            return JsonResponse({"message": "Method saved successfully"})
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+    return JsonResponse({"error": "Invalid request"}, status=400)
+
 # @csrf_exempt
 # def update_list(request):
 #     if request.method == "POST":
