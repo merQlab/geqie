@@ -24,26 +24,25 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
-document.getElementById('testMethod').addEventListener('click', async () => {
-    try {
-        const fileHandles = await window.showOpenFilePicker({
-            multiple: true,
-            types: [{
-                description: 'Images',
-                accept: {'image/*': ['.jpg', '.jpeg', '.png', '.gif']}
-            }]
-        });
-    } catch (error) {
-        console.error("Folder selection cancelled:", error);
+let formData = new FormData();
+
+document.getElementById("imagePath").addEventListener("click", function() {
+    document.getElementById("fileInput").click();
+});
+
+document.getElementById("fileInput").addEventListener("change", function() {
+    const filePathInput = document.getElementById("filePath");
+    if (this.files && this.files[0]) {
+        filePathInput.value = this.files[0].name;
     }
 });
 
-document.getElementById('addNewMethod').addEventListener('click', async () => {
-    
+document.getElementById("addNewMethod").addEventListener("click", function () {
+    saveMethod(true, document.getElementById("methodName").value, "methodName", "addInitContent", "addMapContent", "addDataContent");
 });
 
 document.getElementById("save").addEventListener("click", function () {
-    saveMethod(false);
+    saveMethod(false, document.getElementById("methodSelect").value, "methodSelect", "initContent", "mapContent", "dataContent");
 });
 
 document.getElementById("saveAsNew").addEventListener("click", function () {
@@ -53,15 +52,15 @@ document.getElementById("saveAsNew").addEventListener("click", function () {
     } else if (userInput.trim() === "") {
         alert("Name is empty");
     } else {
-        saveMethod(true, userInput.trim());
+        saveMethod(true, userInput.trim(), "methodSelect", "initContent", "mapContent", "dataContent");
     }
 });
 
-function saveMethod(isNew, saveName) {
-    let methodName = document.getElementById("methodSelect").value;
-    let initContent = document.getElementById("initContent").value;
-    let mapContent = document.getElementById("mapContent").value;
-    let dataContent = document.getElementById("dataContent").value;
+function saveMethod(isNew, saveName, method, init, map, data) {
+    let methodName = document.getElementById(method).value;
+    let initContent = document.getElementById(init).value;
+    let mapContent = document.getElementById(map).value;
+    let dataContent = document.getElementById(data).value;
 
     if (!methodName) {
         alert("Please select a method first.");

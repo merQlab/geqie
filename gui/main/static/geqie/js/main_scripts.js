@@ -73,6 +73,9 @@ document.getElementById('startExperiment').addEventListener('click', async () =>
     const shots = document.getElementById('shots').value;
     formData.append('shots', shots);
 
+    updateProgress(10);
+    animateProgress(10, 90, 3000);
+
     try {
         const response = await fetch(startExperimentUrl, {
             method: "POST",
@@ -81,6 +84,7 @@ document.getElementById('startExperiment').addEventListener('click', async () =>
                 "X-CSRFToken": "{{ csrf_token }}", 
             },
         });
+        updateProgress(90);
 
         if (response.ok) {
             const data = await response.json();
@@ -108,4 +112,26 @@ document.getElementById('startExperiment').addEventListener('click', async () =>
     } catch (error) {
         console.error("Error starting experiment:", error);
     }
+    updateProgress(100);
 });
+
+function updateProgress(value) {
+    const progressBar = document.getElementById('progress-bar');
+    progressBar.style.width = value + '%';
+    progressBar.setAttribute('aria-valuenow', value);
+    progressBar.innerText = value + '%';
+}
+
+function animateProgress(from, to, duration) {
+    const startTime = performance.now();
+    function animate(currentTime) {
+        const elapsed = currentTime - startTime;
+        let progress = from + (to - from) * (elapsed / duration);
+        if (progress > to) progress = to;
+        updateProgress(Math.floor(progress));
+        if (elapsed < duration) {
+        requestAnimationFrame(animate);
+        }
+    }
+    requestAnimationFrame(animate);
+}

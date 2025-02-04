@@ -17,7 +17,6 @@ def home(request):
 def experiment_config(request):
     methods = list_methods()
     computers = QuantumComputer.objects.all()
-    
     return render(request, 'experiment_config.html', {'methods': methods, 'computers': computers})
 
 @csrf_exempt
@@ -77,10 +76,6 @@ def start_experiment(request):
 def edit_method(request):
     methods =  list_methods()
     return render(request, 'edit_method.html', {'methods': methods})
-
-def add_method(request):
-    methods = QuantumMethod.objects.all()
-    return render(request, 'add_method.html', {'methods': methods})
 
 def list_methods():
     methods = []

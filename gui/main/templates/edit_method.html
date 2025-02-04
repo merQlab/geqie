@@ -38,7 +38,7 @@
                         <div class="tab-content mt-3" id="mainTabContent">
                             <!-- Add -->
                             <div class="tab-pane fade show active" id="addMethod" role="tabpanel" aria-labelledby="add-method-tab">
-                                <input type="text" id="methodName" name="methodName" class="form-control" placeholder="Name method">
+                                <input type="text" id="methodName" name="name" class="form-control" placeholder="Name method" required>
 
                                 <ul class="nav nav-tabs mt-3" role="tablist">
                                     <li class="nav-item" role="presentation">
@@ -117,6 +117,24 @@
                 
                             <!-- Test -->
                             <div class="tab-pane fade" id="testMethod" role="tabpanel" aria-labelledby="test-method-tab">
+                                <div class="mb-3">
+                                    <select class="form-select" id="methodSelect">
+                                        <option value="" selected>-- Select method --</option>
+                                        {% for method in methods %}
+                                        <option value="{{ method.name }}">
+                                            {{ method.name }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="mb-3 d-flex align-items-center">
+                                    <input type="text" id="filePath" class="form-control me-3" placeholder="Selected file path" readonly>
+                                    <form id="uploadForm" enctype="multipart/form-data"style="display: none;">
+                                        <input type="file" id="fileInput" accept="image/*">
+                                    </form>
+                                    <button type="button" class="btn btn-primary btn-sm-md" id="imagePath" style="min-width: 120px;">Select image</button>
+                                </div>
+                                <ul class="list-group" id="resultsList"></ul>
                                 <div class="text-center my-3">
                                     <button type="button" class="btn btn-primary" id="startTest">Start</button>
                                 </div>
