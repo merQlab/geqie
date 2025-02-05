@@ -6,6 +6,7 @@ from .models import QuantumMethod, QuantumComputer
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import default_storage
 from django.conf import settings
+from collections import OrderedDict
 import json
 import subprocess
 import os
@@ -52,7 +53,7 @@ def start_experiment(request):
                     result = subprocess.run(command, capture_output=True, text=True, check=True)
                     print(f"Command output: {result.stdout}")
 
-                    output = json.loads(result.stdout.strip())
+                    output = json.loads(result.stdout)
                     results[uploaded_file.name] = output
                     os.remove(file_path)
 
@@ -64,8 +65,8 @@ def start_experiment(request):
                     print(f"JSON decoding error: {e}") 
                     return JsonResponse({"success": False, "error": "Invalid JSON returned by the command."}, status=500)
 
-            print("Returning results.")
-            return JsonResponse(results, safe=False)
+            print("Returning results.", results)
+            return JsonResponse(results)
 
         except Exception as e:
             print(f"Unexpected error: {e}")
@@ -115,6 +116,7 @@ def save_method_files(request):
             data_content = data.get("data")
             is_new = data.get("is_new", False)
             save_name = data.get("save_name")
+            add_new = data.get("add_new")
 
             if not method_name:
                 return JsonResponse({"error": "No method name provided"}, status=400)
@@ -125,11 +127,21 @@ def save_method_files(request):
                 method_path = os.path.join(ENCODINGS_DIR, save_name)
                 os.makedirs(method_path)
 
-            files = {
-                "init.py": init_content,
-                "map.py": map_content,
-                "data.py": data_content,
-            }
+            if add_new:
+                files = {
+                    "__init__.py": """from .init import init as init_function
+from .data import data as data_function
+from .map import map as map_function""",
+                    "init.py": init_content,
+                    "map.py": map_content,
+                    "data.py": data_content,
+                }
+            else:
+                files = {
+                    "init.py": init_content,
+                    "map.py": map_content,
+                    "data.py": data_content,
+                }
 
             for filename, content in files.items():
                 with open(os.path.join(method_path, filename), "w", encoding="utf-8") as f:

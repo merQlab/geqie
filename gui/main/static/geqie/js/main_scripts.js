@@ -57,10 +57,10 @@ document.getElementById('startExperiment').addEventListener('click', async () =>
         return;
     }
 
-    if (!resultFolderPath) {
-        alert("Please select result path!");
-        return;
-    }
+    // if (!resultFolderPath) {
+    //     alert("Please select result path!");
+    //     return;
+    // }
 
     const selectedMethod = document.getElementById('selected-submethod').textContent.trim();
     if (selectedMethod === 'No method') {
@@ -96,7 +96,8 @@ document.getElementById('startExperiment').addEventListener('click', async () =>
                 for (const [fileName, result] of Object.entries(data)) {
                     const listItem = document.createElement("li");
                     listItem.className = "list-group-item";
-                    listItem.textContent = `File: ${fileName}, Result: ${JSON.stringify(result)}`;
+            
+                    listItem.textContent = `File: ${fileName}, Result: ${JSON.stringify(result, null, 2)}`;
                     resultsList.appendChild(listItem);
                 }
             } else {
@@ -105,14 +106,16 @@ document.getElementById('startExperiment').addEventListener('click', async () =>
                 noResultsItem.textContent = "No results";
                 resultsList.appendChild(noResultsItem);
             }
+            
+            updateProgress(100);
         } else {
             const errorData = await response.json();
+            updateProgress(0);
             alert("Failed to start experiment: " + errorData.error);
         }
     } catch (error) {
         console.error("Error starting experiment:", error);
     }
-    updateProgress(100);
 });
 
 function updateProgress(value) {

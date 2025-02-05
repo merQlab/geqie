@@ -24,6 +24,38 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
+document.addEventListener("DOMContentLoaded", function() {
+    document.getElementById("addInitContent").value = 
+    `import numpy as np
+from qiskit.quantum_info import Statevector
+
+def init(n_qubits: int) -> Statevector:    
+    qubits_in_superposition = # place number of qubits in superposition
+    base_state = np.zeros(2**qubits_in_superposition , dtype=int)    
+    base_state[0] = 1    
+    state = np.tile(base_state, 2**(n_qubits - qubits_in_superposition ))    
+    return Statevector(state)`;
+
+    document.getElementById("addMapContent").value = 
+    `import numpy as np
+from qiskit.quantum_info import Operator
+
+def map(u: int, v: int, R: int, image: np.ndarray) -> Operator:    
+    p = image[u, v]  
+    # Provide your own unitary matrix for map operator
+    return Operator(map_operator)`;
+
+    document.getElementById("addDataContent").value = 
+    `import numpy as np
+from qiskit.quantum_info import Statevector
+
+def data(u: int, v: int, R: int, image: np.ndarray) -> Statevector:    
+    m = u * image.shape[0] + v    
+    data_vector = np.zeros(2**(2 * R))    
+    data_vector[m] = 1    
+    return Statevector(data_vector)`;
+});
+
 let formData = new FormData();
 
 document.getElementById("imagePath").addEventListener("click", function() {
@@ -38,11 +70,11 @@ document.getElementById("fileInput").addEventListener("change", function() {
 });
 
 document.getElementById("addNewMethod").addEventListener("click", function () {
-    saveMethod(true, document.getElementById("methodName").value, "methodName", "addInitContent", "addMapContent", "addDataContent");
+    saveMethod(true, true, document.getElementById("methodName").value, "methodName", "addInitContent", "addMapContent", "addDataContent");
 });
 
 document.getElementById("save").addEventListener("click", function () {
-    saveMethod(false, document.getElementById("methodSelect").value, "methodSelect", "initContent", "mapContent", "dataContent");
+    saveMethod(false, false, document.getElementById("methodSelect").value, "methodSelect", "initContent", "mapContent", "dataContent");
 });
 
 document.getElementById("saveAsNew").addEventListener("click", function () {
@@ -52,11 +84,11 @@ document.getElementById("saveAsNew").addEventListener("click", function () {
     } else if (userInput.trim() === "") {
         alert("Name is empty");
     } else {
-        saveMethod(true, userInput.trim(), "methodSelect", "initContent", "mapContent", "dataContent");
+        saveMethod(false, true, userInput.trim(), "methodSelect", "initContent", "mapContent", "dataContent");
     }
 });
 
-function saveMethod(isNew, saveName, method, init, map, data) {
+function saveMethod(addNew, isNew, saveName, method, init, map, data) {
     let methodName = document.getElementById(method).value;
     let initContent = document.getElementById(init).value;
     let mapContent = document.getElementById(map).value;
@@ -80,6 +112,7 @@ function saveMethod(isNew, saveName, method, init, map, data) {
             data: dataContent,
             is_new: isNew,
             save_name: saveName,
+            add_new: addNew,
         }),
     })
     .then(response => response.json())
