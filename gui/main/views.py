@@ -59,10 +59,12 @@ def start_experiment(request):
 
                 except subprocess.CalledProcessError as e:
                     print(f"Command failed with return code {e.returncode}. Stderr: {e.stderr}") 
+                    os.remove(file_path)
                     return JsonResponse({"success": False, "error": f"Command failed: {e}"}, status=500)
 
                 except json.JSONDecodeError as e:
                     print(f"JSON decoding error: {e}") 
+                    os.remove(file_path)
                     return JsonResponse({"success": False, "error": "Invalid JSON returned by the command."}, status=500)
 
             print("Returning results.", results)

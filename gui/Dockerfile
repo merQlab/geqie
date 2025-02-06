@@ -1,7 +1,5 @@
 # Use an official Python runtime as a parent image
-FROM python:3.13-slim
-
-ENV PATH="/usr/local/bin:$PATH"
+FROM python:3.12.8-slim
 
 # Set the working directory in the container
 WORKDIR /gui

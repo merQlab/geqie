@@ -1,6 +1,7 @@
 let formData = new FormData();
 let experiments = [];
 let resultFolderPath = '';
+let animationFrameId;
 
 document.addEventListener('DOMContentLoaded', () => {
     const selectedSubMethod = document.getElementById('selected-submethod');
@@ -99,6 +100,8 @@ document.getElementById('startExperiment').addEventListener('click', async funct
     //     return;
     // }
 
+    animateProgress(10, 90, experiments.length * 3000);
+
     for (const [index, experiment] of experiments.entries()) {
         const formData = new FormData();
         formData.append('result_folder', resultFolderPath);
@@ -108,9 +111,6 @@ document.getElementById('startExperiment').addEventListener('click', async funct
         formData.append('computer', experiment.computer);
         formData.append('shots', experiment.shots);
 
-        updateProgress(10);
-        animateProgress(10, 90, 3000);
-
         try {
             const response = await fetch(startExperimentUrl, {
                 method: "POST",
@@ -119,15 +119,14 @@ document.getElementById('startExperiment').addEventListener('click', async funct
                     "X-CSRFToken": "{{ csrf_token }}",
                 },
             });
-            updateProgress(90);
-
-            const resultsList = document.getElementById("results-list");
-            const headerItem = document.createElement("li");
-            headerItem.className = "list-group-item fw-bold";
-            headerItem.textContent = `Experiment ${index + 1}:`;
-            resultsList.appendChild(headerItem);
 
             if (response.ok) {
+                const resultsList = document.getElementById("results-list");
+                const headerItem = document.createElement("li");
+                headerItem.className = "list-group-item fw-bold";
+                headerItem.textContent = `Experiment ${index + 1}:`;
+                resultsList.appendChild(headerItem);
+
                 const data = await response.json();
                 if (data && Object.keys(data).length > 0) {
                     for (const [fileName, result] of Object.entries(data)) {
@@ -142,13 +141,26 @@ document.getElementById('startExperiment').addEventListener('click', async funct
                     noResultsItem.textContent = "No results";
                     resultsList.appendChild(noResultsItem);
                 }
+                cancelAnimationFrame(animationFrameId);
                 updateProgress(100);
             } else {
-                const errorData = await response.json();
+                cancelAnimationFrame(animationFrameId);
                 updateProgress(0);
-                alert("Failed to start experiment " + (index + 1) + ": " + errorData.error);
+                const errorData = await response.json();
+                console.log("Received errorData:", errorData);
+            
+                const errorMessage = errorData.error || "";
+                console.log("Extracted errorMessage:", errorMessage);
+            
+                if (errorMessage.includes("Command failed")) {
+                    alert("Experiment " + (index + 1) + " failed due to a command execution error. Please check your method implementation.");
+                } else {
+                    alert("Failed to start experiment " + (index + 1) + ": " + errorMessage);
+                }
             }
         } catch (error) {
+            cancelAnimationFrame(animationFrameId);
+            updateProgress(0);
             console.error("Error starting experiment " + (index + 1) + ":", error);
         }
     }
@@ -179,8 +191,8 @@ function animateProgress(from, to, duration) {
         if (progress > to) progress = to;
         updateProgress(Math.floor(progress));
         if (elapsed < duration) {
-            requestAnimationFrame(animate);
+            animationFrameId = requestAnimationFrame(animate);
         }
     }
-    requestAnimationFrame(animate);
+    animationFrameId = requestAnimationFrame(animate);
 }
