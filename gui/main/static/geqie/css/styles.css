@@ -109,3 +109,13 @@ textarea:focus, select:focus {
     border-color: #007BFF;
     outline: none;
 }
+
+#results-list {
+    max-height: 772px;
+    overflow-y: auto;
+}
+
+#methods-list {
+    max-height: 340px;
+    overflow-y: auto;
+}

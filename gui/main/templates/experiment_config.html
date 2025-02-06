@@ -18,7 +18,7 @@
                 <div class="card shadow-sm mb-4">
                     <div class="card-body">
                         <h4 class="card-title">Methods</h4>
-                        <ul class="list-group">
+                        <ul class="list-group" id="methods-list">
                             {% for method in methods %}
                                 <li class="list-group-item list-group-item-action sub-item" id="method-{{ method.id }}" methodname="{{ method.name }}" title="{{ method.description }}">
                                     <details>
@@ -34,7 +34,7 @@
                 <div class="card shadow-sm mb-4">
                     <div class="card-body">
                         <h4 class="card-title">Computers</h4>
-                        <ul class="list-group">
+                        <ul class="list-group" id="methods-list">
                             {% for computer in computers %}
                                 <li class="list-group-item list-group-item-action" id="computer-{{ computer.id }}" title="{{ computer.description }}">
                                     <details>
@@ -64,6 +64,7 @@
             <div class="col-md-6 text-center">
                 <div class="card shadow-sm mb-4">
                     <div class="card-body">
+                        <h4 class="card-title mb-3">Prepare Experiment</h4>
                         <div class="d-flex justify-content-center gap-3 mb-3">
                             <form id="uploadForm" enctype="multipart/form-data" style="display: none;">
                                 <input type="file" id="imageFile" name="image" accept="image/*" required />
@@ -84,7 +85,34 @@
                             <label class="number-label" for="shots">Number of shots:</label>
                             <input class="number-input" type="number" id="shots" min="1" value="1024">
                         </div>
-                        <button class="btn btn-success" type="submit" id="startExperiment">Start experiment</button>
+                        <button class="btn btn-primary" type="button" id="addExperiment">Add experiment</button>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h4 class="card-title mb-3">Experiments List</h4>
+                        <form id="experimentsForm" enctype="multipart/form-data">
+                            <div class="table-responsive mb-3" style="max-height: 346px; overflow-y: auto;">
+                                <table class="table table-bordered" id="experimentsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Image</th>
+                                            <th>Method</th>
+                                            <th>Computer</th>
+                                            <th>Shots</th>
+                                            <th>
+                                                <img src="{% static 'geqie/icon/trash.png' %}" alt="Trash Icon" style="width:20px;height:20px;">
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="experimentsTableBody">
+                                    </tbody>
+                                </table>
+                            </div>
+                            <button class="btn btn-success" type="submit" id="startExperiment">Start experiments</button>
+                        </form>
                         <script>
                             const startExperimentUrl = "{% url 'start_experiment' %}";
                         </script>
