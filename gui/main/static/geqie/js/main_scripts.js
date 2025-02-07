@@ -2,6 +2,7 @@ let formData = new FormData();
 let experiments = [];
 let resultFolderPath = '';
 let animationFrameId;
+let isResponseOk;
 
 document.addEventListener('DOMContentLoaded', () => {
     const selectedSubMethod = document.getElementById('selected-submethod');
@@ -31,10 +32,14 @@ document.getElementById('selectImage').addEventListener('click', () => {
 });
 
 document.getElementById('imageFile').addEventListener('change', async () => {
-    formData = new FormData();
-    const imageFile = document.getElementById('imageFile').files[0];
+    let formData = new FormData();
+    const files = document.getElementById('imageFile').files;
 
-    if (!imageFile) return;
+    if (!files.length) return;
+
+    for (let i = 0; i < files.length; i++) {
+        formData.append('images[]', files[i]);
+    }
 });
 
 document.getElementById('addExperiment').addEventListener('click', () => {
@@ -132,7 +137,20 @@ document.getElementById('startExperiment').addEventListener('click', async funct
                     for (const [fileName, result] of Object.entries(data)) {
                         const listItem = document.createElement("li");
                         listItem.className = "list-group-item";
-                        listItem.textContent = `File: ${fileName}, Result: ${JSON.stringify(result, null, 2)}`;
+                        
+                        const strongFileText = document.createElement("strong");
+                        strongFileText.textContent = "File: ";
+                        const fileNameText = document.createTextNode(fileName);
+
+                        const strongResultText = document.createElement("strong");
+                        strongResultText.textContent = "Result: ";
+                        const resultValueText = document.createTextNode(JSON.stringify(result, null, 2));
+
+                        listItem.appendChild(strongFileText);
+                        listItem.appendChild(fileNameText);
+                        listItem.appendChild(document.createElement("br"));
+                        listItem.appendChild(strongResultText);
+                        listItem.appendChild(resultValueText);
                         resultsList.appendChild(listItem);
                     }
                 } else {
@@ -141,11 +159,9 @@ document.getElementById('startExperiment').addEventListener('click', async funct
                     noResultsItem.textContent = "No results";
                     resultsList.appendChild(noResultsItem);
                 }
-                cancelAnimationFrame(animationFrameId);
-                updateProgress(100);
+                isResponseOk = true;
             } else {
-                cancelAnimationFrame(animationFrameId);
-                updateProgress(0);
+                isResponseOk = false;
                 const errorData = await response.json();
                 console.log("Received errorData:", errorData);
             
@@ -159,10 +175,15 @@ document.getElementById('startExperiment').addEventListener('click', async funct
                 }
             }
         } catch (error) {
-            cancelAnimationFrame(animationFrameId);
-            updateProgress(0);
             console.error("Error starting experiment " + (index + 1) + ":", error);
         }
+    }
+    if (isResponseOk) {
+        cancelAnimationFrame(animationFrameId);
+        updateProgress(100);
+    } else {
+        cancelAnimationFrame(animationFrameId);
+        updateProgress(0);
     }
 });
 

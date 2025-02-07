@@ -11,6 +11,10 @@ import json
 import subprocess
 import os
 import uuid
+import logging
+
+logger = logging.getLogger(__name__)
+loggerFront = logging.getLogger('frontend_logs')
 
 def home(request):
     return render(request, 'home.html')
@@ -18,11 +22,13 @@ def home(request):
 def experiment_config(request):
     methods = list_methods()
     computers = QuantumComputer.objects.all()
+    logger.info("Experiment_config card")
     return render(request, 'experiment_config.html', {'methods': methods, 'computers': computers})
 
 @csrf_exempt
 def start_experiment(request):
     if request.method == "POST" and request.FILES:
+        logger.info("Processing POST request")
         results = {}
         try:
             selected_method = request.POST.get('selected_method')
@@ -37,7 +43,7 @@ def start_experiment(request):
                     for chunk in uploaded_file.chunks():
                         destination.write(chunk)
 
-                print(f"File saved at: {file_path}")
+                logger.info("File saved at: %s", str(file_path))
 
                 command = [
                     "geqie",
@@ -47,37 +53,39 @@ def start_experiment(request):
                     "--n-shots", shots,
                     "--return-padded-counts", "true"
                 ]
-                print(f"Executing command: {' '.join(command)}")
+                logger.info("Executing command: %s", str(command))
 
                 try:
                     result = subprocess.run(command, capture_output=True, text=True, check=True)
-                    print(f"Command output: {result.stdout}")
+                    logger.info("Command output: %s", str(result.stdout))
 
                     output = json.loads(result.stdout)
                     results[uploaded_file.name] = output
                     os.remove(file_path)
+                    logger.info("Deleted image")
 
                 except subprocess.CalledProcessError as e:
-                    print(f"Command failed with return code {e.returncode}. Stderr: {e.stderr}") 
+                    logger.critical("Command failed with return code %s. Stderr: %s", str(e.returncode), str(e.stderr))
                     os.remove(file_path)
                     return JsonResponse({"success": False, "error": f"Command failed: {e}"}, status=500)
 
                 except json.JSONDecodeError as e:
-                    print(f"JSON decoding error: {e}") 
+                    logger.critical("JSON decoding error: %s", str(e))
                     os.remove(file_path)
                     return JsonResponse({"success": False, "error": "Invalid JSON returned by the command."}, status=500)
 
-            print("Returning results.", results)
+            logger.info("Returned results: %s", str(results))
             return JsonResponse(results)
 
         except Exception as e:
-            print(f"Unexpected error: {e}")
+            logger.critical("Unexpected error: %s", str(e))
             return JsonResponse({"success": False, "error": f"Unexpected error: {e}"}, status=500)
 
     return JsonResponse({"success": False, "error": "Invalid request."}, status=400)
 
 def edit_method(request):
     methods =  list_methods()
+    logger.info("Edit_method card")
     return render(request, 'edit_method.html', {'methods': methods})
 
 def list_methods():
@@ -92,6 +100,7 @@ def list_methods():
 def read_method_files(request, method_name):
     method_path = os.path.join(ENCODINGS_DIR, method_name)
     if not os.path.exists(method_path):
+        logger.error("Method not found")
         return JsonResponse({"error": "Method not found"}, status=404)
 
     files = ["init.py", "map.py", "data.py"]
@@ -121,6 +130,7 @@ def save_method_files(request):
             add_new = data.get("add_new")
 
             if not method_name:
+                logger.error("No method name provided")
                 return JsonResponse({"error": "No method name provided"}, status=400)
 
             method_path = os.path.join(ENCODINGS_DIR, method_name)
@@ -152,9 +162,38 @@ from .map import map as map_function""",
             return JsonResponse({"message": "Method saved successfully"})
 
         except Exception as e:
+            logger.critical("Error: %s", str(e))
             return JsonResponse({"error": str(e)}, status=500)
 
     return JsonResponse({"error": "Invalid request"}, status=400)
+
+@csrf_exempt
+def log_from_js(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            level = data.get('level', 'info')
+            message = data.get('message', '')
+
+            if level == 'debug':
+                loggerFront.debug(message)
+            elif level == 'info':
+                loggerFront.info(message)
+            elif level == 'warning':
+                loggerFront.warning(message)
+            elif level == 'error':
+                loggerFront.error(message)
+            elif level == 'critical':
+                loggerFront.critical(message)
+            else:
+                loggerFront.info(f"[Unknown level] {message}")
+
+            return JsonResponse({'status': 'success'})
+        except Exception as e:
+            loggerFront.error(f"Failed to process JS log: {str(e)}")
+            return JsonResponse({'status': 'error'}, status=400)
+    return JsonResponse({'error': 'Invalid request'}, status=405)
+
 
 # @csrf_exempt
 # def update_list(request):

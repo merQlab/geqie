@@ -1,0 +1,46 @@
+[07/Feb/2025 10:35:12] ERROR [django.request:248] Internal Server Error: /start-Experiment/
+[07/Feb/2025 10:35:12] ERROR [django.server:213] "POST /start-Experiment/ HTTP/1.1" 500 336
+[07/Feb/2025 11:21:35] ERROR [main.views:29] Processing POST request
+[07/Feb/2025 11:21:35] ERROR [main.views:54] Executing command: ['geqie', 'simulate', '--encoding', 'frqi', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\1eb86836-be07-483b-8e5c-164355c66684_test_image.png', '--n-shots', '1024', '--return-padded-counts', 'true']
+[07/Feb/2025 12:31:02] ERROR [django.request:248] Internal Server Error: /get-method/frqi/
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: read_method_files() got multiple values for argument 'method_name'
+[07/Feb/2025 12:31:02] ERROR [django.server:213] "GET /get-method/frqi/ HTTP/1.1" 500 64957
+[07/Feb/2025 12:31:10] ERROR [django.request:248] Internal Server Error: /get-method/mcqi/
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: read_method_files() got multiple values for argument 'method_name'
+[07/Feb/2025 12:31:10] ERROR [django.server:213] "GET /get-method/mcqi/ HTTP/1.1" 500 64957
+[07/Feb/2025 12:31:20] ERROR [django.request:248] Internal Server Error: /get-method/frqi/
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: read_method_files() got multiple values for argument 'method_name'
+[07/Feb/2025 12:31:20] ERROR [django.server:213] "GET /get-method/frqi/ HTTP/1.1" 500 64957
+[07/Feb/2025 12:38:34] ERROR [django.request:248] Internal Server Error: /get-method/frqi/
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: read_method_files() got multiple values for argument 'method_name'
+[07/Feb/2025 12:38:34] ERROR [django.server:213] "GET /get-method/frqi/ HTTP/1.1" 500 64957
+[07/Feb/2025 12:42:59] ERROR [frontend_logs:185] B³¹d podczas ³adowania danych!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!.
+[07/Feb/2025 13:16:34] ERROR [frontend_logs:185] Method added.

@@ -121,6 +121,55 @@ USE_TZ = True
 STATIC_URL = 'main/static/geqie/'
 STATICFILES_DIRS = [BASE_DIR / 'main/static/geqie/']
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s',
+            'datefmt': "%d/%b/%Y %H:%M:%S"
+        },
+        'simple': {
+            'format': '%(levelname)s: %(message)s'
+        },
+    },
+    'handlers': {
+        # Handler wypisujący logi na konsolę
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+            'level': 'DEBUG',
+        },
+        # Handler zapisujący błędy do pliku
+        'file': {
+            'class': 'logging.FileHandler',
+            'formatter': 'verbose',
+            'level': 'ERROR',
+            'filename': os.path.join(BASE_DIR, 'logs', 'error.log'),
+        },
+    },
+    'loggers': {
+        # Logger ogólny, obejmujący Django
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': True,
+        },
+        # Logger dla main
+        'main': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        
+        'frontend_logs': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    },
+}
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
@@ -131,9 +180,9 @@ CRISPY_TEMPLATE_PACK = 'bootstrap5'
 MEDIA_URL = '/grayscale/'
 
 #Docker path
-MEDIA_ROOT = os.path.join(BASE_DIR, 'assets', 'test_images')
-#MEDIA_ROOT = os.path.join(BASE_DIR, '..', 'assets', 'test_images')
+#MEDIA_ROOT = os.path.join(BASE_DIR, 'assets', 'test_images')
+MEDIA_ROOT = os.path.join(BASE_DIR, '..', 'assets', 'test_images')
 
 #Docker path
-ENCODINGS_DIR = os.path.abspath(os.path.join(BASE_DIR, "encodings"))
-#ENCODINGS_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "geqie", "encodings"))
+#ENCODINGS_DIR = os.path.abspath(os.path.join(BASE_DIR, "encodings"))
+ENCODINGS_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "geqie", "encodings"))

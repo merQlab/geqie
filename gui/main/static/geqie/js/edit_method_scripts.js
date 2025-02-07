@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 mapContent.value = data.map || "No content found.";
                 dataContent.value = data.data || "No content found.";
             })
-            .catch(error => console.error("Error fetching method data:", error));
+            .catch(error => logToServer('critical', 'Error fetching method data: ${error}'));
     });
 });
 
@@ -70,10 +70,12 @@ document.getElementById("fileInput").addEventListener("change", function() {
 });
 
 document.getElementById("addNewMethod").addEventListener("click", function () {
+    logToServer('info', 'Method added.');
     saveMethod(true, true, document.getElementById("methodName").value, "methodName", "addInitContent", "addMapContent", "addDataContent");
 });
 
 document.getElementById("save").addEventListener("click", function () {
+    logToServer('info', 'Method saved.');
     saveMethod(false, false, document.getElementById("methodSelect").value, "methodSelect", "initContent", "mapContent", "dataContent");
 });
 
@@ -84,6 +86,7 @@ document.getElementById("saveAsNew").addEventListener("click", function () {
     } else if (userInput.trim() === "") {
         alert("Name is empty");
     } else {
+        logToServer('info', 'Method saved as new.');
         saveMethod(false, true, userInput.trim(), "methodSelect", "initContent", "mapContent", "dataContent");
     }
 });
@@ -118,12 +121,14 @@ function saveMethod(addNew, isNew, saveName, method, init, map, data) {
     .then(response => response.json())
     .then(data => {
         if (data.error) {
+            logToServer('warning', 'Error: ${data.error}')
             alert("Error: " + data.error);
         } else {
+            logToServer('info', 'Method saved successfully!')
             alert("Method saved successfully!");
         }
     })
-    .catch(error => console.error("Fetch error:", error));
+    .catch(error => logToServer('critical', 'Fetch error: ${error}'));
 }
 
 function getCSRFToken() {
