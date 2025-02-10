@@ -2,11 +2,11 @@ from django.shortcuts import render
 from django.http import JsonResponse
 
 from gui.settings import ENCODINGS_DIR
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from .models import QuantumMethod, QuantumComputer
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import default_storage
 from django.conf import settings
-from collections import OrderedDict
 import json
 import subprocess
 import os
@@ -34,51 +34,62 @@ def start_experiment(request):
             selected_method = request.POST.get('selected_method')
             shots = request.POST.get('shots')
 
-            for key, uploaded_file in request.FILES.items():
-
+            def process_file(uploaded_file):
                 unique_filename = f"{uuid.uuid4()}_{uploaded_file.name}"
                 file_path = os.path.join(settings.MEDIA_ROOT, unique_filename)
-
-                with default_storage.open(file_path, 'wb+') as destination:
-                    for chunk in uploaded_file.chunks():
-                        destination.write(chunk)
-
-                logger.info("File saved at: %s", str(file_path))
-
-                command = [
-                    "geqie",
-                    "simulate",
-                    "--encoding", selected_method,
-                    "--image", file_path,
-                    "--n-shots", shots,
-                    "--return-padded-counts", "true"
-                ]
-                logger.info("Executing command: %s", str(command))
-
                 try:
+                    with default_storage.open(file_path, 'wb+') as destination:
+                        for chunk in uploaded_file.chunks():
+                            destination.write(chunk)
+                    logger.info("File saved at: %s", file_path)
+
+                    command = [
+                        "geqie",
+                        "simulate",
+                        "--encoding", selected_method,
+                        "--image", file_path,
+                        "--n-shots", shots,
+                        "--return-padded-counts", "true"
+                    ]
+                    logger.info("Executing command: %s", command)
                     result = subprocess.run(command, capture_output=True, text=True, check=True)
-                    logger.info("Command output: %s", str(result.stdout))
+                    logger.info("Command output: %s", result.stdout)
 
                     output = json.loads(result.stdout)
-                    results[uploaded_file.name] = output
-                    os.remove(file_path)
-                    logger.info("Deleted image")
-
+                    return uploaded_file.name, output
                 except subprocess.CalledProcessError as e:
-                    logger.critical("Command failed with return code %s. Stderr: %s", str(e.returncode), str(e.stderr))
-                    os.remove(file_path)
-                    return JsonResponse({"success": False, "error": f"Command failed: {e}"}, status=500)
-
+                    logger.critical("Command failed with return code %s. Stderr: %s", e.returncode, e.stderr)
+                    raise Exception(f"Command failed: {e}")
                 except json.JSONDecodeError as e:
-                    logger.critical("JSON decoding error: %s", str(e))
-                    os.remove(file_path)
-                    return JsonResponse({"success": False, "error": "Invalid JSON returned by the command."}, status=500)
+                    logger.critical("JSON decoding error: %s", e)
+                    raise Exception("Invalid JSON returned by the command.")
+                finally:
+                    if os.path.exists(file_path):
+                        os.remove(file_path)
+                        logger.info("Deleted image at: %s", file_path)
 
-            logger.info("Returned results: %s", str(results))
+            file_list = request.FILES.getlist('images[]')
+            if not file_list:
+                file_list = list(request.FILES.values())
+
+            with ThreadPoolExecutor() as executor:
+                futures = {
+                    executor.submit(process_file, uploaded_file): uploaded_file
+                    for uploaded_file in file_list
+                }
+                for future in as_completed(futures):
+                    try:
+                        file_name, output = future.result()
+                        results[file_name] = output
+                    except Exception as e:
+                        logger.critical("Error processing file: %s", e)
+                        return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+            logger.info("Returned results: %s", results)
             return JsonResponse(results)
 
         except Exception as e:
-            logger.critical("Unexpected error: %s", str(e))
+            logger.critical("Unexpected error: %s", e)
             return JsonResponse({"success": False, "error": f"Unexpected error: {e}"}, status=500)
 
     return JsonResponse({"success": False, "error": "Invalid request."}, status=400)

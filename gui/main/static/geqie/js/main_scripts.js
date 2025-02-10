@@ -43,12 +43,12 @@ document.getElementById('imageFile').addEventListener('change', async () => {
 });
 
 document.getElementById('addExperiment').addEventListener('click', () => {
-    const imageFile = document.getElementById('imageFile').files[0];
+    const files = document.getElementById('imageFile').files;
     const selectedMethod = document.getElementById('selected-submethod').textContent.trim();
     const selectedComputer = document.getElementById('selected-computer').textContent.trim();
     const shots = document.getElementById('shots').value;
 
-    if (!imageFile) {
+    if (!files) {
         alert("Please select an image first!");
         return;
     }
@@ -59,8 +59,7 @@ document.getElementById('addExperiment').addEventListener('click', () => {
     }
 
     const experiment = {
-        image: imageFile,
-        imageName: imageFile.name,
+        images: Array.from(files),
         method: selectedMethod,
         computer: selectedComputer,
         shots: shots
@@ -75,13 +74,26 @@ function updateExperimentsTable() {
     tableBody.innerHTML = '';
 
     experiments.forEach((experiment, index) => {
+        let imageNames = experiment.imageName;
+        if (!imageNames && experiment.images && experiment.images.length > 0) {
+            imageNames = experiment.images.map(image => image.name).join(', ');
+        }
+
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td>${experiment.imageName}</td>
+            <td>
+                <div style="max-width: 180px; overflow-x: auto; white-space: nowrap;">
+                    ${imageNames}
+                </div>
+            </td>
             <td>${experiment.method}</td>
             <td>${experiment.computer}</td>
             <td>${experiment.shots}</td>
-            <td><button class="btn btn-danger btn-sm" onclick="removeExperiment(${index})">Remove</button></td>
+            <td>
+                <button class="btn btn-danger btn-sm" onclick="removeExperiment(${index})">
+                    Remove
+                </button>
+            </td>
         `;
         tableBody.appendChild(row);
     });
@@ -111,7 +123,9 @@ document.getElementById('startExperiment').addEventListener('click', async funct
         const formData = new FormData();
         formData.append('result_folder', resultFolderPath);
         formData.append('selected_method', experiment.method);
-        formData.append('image', experiment.image);
+        experiment.images.forEach(image => {
+            formData.append('images[]', image);
+        });
         formData.append('method', experiment.method);
         formData.append('computer', experiment.computer);
         formData.append('shots', experiment.shots);
@@ -127,6 +141,7 @@ document.getElementById('startExperiment').addEventListener('click', async funct
 
             if (response.ok) {
                 const resultsList = document.getElementById("results-list");
+                resultsList.innerHTML = '';
                 const headerItem = document.createElement("li");
                 headerItem.className = "list-group-item fw-bold";
                 headerItem.textContent = `Experiment ${index + 1}:`;
