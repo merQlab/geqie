@@ -18,13 +18,15 @@
             <div class="col-md-3">
                 <div class="card shadow-sm mb-4">
                     <div class="card-body">
-                        <h4 class="card-title text-center">Methods</h4>
+                        <div class="d-flex align-items-center position-relative">
+                            <h4 class="card-title text-center flex-grow-1">Methods</h4>
+                            <a class="btn btn-primary edit-button btn-sm position-absolute end-0" href="{% url 'edit_method' %}">Edit</a>
+                        </div>
+                        
                         <ul class="list-group" id="methods-list">
                             {% for method in methods %}
                                 <li class="list-group-item list-group-item-action sub-item" id="method-{{ method.id }}" methodname="{{ method.name }}" title="{{ method.description }}">
-                                    <details>
-                                        <summary>{{ method.name }}</summary>
-                                    </details>
+                                    {{ method.name }}
                                 </li>
                             {% empty %}
                                 <li class="list-group-item">No methods available</li>
@@ -72,7 +74,6 @@
                             </form>
                             <button class="btn btn-primary" id="selectImage">Select Image</button>
                             <button class="btn btn-primary" id="resultFolder">Result folder</button>
-                            <a class="btn btn-primary" href="{% url 'edit_method' %}">Manage methods</a>
                         </div>
                         <div class="my-3">
                             <p class="d-inline">Selected method:</p>
@@ -104,6 +105,9 @@
                                             <th>Computer</th>
                                             <th>Shots</th>
                                             <th>
+                                                <script>
+                                                    const trashIconPath = "{% static 'geqie/icon/trash.png' %}";
+                                                </script>
                                                 <img src="{% static 'geqie/icon/trash.png' %}" alt="Trash Icon" style="width:20px;height:20px;">
                                             </th>
                                         </tr>

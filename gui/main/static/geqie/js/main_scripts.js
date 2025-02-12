@@ -48,13 +48,18 @@ document.getElementById('addExperiment').addEventListener('click', () => {
     const selectedComputer = document.getElementById('selected-computer').textContent.trim();
     const shots = document.getElementById('shots').value;
 
-    if (!files) {
+    if (files.length === 0) {
         alert("Please select an image first!");
         return;
     }
 
     if (selectedMethod === 'No method' || selectedMethod === '') {
         alert("Please select a method!");
+        return;
+    }
+
+    if (shots <= 0) {
+        alert("Please enter a valid number of shots greater than 0!");
         return;
     }
 
@@ -82,17 +87,20 @@ function updateExperimentsTable() {
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>
-                <div style="max-width: 180px; overflow-x: auto; white-space: nowrap;">
+                <div style="max-width: 320px; overflow-x: auto; white-space: nowrap;">
                     ${imageNames}
                 </div>
             </td>
-            <td>${experiment.method}</td>
-            <td>${experiment.computer}</td>
-            <td>${experiment.shots}</td>
-            <td>
-                <button class="btn btn-danger btn-sm" onclick="removeExperiment(${index})">
-                    Remove
-                </button>
+            <td style="vertical-align: middle;">${experiment.method}</td>
+            <td style="vertical-align: middle;">${experiment.computer}</td>
+            <td style="vertical-align: middle;">${experiment.shots}</td>
+            <td style="vertical-align: middle;">
+                <img 
+                    src="${trashIconPath}" 
+                    alt="Trash Icon" 
+                    style="width:20px;height:20px;cursor:pointer;" 
+                    onclick="removeExperiment(${index})"
+                >
             </td>
         `;
         tableBody.appendChild(row);
@@ -104,7 +112,8 @@ function removeExperiment(index) {
     updateExperimentsTable();
 }
 
-document.getElementById('startExperiment').addEventListener('click', async function(event)  {
+
+document.getElementById('startExperiment').addEventListener('click', async function(event) {
     event.preventDefault();
 
     if (experiments.length === 0) {
@@ -117,88 +126,98 @@ document.getElementById('startExperiment').addEventListener('click', async funct
     //     return;
     // }
 
-    animateProgress(10, 90, experiments.length * 3000);
+    const startExperimentBtn = document.getElementById('startExperiment');
+    startExperimentBtn.disabled = true;
 
-    for (const [index, experiment] of experiments.entries()) {
-        const formData = new FormData();
-        formData.append('result_folder', resultFolderPath);
-        formData.append('selected_method', experiment.method);
-        experiment.images.forEach(image => {
-            formData.append('images[]', image);
-        });
-        formData.append('method', experiment.method);
-        formData.append('computer', experiment.computer);
-        formData.append('shots', experiment.shots);
+    try {
+        const totalImages = experiments.reduce((sum, experiment) => sum + experiment.images.length, 0);
+        animateProgress(10, 90, totalImages / 2 * experiments.length * 3000);
 
-        try {
-            const response = await fetch(startExperimentUrl, {
-                method: "POST",
-                body: formData,
-                headers: {
-                    "X-CSRFToken": "{{ csrf_token }}",
-                },
+        const resultsList = document.getElementById("results-list");
+        resultsList.innerHTML = '';
+
+        for (const [index, experiment] of experiments.entries()) {
+            const formData = new FormData();
+            formData.append('result_folder', resultFolderPath);
+            formData.append('selected_method', experiment.method);
+            experiment.images.forEach(image => {
+                formData.append('images[]', image);
             });
+            formData.append('method', experiment.method);
+            formData.append('computer', experiment.computer);
+            formData.append('shots', experiment.shots);
 
-            if (response.ok) {
-                const resultsList = document.getElementById("results-list");
-                resultsList.innerHTML = '';
-                const headerItem = document.createElement("li");
-                headerItem.className = "list-group-item fw-bold";
-                headerItem.textContent = `Experiment ${index + 1}:`;
-                resultsList.appendChild(headerItem);
+            try {
+                const response = await fetch(startExperimentUrl, {
+                    method: "POST",
+                    body: formData,
+                    headers: {
+                        "X-CSRFToken": "{{ csrf_token }}",
+                    },
+                });
 
-                const data = await response.json();
-                if (data && Object.keys(data).length > 0) {
-                    for (const [fileName, result] of Object.entries(data)) {
-                        const listItem = document.createElement("li");
-                        listItem.className = "list-group-item";
-                        
-                        const strongFileText = document.createElement("strong");
-                        strongFileText.textContent = "File: ";
-                        const fileNameText = document.createTextNode(fileName);
+                if (response.ok) {
+                    const headerItem = document.createElement("li");
+                    headerItem.className = "list-group-item fw-bold";
+                    headerItem.textContent = `Experiment ${index + 1}:`;
+                    resultsList.appendChild(headerItem);
 
-                        const strongResultText = document.createElement("strong");
-                        strongResultText.textContent = "Result: ";
-                        const resultValueText = document.createTextNode(JSON.stringify(result, null, 2));
+                    const data = await response.json();
+                    if (data && Object.keys(data).length > 0) {
+                        for (const [fileName, result] of Object.entries(data)) {
+                            const listItem = document.createElement("li");
+                            listItem.className = "list-group-item";
 
-                        listItem.appendChild(strongFileText);
-                        listItem.appendChild(fileNameText);
-                        listItem.appendChild(document.createElement("br"));
-                        listItem.appendChild(strongResultText);
-                        listItem.appendChild(resultValueText);
-                        resultsList.appendChild(listItem);
+                            const strongFileText = document.createElement("strong");
+                            strongFileText.textContent = "File: ";
+                            const fileNameText = document.createTextNode(fileName);
+
+                            const strongResultText = document.createElement("strong");
+                            strongResultText.textContent = "Result: ";
+                            const resultValueText = document.createTextNode(JSON.stringify(result, null, 2));
+
+                            listItem.appendChild(strongFileText);
+                            listItem.appendChild(fileNameText);
+                            listItem.appendChild(document.createElement("br"));
+                            listItem.appendChild(strongResultText);
+                            listItem.appendChild(resultValueText);
+                            resultsList.appendChild(listItem);
+                        }
+                    } else {
+                        const noResultsItem = document.createElement("li");
+                        noResultsItem.className = "list-group-item text-muted";
+                        noResultsItem.textContent = "No results";
+                        resultsList.appendChild(noResultsItem);
                     }
+                    isResponseOk = true;
                 } else {
-                    const noResultsItem = document.createElement("li");
-                    noResultsItem.className = "list-group-item text-muted";
-                    noResultsItem.textContent = "No results";
-                    resultsList.appendChild(noResultsItem);
+                    isResponseOk = false;
+                    const errorData = await response.json();
+                    console.log("Received errorData:", errorData);
+
+                    const errorMessage = errorData.error || "";
+                    console.log("Extracted errorMessage:", errorMessage);
+
+                    if (errorMessage.includes("Command failed")) {
+                        alert("Experiment " + (index + 1) + " failed due to a command execution error. Please check your method implementation.");
+                    } else {
+                        alert("Failed to start experiment " + (index + 1) + ": " + errorMessage);
+                    }
                 }
-                isResponseOk = true;
-            } else {
-                isResponseOk = false;
-                const errorData = await response.json();
-                console.log("Received errorData:", errorData);
-            
-                const errorMessage = errorData.error || "";
-                console.log("Extracted errorMessage:", errorMessage);
-            
-                if (errorMessage.includes("Command failed")) {
-                    alert("Experiment " + (index + 1) + " failed due to a command execution error. Please check your method implementation.");
-                } else {
-                    alert("Failed to start experiment " + (index + 1) + ": " + errorMessage);
-                }
+            } catch (error) {
+                console.error("Error starting experiment " + (index + 1) + ":", error);
             }
-        } catch (error) {
-            console.error("Error starting experiment " + (index + 1) + ":", error);
         }
-    }
-    if (isResponseOk) {
-        cancelAnimationFrame(animationFrameId);
-        updateProgress(100);
-    } else {
-        cancelAnimationFrame(animationFrameId);
-        updateProgress(0);
+
+        if (isResponseOk) {
+            cancelAnimationFrame(animationFrameId);
+            updateProgress(100);
+        } else {
+            cancelAnimationFrame(animationFrameId);
+            updateProgress(0);
+        }
+    } finally {
+        startExperimentBtn.disabled = false;
     }
 });
 

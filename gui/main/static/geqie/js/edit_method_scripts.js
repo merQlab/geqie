@@ -91,7 +91,7 @@ document.getElementById("saveAsNew").addEventListener("click", function () {
     }
 });
 
-function saveMethod(addNew, isNew, saveName, method, init, map, data) {
+async function saveMethod(addNew, isNew, saveName, method, init, map, data) {
     let methodName = document.getElementById(method).value;
     let initContent = document.getElementById(init).value;
     let mapContent = document.getElementById(map).value;
@@ -99,6 +99,11 @@ function saveMethod(addNew, isNew, saveName, method, init, map, data) {
 
     if (!methodName) {
         alert("Please select a method first.");
+        return;
+    }
+
+    const canProceed = await checkFolderExists(methodName);
+    if (!canProceed) {
         return;
     }
 
@@ -143,4 +148,20 @@ function getCSRFToken() {
         });
     }
     return cookieValue;
+}
+
+function checkFolderExists(methodName) {
+    return fetch(`/check_folder/?folder_name=${encodeURIComponent(methodName)}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.exists) {
+                alert("Folder already exists! Change method name.");
+                return false;
+            }
+            return true;
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            return false;
+        });
 }

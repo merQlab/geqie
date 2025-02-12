@@ -20,10 +20,15 @@ def home(request):
     return render(request, 'home.html')
 
 def experiment_config(request):
-    methods = list_methods()
+    methods = approved_methods()
     computers = QuantumComputer.objects.all()
     logger.info("Experiment_config card")
     return render(request, 'experiment_config.html', {'methods': methods, 'computers': computers})
+
+def edit_method(request):
+    methods =  approved_methods()
+    logger.info("Edit_method card")
+    return render(request, 'edit_method.html', {'methods': methods})
 
 @csrf_exempt
 def start_experiment(request):
@@ -94,12 +99,7 @@ def start_experiment(request):
 
     return JsonResponse({"success": False, "error": "Invalid request."}, status=400)
 
-def edit_method(request):
-    methods =  list_methods()
-    logger.info("Edit_method card")
-    return render(request, 'edit_method.html', {'methods': methods})
-
-def list_methods():
+def all_methods():
     methods = []
     if os.path.exists(ENCODINGS_DIR):
         for method_name in os.listdir(ENCODINGS_DIR):
@@ -107,6 +107,20 @@ def list_methods():
             if os.path.isdir(method_path):
                 methods.append({"name": method_name})
     return methods
+
+def approved_methods():
+    methods = []
+    if os.path.exists(ENCODINGS_DIR):
+        for method_name in os.listdir(ENCODINGS_DIR):
+            method_path = os.path.join(ENCODINGS_DIR, method_name)
+            if os.path.isdir(method_path):
+                methods.append({"name": method_name})
+
+        approved_method_names = list(
+        QuantumMethod.objects.filter(approved=True).values_list('name', flat=True)
+        )
+        approved_methods = [m for m in methods if m["name"] in approved_method_names]
+    return approved_methods
 
 def read_method_files(request, method_name):
     method_path = os.path.join(ENCODINGS_DIR, method_name)
@@ -177,6 +191,15 @@ from .map import map as map_function""",
             return JsonResponse({"error": str(e)}, status=500)
 
     return JsonResponse({"error": "Invalid request"}, status=400)
+
+def check_folder_exists(request):
+    folder_name = request.GET.get("folder_name", "")
+    folder_path = os.path.join(settings.ENCODINGS_DIR, folder_name)
+
+    if os.path.exists(folder_path) and os.path.isdir(folder_path):
+        return JsonResponse({"exists": True})
+    else:
+        return JsonResponse({"exists": False})
 
 @csrf_exempt
 def log_from_js(request):

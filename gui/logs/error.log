@@ -1,46 +1,306 @@
-[07/Feb/2025 10:35:12] ERROR [django.request:248] Internal Server Error: /start-Experiment/
-[07/Feb/2025 10:35:12] ERROR [django.server:213] "POST /start-Experiment/ HTTP/1.1" 500 336
-[07/Feb/2025 11:21:35] ERROR [main.views:29] Processing POST request
-[07/Feb/2025 11:21:35] ERROR [main.views:54] Executing command: ['geqie', 'simulate', '--encoding', 'frqi', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\1eb86836-be07-483b-8e5c-164355c66684_test_image.png', '--n-shots', '1024', '--return-padded-counts', 'true']
-[07/Feb/2025 12:31:02] ERROR [django.request:248] Internal Server Error: /get-method/frqi/
-Traceback (most recent call last):
-  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
-    response = get_response(request)
-               ^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
-    response = wrapped_callback(request, *callback_args, **callback_kwargs)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-TypeError: read_method_files() got multiple values for argument 'method_name'
-[07/Feb/2025 12:31:02] ERROR [django.server:213] "GET /get-method/frqi/ HTTP/1.1" 500 64957
-[07/Feb/2025 12:31:10] ERROR [django.request:248] Internal Server Error: /get-method/mcqi/
-Traceback (most recent call last):
-  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
-    response = get_response(request)
-               ^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
-    response = wrapped_callback(request, *callback_args, **callback_kwargs)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-TypeError: read_method_files() got multiple values for argument 'method_name'
-[07/Feb/2025 12:31:10] ERROR [django.server:213] "GET /get-method/mcqi/ HTTP/1.1" 500 64957
-[07/Feb/2025 12:31:20] ERROR [django.request:248] Internal Server Error: /get-method/frqi/
-Traceback (most recent call last):
-  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
-    response = get_response(request)
-               ^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
-    response = wrapped_callback(request, *callback_args, **callback_kwargs)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-TypeError: read_method_files() got multiple values for argument 'method_name'
-[07/Feb/2025 12:31:20] ERROR [django.server:213] "GET /get-method/frqi/ HTTP/1.1" 500 64957
-[07/Feb/2025 12:38:34] ERROR [django.request:248] Internal Server Error: /get-method/frqi/
-Traceback (most recent call last):
-  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
-    response = get_response(request)
-               ^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
-    response = wrapped_callback(request, *callback_args, **callback_kwargs)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-TypeError: read_method_files() got multiple values for argument 'method_name'
-[07/Feb/2025 12:38:34] ERROR [django.server:213] "GET /get-method/frqi/ HTTP/1.1" 500 64957
-[07/Feb/2025 12:42:59] ERROR [frontend_logs:185] B³¹d podczas ³adowania danych!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!.
-[07/Feb/2025 13:16:34] ERROR [frontend_logs:185] Method added.
+[12/Feb/2025 13:29:50] CRITICAL [main.views:66] Command failed with return code 1. Stderr: Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\Admin\Desktop\geqie\.venv\Scripts\geqie.exe\__main__.py", line 7, in <module>
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1161, in __call__
+    return self.main(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1082, in main
+    rv = self.invoke(ctx)
+         ^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1697, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1443, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 106, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\cloup\_context.py", line 47, in new_func
+    return f(get_current_context(), *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 117, in simulate
+    print(json.dumps(main.simulate(circuit, **cli_params)))
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\main.py", line 79, in simulate
+    counts = result.get_counts(circuit)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\qiskit\result\result.py", line 284, in get_counts
+    raise QiskitError(f'No counts for experiment "{repr(key)}"')
+qiskit.exceptions.QiskitError: 'No counts for experiment "<qiskit.circuit.quantumcircuit.QuantumCircuit object at 0x00000172C3043BC0>"'
+
+[12/Feb/2025 13:29:50] CRITICAL [main.views:90] Error processing file: Command failed: Command '['geqie', 'simulate', '--encoding', 'frqi', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\ffae7911-ba83-4c28-a537-cc8fde3b4634_test_image.png', '--n-shots', '0', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+[12/Feb/2025 13:29:50] ERROR [django.request:248] Internal Server Error: /start-Experiment/
+[12/Feb/2025 13:29:50] ERROR [django.server:213] "POST /start-Experiment/ HTTP/1.1" 500 333
+[12/Feb/2025 15:55:44] CRITICAL [main.views:66] Command failed with return code 1. Stderr: Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\Admin\Desktop\geqie\.venv\Scripts\geqie.exe\__main__.py", line 7, in <module>
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1161, in __call__
+    return self.main(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1082, in main
+    rv = self.invoke(ctx)
+         ^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1697, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1443, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 106, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\cloup\_context.py", line 47, in new_func
+    return f(get_current_context(), *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 115, in simulate
+    circuit = ctx.invoke(encode, **params)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 96, in encode
+    e = _get_encoding_functions(params)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 48, in _get_encoding_functions
+    init_function = getattr(_import_module("init", init_path), "init")
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 32, in _import_module
+    spec.loader.exec_module(module)
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 1132, in get_code
+  File "<frozen importlib._bootstrap_external>", line 1190, in get_data
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\Admin\\Desktop\\geqie\\.venv\\Lib\\site-packages\\geqie\\encodings\\sss\\init.py'
+
+[12/Feb/2025 15:55:44] CRITICAL [main.views:90] Error processing file: Command failed: Command '['geqie', 'simulate', '--encoding', 'sss', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\aa545bab-79c8-4964-b42c-f6e4aee73c15_test_image.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+[12/Feb/2025 15:55:44] ERROR [django.request:248] Internal Server Error: /start-Experiment/
+[12/Feb/2025 15:55:44] ERROR [django.server:213] "POST /start-Experiment/ HTTP/1.1" 500 335
+[12/Feb/2025 15:58:20] CRITICAL [main.views:66] Command failed with return code 1. Stderr: Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\Admin\Desktop\geqie\.venv\Scripts\geqie.exe\__main__.py", line 7, in <module>
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1161, in __call__
+    return self.main(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1082, in main
+    rv = self.invoke(ctx)
+         ^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1697, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1443, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 106, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\cloup\_context.py", line 47, in new_func
+    return f(get_current_context(), *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 115, in simulate
+    circuit = ctx.invoke(encode, **params)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 96, in encode
+    e = _get_encoding_functions(params)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 48, in _get_encoding_functions
+    init_function = getattr(_import_module("init", init_path), "init")
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 32, in _import_module
+    spec.loader.exec_module(module)
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 1132, in get_code
+  File "<frozen importlib._bootstrap_external>", line 1190, in get_data
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\Admin\\Desktop\\geqie\\.venv\\Lib\\site-packages\\geqie\\encodings\\sss\\init.py'
+
+[12/Feb/2025 15:58:20] CRITICAL [main.views:90] Error processing file: Command failed: Command '['geqie', 'simulate', '--encoding', 'sss', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\2c698ef6-4899-40e3-9274-40aeb4121db1_test_image.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+[12/Feb/2025 15:58:20] ERROR [django.request:248] Internal Server Error: /start-Experiment/
+[12/Feb/2025 15:58:20] ERROR [django.server:213] "POST /start-Experiment/ HTTP/1.1" 500 335
+[12/Feb/2025 16:03:44] CRITICAL [main.views:66] Command failed with return code 1. Stderr: Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\Admin\Desktop\geqie\.venv\Scripts\geqie.exe\__main__.py", line 7, in <module>
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1161, in __call__
+    return self.main(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1082, in main
+    rv = self.invoke(ctx)
+         ^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1697, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1443, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 106, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\cloup\_context.py", line 47, in new_func
+    return f(get_current_context(), *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 115, in simulate
+    circuit = ctx.invoke(encode, **params)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 96, in encode
+    e = _get_encoding_functions(params)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 48, in _get_encoding_functions
+    init_function = getattr(_import_module("init", init_path), "init")
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 32, in _import_module
+    spec.loader.exec_module(module)
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 1132, in get_code
+  File "<frozen importlib._bootstrap_external>", line 1190, in get_data
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\Admin\\Desktop\\geqie\\.venv\\Lib\\site-packages\\geqie\\encodings\\sss\\init.py'
+
+[12/Feb/2025 16:03:44] CRITICAL [main.views:90] Error processing file: Command failed: Command '['geqie', 'simulate', '--encoding', 'sss', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\545aec37-ec69-48c7-8c57-6d66faa17115_test_image.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+[12/Feb/2025 16:03:44] ERROR [django.request:248] Internal Server Error: /start-Experiment/
+[12/Feb/2025 16:03:44] ERROR [django.server:213] "POST /start-Experiment/ HTTP/1.1" 500 335
+[12/Feb/2025 16:03:53] CRITICAL [main.views:66] Command failed with return code 1. Stderr: Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\Admin\Desktop\geqie\.venv\Scripts\geqie.exe\__main__.py", line 7, in <module>
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1161, in __call__
+    return self.main(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1082, in main
+    rv = self.invoke(ctx)
+         ^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1697, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1443, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 106, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\cloup\_context.py", line 47, in new_func
+    return f(get_current_context(), *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 115, in simulate
+    circuit = ctx.invoke(encode, **params)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 96, in encode
+    e = _get_encoding_functions(params)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 48, in _get_encoding_functions
+    init_function = getattr(_import_module("init", init_path), "init")
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 32, in _import_module
+    spec.loader.exec_module(module)
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 1132, in get_code
+  File "<frozen importlib._bootstrap_external>", line 1190, in get_data
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\Admin\\Desktop\\geqie\\.venv\\Lib\\site-packages\\geqie\\encodings\\sss\\init.py'
+
+[12/Feb/2025 16:03:53] CRITICAL [main.views:90] Error processing file: Command failed: Command '['geqie', 'simulate', '--encoding', 'sss', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\ceae1f96-ffd9-4940-87b6-3040e2d66e3e_test_image.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+[12/Feb/2025 16:03:53] ERROR [django.request:248] Internal Server Error: /start-Experiment/
+[12/Feb/2025 16:03:53] ERROR [django.server:213] "POST /start-Experiment/ HTTP/1.1" 500 335
+[12/Feb/2025 16:05:56] CRITICAL [main.views:66] Command failed with return code 1. Stderr: Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\Admin\Desktop\geqie\.venv\Scripts\geqie.exe\__main__.py", line 7, in <module>
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1161, in __call__
+    return self.main(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1082, in main
+    rv = self.invoke(ctx)
+         ^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1697, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1443, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 106, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\cloup\_context.py", line 47, in new_func
+    return f(get_current_context(), *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 115, in simulate
+    circuit = ctx.invoke(encode, **params)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 96, in encode
+    e = _get_encoding_functions(params)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 48, in _get_encoding_functions
+    init_function = getattr(_import_module("init", init_path), "init")
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 32, in _import_module
+    spec.loader.exec_module(module)
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 1132, in get_code
+  File "<frozen importlib._bootstrap_external>", line 1190, in get_data
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\Admin\\Desktop\\geqie\\.venv\\Lib\\site-packages\\geqie\\encodings\\sss\\init.py'
+
+[12/Feb/2025 16:05:56] CRITICAL [main.views:90] Error processing file: Command failed: Command '['geqie', 'simulate', '--encoding', 'sss', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\7422553d-3da1-427c-9e0c-2b2e93321cea_test_image.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+[12/Feb/2025 16:05:56] ERROR [django.request:248] Internal Server Error: /start-Experiment/
+[12/Feb/2025 16:05:56] ERROR [django.server:213] "POST /start-Experiment/ HTTP/1.1" 500 335

@@ -72,6 +72,10 @@ textarea:focus, select:focus {
     transition: background-color 0.3s ease;
 }
 
+.edit-button {
+    margin-top: -10px;
+}
+
 .btn-custom:hover {
     background-color: #5a6268;
 }
