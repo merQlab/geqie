@@ -158,6 +158,7 @@ document.getElementById('startExperiment').addEventListener('click', async funct
                     headerItem.textContent = `Experiment ${index + 1}:`;
                     resultsList.appendChild(headerItem);
                     const data = await response.json();
+                    logToServer('info', `Response ok: ${JSON.stringify(data, null, 2)}`);
                     if (data && Object.keys(data).length > 0) {
                         for (const [fileName, result] of Object.entries(data)) {
                             const listItem = document.createElement("li");
@@ -169,7 +170,7 @@ document.getElementById('startExperiment').addEventListener('click', async funct
 
                             const strongResultText = document.createElement("strong");
                             strongResultText.textContent = "Result: ";
-                            const resultValueText = document.createTextNode(JSON.stringify(result, null, 2));
+                            const resultValueText = document.createTextNode(result);
 
                             listItem.appendChild(strongFileText);
                             listItem.appendChild(fileNameText);
@@ -180,7 +181,7 @@ document.getElementById('startExperiment').addEventListener('click', async funct
 
                             allResults.push({
                                 file: fileName,
-                                result: JSON.stringify(result)
+                                result: result
                             });
                         }
                     } else {

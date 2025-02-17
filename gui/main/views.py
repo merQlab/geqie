@@ -11,6 +11,7 @@ import subprocess
 import os
 import uuid
 import logging
+from collections import OrderedDict
 
 logger = logging.getLogger(__name__)
 loggerFront = logging.getLogger('frontend_logs')
@@ -60,7 +61,11 @@ def start_experiment(request):
                     logger.info("Command output: %s", result.stdout)
 
                     output = json.loads(result.stdout)
-                    return uploaded_file.name, output
+                    logger.info("Command output: %s", output)
+                    ordered_output = json.dumps(OrderedDict(output))
+                    logger.info("OrderedDict: %s", ordered_output)
+                    
+                    return uploaded_file.name, ordered_output
                 except subprocess.CalledProcessError as e:
                     logger.critical("Command failed with return code %s. Stderr: %s", e.returncode, e.stderr)
                     raise Exception(f"Command failed: {e}")

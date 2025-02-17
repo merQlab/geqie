@@ -1,5 +1,5 @@
 window.logToServer = function(level, message) {
-    fetch('/api/log/', {
+    fetch('/logs/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

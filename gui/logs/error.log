@@ -439,3 +439,432 @@ qiskit.exceptions.QiskitError: 'Data for experiment "circuit-162" could not be f
 [17/Feb/2025 14:32:17] ERROR [django.server:213] "POST /start-Experiment/ HTTP/1.1" 500 352
 [17/Feb/2025 14:32:17] ERROR [frontend_logs:218] Received errorData: [object Object]
 [17/Feb/2025 14:32:17] ERROR [frontend_logs:218] Extracted errorMessage: Command failed: Command '['geqie', 'simulate', '--encoding', 'frqi', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\3797b292-65f9-4614-9a02-0702a13772d2_test_image.png', '--n-shots', '10000000000000000000', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+[17/Feb/2025 15:09:01] CRITICAL [main.views:65] Command failed with return code 1. Stderr: 
+[17/Feb/2025 15:09:01] CRITICAL [main.views:89] Error processing file: Command failed: Command '['geqie', 'simulate', '--encoding', 'frqi', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\bac2153f-4794-457b-abd4-21c22d50bd15_test_image.png', '--n-shots', '1024000000', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+[17/Feb/2025 15:09:01] ERROR [django.request:248] Internal Server Error: /start-Experiment/
+[17/Feb/2025 15:09:01] ERROR [django.server:213] "POST /start-Experiment/ HTTP/1.1" 500 342
+[17/Feb/2025 15:09:01] ERROR [frontend_logs:218] Received errorData: [object Object]
+[17/Feb/2025 15:09:01] ERROR [frontend_logs:218] Extracted errorMessage: Command failed: Command '['geqie', 'simulate', '--encoding', 'frqi', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\bac2153f-4794-457b-abd4-21c22d50bd15_test_image.png', '--n-shots', '1024000000', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+[17/Feb/2025 15:09:28] CRITICAL [main.views:65] Command failed with return code 1. Stderr: Simulation failed and returned the following error message:
+ERROR:  [Experiment 0] vector too long
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\Admin\Desktop\geqie\.venv\Scripts\geqie.exe\__main__.py", line 7, in <module>
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1161, in __call__
+    return self.main(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1082, in main
+    rv = self.invoke(ctx)
+         ^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1697, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1443, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 106, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\cloup\_context.py", line 47, in new_func
+    return f(get_current_context(), *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 117, in simulate
+    print(json.dumps(main.simulate(circuit, **cli_params)))
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\main.py", line 79, in simulate
+    counts = result.get_counts(circuit)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\qiskit\result\result.py", line 264, in get_counts
+    exp = self._get_experiment(key)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\qiskit\result\result.py", line 375, in _get_experiment
+    raise QiskitError(f'Data for experiment "{key}" could not be found.')
+qiskit.exceptions.QiskitError: 'Data for experiment "circuit-162" could not be found.'
+
+[17/Feb/2025 15:09:28] CRITICAL [main.views:89] Error processing file: Command failed: Command '['geqie', 'simulate', '--encoding', 'frqi', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\9fb8402d-647b-4665-a23c-42afc126006d_test_image.png', '--n-shots', '10240000000000000000', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+[17/Feb/2025 15:09:28] ERROR [django.request:248] Internal Server Error: /start-Experiment/
+[17/Feb/2025 15:09:28] ERROR [django.server:213] "POST /start-Experiment/ HTTP/1.1" 500 352
+[17/Feb/2025 15:09:28] ERROR [frontend_logs:218] Received errorData: [object Object]
+[17/Feb/2025 15:09:28] ERROR [frontend_logs:218] Extracted errorMessage: Command failed: Command '['geqie', 'simulate', '--encoding', 'frqi', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\9fb8402d-647b-4665-a23c-42afc126006d_test_image.png', '--n-shots', '10240000000000000000', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+[17/Feb/2025 15:12:03] CRITICAL [main.views:65] Command failed with return code 1. Stderr: Simulation failed and returned the following error message:
+ERROR:  [Experiment 0] vector too long
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\Admin\Desktop\geqie\.venv\Scripts\geqie.exe\__main__.py", line 7, in <module>
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1161, in __call__
+    return self.main(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1082, in main
+    rv = self.invoke(ctx)
+         ^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1697, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1443, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 106, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\cloup\_context.py", line 47, in new_func
+    return f(get_current_context(), *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 117, in simulate
+    print(json.dumps(main.simulate(circuit, **cli_params)))
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\main.py", line 79, in simulate
+    counts = result.get_counts(circuit)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\qiskit\result\result.py", line 264, in get_counts
+    exp = self._get_experiment(key)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\qiskit\result\result.py", line 375, in _get_experiment
+    raise QiskitError(f'Data for experiment "{key}" could not be found.')
+qiskit.exceptions.QiskitError: 'Data for experiment "circuit-162" could not be found.'
+
+[17/Feb/2025 15:12:03] CRITICAL [main.views:89] Error processing file: Command failed: Command '['geqie', 'simulate', '--encoding', 'frqi', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\196e684c-b3cc-4014-bcf5-f277281724a7_test_image.png', '--n-shots', '10240000000000000000', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+[17/Feb/2025 15:12:03] ERROR [django.request:248] Internal Server Error: /start-Experiment/
+[17/Feb/2025 15:12:03] ERROR [django.server:213] "POST /start-Experiment/ HTTP/1.1" 500 352
+[17/Feb/2025 15:12:03] ERROR [frontend_logs:218] Received errorData: {
+  "success": false,
+  "error": "Command failed: Command '['geqie', 'simulate', '--encoding', 'frqi', '--image', 'C:\\\\Users\\\\Admin\\\\Desktop\\\\geqie\\\\gui\\\\..\\\\assets\\\\test_images\\\\196e684c-b3cc-4014-bcf5-f277281724a7_test_image.png', '--n-shots', '10240000000000000000', '--return-padded-counts', 'true']' returned non-zero exit status 1."
+}
+[17/Feb/2025 15:12:03] ERROR [frontend_logs:218] Extracted errorMessage: Command failed: Command '['geqie', 'simulate', '--encoding', 'frqi', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\196e684c-b3cc-4014-bcf5-f277281724a7_test_image.png', '--n-shots', '10240000000000000000', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+[17/Feb/2025 15:23:02] ERROR [main.views:60] Command output: {"000": 0, "001": 265, "010": 40, "011": 214, "100": 126, "101": 129, "110": 209, "111": 41}
+
+[17/Feb/2025 15:24:37] ERROR [main.views:60] Command output: {"000": 0, "001": 253, "010": 39, "011": 227, "100": 143, "101": 121, "110": 205, "111": 36}
+
+[17/Feb/2025 15:24:37] ERROR [main.views:63] Command output: {'000': 0, '001': 253, '010': 39, '011': 227, '100': 143, '101': 121, '110': 205, '111': 36}
+[17/Feb/2025 15:36:17] ERROR [frontend_logs:219] Response ok: [object Response]
+[17/Feb/2025 15:37:14] ERROR [frontend_logs:219] Response ok: {}
+[17/Feb/2025 15:39:39] ERROR [frontend_logs:219] Response ok: {
+  "test_image.png": {
+    "100": 125,
+    "101": 144,
+    "110": 219,
+    "111": 43,
+    "000": 0,
+    "001": 240,
+    "010": 37,
+    "011": 216
+  }
+}
+[17/Feb/2025 15:48:36] CRITICAL [main.views:100] Error processing file: 'int' object has no attribute 'keys'
+[17/Feb/2025 15:48:36] ERROR [django.request:248] Internal Server Error: /start-Experiment/
+[17/Feb/2025 15:48:36] ERROR [django.server:213] "POST /start-Experiment/ HTTP/1.1" 500 67
+[17/Feb/2025 15:48:36] ERROR [frontend_logs:229] Received errorData: {
+  "success": false,
+  "error": "'int' object has no attribute 'keys'"
+}
+[17/Feb/2025 15:48:36] ERROR [frontend_logs:229] Extracted errorMessage: 'int' object has no attribute 'keys'
+[17/Feb/2025 15:55:49] CRITICAL [main.views:100] Error processing file: 'int' object has no attribute 'keys'
+[17/Feb/2025 15:55:49] ERROR [django.request:248] Internal Server Error: /start-Experiment/
+[17/Feb/2025 15:55:49] ERROR [django.server:213] "POST /start-Experiment/ HTTP/1.1" 500 67
+[17/Feb/2025 15:55:49] ERROR [frontend_logs:229] Received errorData: {
+  "success": false,
+  "error": "'int' object has no attribute 'keys'"
+}
+[17/Feb/2025 15:55:49] ERROR [frontend_logs:229] Extracted errorMessage: 'int' object has no attribute 'keys'
+[17/Feb/2025 15:58:46] ERROR [main.views:77] Final json: [{"file": "000", "results": [{"key": "result", "value": 0}]}, {"file": "001", "results": [{"key": "result", "value": 253}]}, {"file": "010", "results": [{"key": "result", "value": 33}]}, {"file": "011", "results": [{"key": "result", "value": 221}]}, {"file": "100", "results": [{"key": "result", "value": 132}]}, {"file": "101", "results": [{"key": "result", "value": 122}]}, {"file": "110", "results": [{"key": "result", "value": 235}]}, {"file": "111", "results": [{"key": "result", "value": 28}]}]
+[17/Feb/2025 16:04:38] ERROR [main.views:64] Command output: {'000': 0, '001': 283, '010': 36, '011': 219, '100': 115, '101': 127, '110': 214, '111': 30}
+[17/Feb/2025 16:04:38] ERROR [main.views:66] OrderedDict: {"000": 0, "001": 283, "010": 36, "011": 219, "100": 115, "101": 127, "110": 214, "111": 30}
+[17/Feb/2025 16:06:42] ERROR [frontend_logs:223] Response ok: {
+  "test_image.png": "{\"000\": 0, \"001\": 276, \"010\": 40, \"011\": 207, \"100\": 126, \"101\": 112, \"110\": 230, \"111\": 33}"
+}
+[17/Feb/2025 16:12:22] CRITICAL [main.views:94] Error processing file: need more than 1 value to unpack
+[17/Feb/2025 16:12:22] ERROR [django.request:248] Internal Server Error: /start-Experiment/
+[17/Feb/2025 16:12:23] ERROR [django.server:213] "POST /start-Experiment/ HTTP/1.1" 500 63
+[17/Feb/2025 16:12:23] ERROR [frontend_logs:223] Received errorData: {
+  "success": false,
+  "error": "need more than 1 value to unpack"
+}
+[17/Feb/2025 16:12:23] ERROR [frontend_logs:223] Extracted errorMessage: need more than 1 value to unpack
+[17/Feb/2025 16:13:04] CRITICAL [main.views:94] Error processing file: 'CompletedProcess' object is not iterable
+[17/Feb/2025 16:13:04] ERROR [django.request:248] Internal Server Error: /start-Experiment/
+[17/Feb/2025 16:13:04] ERROR [django.server:213] "POST /start-Experiment/ HTTP/1.1" 500 72
+[17/Feb/2025 16:13:04] ERROR [frontend_logs:223] Received errorData: {
+  "success": false,
+  "error": "'CompletedProcess' object is not iterable"
+}
+[17/Feb/2025 16:13:04] ERROR [frontend_logs:223] Extracted errorMessage: 'CompletedProcess' object is not iterable
+[17/Feb/2025 16:19:17] ERROR [frontend_logs:223] Response ok: {
+  "test_image.png": {
+    "100": 130,
+    "101": 113,
+    "110": 198,
+    "111": 39,
+    "000": 0,
+    "001": 284,
+    "010": 37,
+    "011": 223
+  }
+}
+[17/Feb/2025 16:20:11] ERROR [frontend_logs:230] Response ok: {
+  "test_image.png": {
+    "100": 125,
+    "101": 126,
+    "110": 221,
+    "111": 33,
+    "000": 0,
+    "001": 258,
+    "010": 34,
+    "011": 227
+  }
+}
+[17/Feb/2025 16:20:21] ERROR [frontend_logs:230] Response ok: {
+  "test_image.png": {
+    "100": 135,
+    "101": 125,
+    "110": 239,
+    "111": 28,
+    "000": 0,
+    "001": 253,
+    "010": 31,
+    "011": 213
+  }
+}
+[17/Feb/2025 16:21:03] ERROR [main.views:64] Command output: {'000': 0, '001': 258, '010': 46, '011': 227, '100': 123, '101': 114, '110': 217, '111': 39}
+[17/Feb/2025 16:21:03] ERROR [main.views:66] OrderedDict: OrderedDict({'000': 0, '001': 258, '010': 46, '011': 227, '100': 123, '101': 114, '110': 217, '111': 39})
+[17/Feb/2025 16:21:03] ERROR [frontend_logs:223] Response ok: {
+  "test_image.png": {
+    "100": 123,
+    "101": 114,
+    "110": 217,
+    "111": 39,
+    "000": 0,
+    "001": 258,
+    "010": 46,
+    "011": 227
+  }
+}
+[17/Feb/2025 16:23:48] ERROR [frontend_logs:242] Response ok: {
+  "test_image.png": [
+    [
+      "000",
+      0
+    ],
+    [
+      "001",
+      231
+    ],
+    [
+      "010",
+      37
+    ],
+    [
+      "011",
+      218
+    ],
+    [
+      "100",
+      118
+    ],
+    [
+      "101",
+      135
+    ],
+    [
+      "110",
+      244
+    ],
+    [
+      "111",
+      41
+    ]
+  ]
+}
+[17/Feb/2025 16:24:09] ERROR [main.views:83] Ordered list: [('000', 0), ('001', 249), ('010', 42), ('011', 222), ('100', 121), ('101', 126), ('110', 234), ('111', 30)]
+[17/Feb/2025 16:24:09] ERROR [frontend_logs:242] Response ok: {
+  "test_image.png": [
+    [
+      "000",
+      0
+    ],
+    [
+      "001",
+      249
+    ],
+    [
+      "010",
+      42
+    ],
+    [
+      "011",
+      222
+    ],
+    [
+      "100",
+      121
+    ],
+    [
+      "101",
+      126
+    ],
+    [
+      "110",
+      234
+    ],
+    [
+      "111",
+      30
+    ]
+  ]
+}
+[17/Feb/2025 16:24:33] ERROR [main.views:83] Ordered list: [('000', 0), ('001', 278), ('010', 34), ('011', 220), ('100', 110), ('101', 139), ('110', 206), ('111', 37)]
+[17/Feb/2025 16:24:33] ERROR [frontend_logs:242] Response ok: {
+  "test_image.png": [
+    [
+      "000",
+      0
+    ],
+    [
+      "001",
+      278
+    ],
+    [
+      "010",
+      34
+    ],
+    [
+      "011",
+      220
+    ],
+    [
+      "100",
+      110
+    ],
+    [
+      "101",
+      139
+    ],
+    [
+      "110",
+      206
+    ],
+    [
+      "111",
+      37
+    ]
+  ]
+}
+[17/Feb/2025 16:27:46] ERROR [frontend_logs:223] Response ok: {
+  "test_image.png": "{\"000\": 0, \"001\": 253, \"010\": 26, \"011\": 204, \"100\": 134, \"101\": 134, \"110\": 238, \"111\": 35}"
+}
+[17/Feb/2025 16:35:17] ERROR [frontend_logs:223] Response ok: {
+  "test_image.png": "{\"000\": 0, \"001\": 260, \"010\": 42, \"011\": 212, \"100\": 113, \"101\": 131, \"110\": 216, \"111\": 50}"
+}
+[17/Feb/2025 16:37:07] ERROR [frontend_logs:223] Response ok: {
+  "test_image.png": "{\"000\": 0, \"001\": 271, \"010\": 34, \"011\": 223, \"100\": 106, \"101\": 137, \"110\": 220, \"111\": 33}"
+}
+[17/Feb/2025 16:38:55] ERROR [frontend_logs:223] Response ok: {
+  "test_image.png": "{\"000\": 0, \"001\": 248, \"010\": 37, \"011\": 217, \"100\": 140, \"101\": 138, \"110\": 205, \"111\": 39}"
+}
+[17/Feb/2025 16:41:02] ERROR [frontend_logs:223] Response ok: {
+  "test_image.png": "{\"000\": 0, \"001\": 246, \"010\": 39, \"011\": 229, \"100\": 131, \"101\": 123, \"110\": 214, \"111\": 42}"
+}
+[17/Feb/2025 16:42:51] ERROR [frontend_logs:223] Response ok: {
+  "test_image.png": "{\"000\": 0, \"001\": 249, \"010\": 38, \"011\": 222, \"100\": 126, \"101\": 103, \"110\": 245, \"111\": 41}"
+}
+[17/Feb/2025 16:43:34] ERROR [frontend_logs:223] Response ok: {
+  "test_image.png": "{\"000\": 0, \"001\": 247, \"010\": 47, \"011\": 196, \"100\": 126, \"101\": 135, \"110\": 237, \"111\": 36}"
+}
+[17/Feb/2025 16:43:34] ERROR [frontend_logs:223] resultStr: "{\"000\": 0, \"001\": 247, \"010\": 47, \"011\": 196, \"100\": 126, \"101\": 135, \"110\": 237, \"111\": 36}"
+[17/Feb/2025 16:50:27] ERROR [frontend_logs:223] Response ok: {
+  "test_image.png": "{\"000\": 0, \"001\": 269, \"010\": 38, \"011\": 224, \"100\": 121, \"101\": 123, \"110\": 215, \"111\": 34}"
+}
+[17/Feb/2025 16:50:27] ERROR [frontend_logs:223] resultStr: "{\"000\": 0, \"001\": 269, \"010\": 38, \"011\": 224, \"100\": 121, \"101\": 123, \"110\": 215, \"111\": 34}"
+[17/Feb/2025 16:51:57] ERROR [frontend_logs:223] Response ok: {
+  "test_image.png": "{\"000\": 0, \"001\": 250, \"010\": 39, \"011\": 210, \"100\": 135, \"101\": 118, \"110\": 233, \"111\": 39}"
+}
+[17/Feb/2025 16:51:57] ERROR [frontend_logs:223] resultStr: "{\"000\": 0, \"001\": 250, \"010\": 39, \"011\": 210, \"100\": 135, \"101\": 118, \"110\": 233, \"111\": 39}"
+[17/Feb/2025 16:55:05] ERROR [frontend_logs:223] Response ok: {
+  "test_image.png": "{\"000\": 0, \"001\": 239, \"010\": 36, \"011\": 205, \"100\": 131, \"101\": 137, \"110\": 237, \"111\": 39}"
+}
+[17/Feb/2025 16:55:05] ERROR [frontend_logs:223] resultStr: "{'000': 0, '001': 239, '010': 36, '011': 205, '100': 131, '101': 137, '110': 237, '111': 39}"
+[17/Feb/2025 16:58:55] ERROR [frontend_logs:223] Response ok: {
+  "test_image.png": "{\"000\": 0, \"001\": 257, \"010\": 38, \"011\": 213, \"100\": 127, \"101\": 127, \"110\": 220, \"111\": 42}"
+}
+[17/Feb/2025 16:58:55] ERROR [frontend_logs:223] resultStr: "{'000': 0, '001': 257, '010': 38, '011': 213, '100': 127, '101': 127, '110': 220, '111': 42}"
+[17/Feb/2025 17:01:00] ERROR [frontend_logs:223] Response ok: {
+  "test_image.png": "{\"000\": 0, \"001\": 248, \"010\": 28, \"011\": 220, \"100\": 130, \"101\": 132, \"110\": 237, \"111\": 29}"
+}
+[17/Feb/2025 17:01:00] ERROR [frontend_logs:223] resultStr: "{'000': 0, '001': 248, '010': 28, '011': 220, '100': 130, '101': 132, '110': 237, '111': 29}"
+[17/Feb/2025 17:02:40] ERROR [frontend_logs:223] Response ok: {
+  "test_image.png": "{\"000\": 0, \"001\": 246, \"010\": 37, \"011\": 216, \"100\": 140, \"101\": 111, \"110\": 226, \"111\": 48}"
+}
+[17/Feb/2025 17:02:40] ERROR [frontend_logs:223] resultStr: "'000': 0, '001': 246, '010': 37, '011': 216, '100': 140, '101': 111, '110': 226, '111': 48"
+[17/Feb/2025 17:05:52] ERROR [frontend_logs:223] Response ok: {
+  "test_image.png": "{\"000\": 0, \"001\": 236, \"010\": 45, \"011\": 249, \"100\": 117, \"101\": 128, \"110\": 216, \"111\": 33}"
+}
+[17/Feb/2025 17:05:52] ERROR [frontend_logs:223] resultStr: "{\n  \"100\": 117,\n  \"101\": 128,\n  \"110\": 216,\n  \"111\": 33,\n  \"000\": 0,\n  \"001\": 236,\n  \"010\": 45,\n  \"011\": 249\n}"
+[17/Feb/2025 17:07:22] ERROR [frontend_logs:223] Error starting experiment 1: ReferenceError: result is not defined
+[17/Feb/2025 17:08:26] ERROR [frontend_logs:223] Response ok: {
+  "test_image.png": "{\"000\": 0, \"001\": 253, \"010\": 24, \"011\": 228, \"100\": 131, \"101\": 117, \"110\": 230, \"111\": 41}"
+}
+[17/Feb/2025 17:08:26] ERROR [frontend_logs:223] resultStr: "{'000': 0, '001': 253, '010': 24, '011': 228, '100': 131, '101': 117, '110': 230, '111': 41}"
+[17/Feb/2025 17:09:11] ERROR [frontend_logs:223] Response ok: {
+  "test_image.png": "{\"000\": 0, \"001\": 237, \"010\": 37, \"011\": 219, \"100\": 125, \"101\": 134, \"110\": 233, \"111\": 39}"
+}
+[17/Feb/2025 17:09:11] ERROR [frontend_logs:223] resultStr: "{'000': 0, '001': 237, '010': 37, '011': 219, '100': 125, '101': 134, '110': 233, '111': 39}"
+[17/Feb/2025 17:09:14] ERROR [frontend_logs:223] Response ok: {
+  "test_image.png": "{\"000\": 0, \"001\": 246, \"010\": 51, \"011\": 204, \"100\": 169, \"101\": 129, \"110\": 197, \"111\": 28}"
+}
+[17/Feb/2025 17:09:14] ERROR [frontend_logs:223] resultStr: "{'000': 0, '001': 246, '010': 51, '011': 204, '100': 169, '101': 129, '110': 197, '111': 28}"
+[17/Feb/2025 17:09:17] ERROR [frontend_logs:223] Response ok: {
+  "test_image.png": "{\"000\": 0, \"001\": 274, \"010\": 32, \"011\": 209, \"100\": 130, \"101\": 129, \"110\": 220, \"111\": 30}"
+}
+[17/Feb/2025 17:09:17] ERROR [frontend_logs:223] resultStr: "{'000': 0, '001': 274, '010': 32, '011': 209, '100': 130, '101': 129, '110': 220, '111': 30}"
+[17/Feb/2025 17:10:01] ERROR [frontend_logs:223] Response ok: {
+  "test_image.png": "{\"000\": 0, \"001\": 295, \"010\": 43, \"011\": 214, \"100\": 119, \"101\": 119, \"110\": 202, \"111\": 32}"
+}
+[17/Feb/2025 17:10:01] ERROR [frontend_logs:223] resultStr: "{'000': 0, '001': 295, '010': 43, '011': 214, '100': 119, '101': 119, '110': 202, '111': 32}"
+[17/Feb/2025 17:10:04] ERROR [frontend_logs:223] Response ok: {
+  "test_image.png": "{\"000\": 0, \"001\": 255, \"010\": 24, \"011\": 211, \"100\": 142, \"101\": 130, \"110\": 232, \"111\": 30}"
+}
+[17/Feb/2025 17:10:04] ERROR [frontend_logs:223] resultStr: "{'000': 0, '001': 255, '010': 24, '011': 211, '100': 142, '101': 130, '110': 232, '111': 30}"
+[17/Feb/2025 17:10:08] ERROR [frontend_logs:223] Response ok: {
+  "test_image.png": "{\"000\": 0, \"001\": 240, \"010\": 33, \"011\": 226, \"100\": 113, \"101\": 128, \"110\": 253, \"111\": 31}"
+}
+[17/Feb/2025 17:10:08] ERROR [frontend_logs:223] resultStr: "{'000': 0, '001': 240, '010': 33, '011': 226, '100': 113, '101': 128, '110': 253, '111': 31}"
+[17/Feb/2025 17:15:07] ERROR [frontend_logs:223] Response ok: {
+  "test_image.png": "{\"000\": 0, \"001\": 253, \"010\": 35, \"011\": 247, \"100\": 144, \"101\": 116, \"110\": 191, \"111\": 38}"
+}
+[17/Feb/2025 17:15:07] ERROR [frontend_logs:223] resultStr: "'000': 0, '001': 253, '010': 35, '011': 247, '100': 144, '101': 116, '110': 191, '111': 38"
+[17/Feb/2025 17:16:25] ERROR [frontend_logs:223] Response ok: {
+  "test_image.png": "{\"000\": 0, \"001\": 254, \"010\": 30, \"011\": 222, \"100\": 143, \"101\": 119, \"110\": 213, \"111\": 43}"
+}
+[17/Feb/2025 17:16:25] ERROR [frontend_logs:223] resultStr: "{'000': 0, '001': 254, '010': 30, '011': 222, '100': 143, '101': 119, '110': 213, '111': 43}"
+[17/Feb/2025 17:17:15] ERROR [frontend_logs:223] Response ok: {
+  "test_image.png": "{\"000\": 0, \"001\": 256, \"010\": 35, \"011\": 211, \"100\": 130, \"101\": 138, \"110\": 219, \"111\": 35}"
+}
+[17/Feb/2025 17:17:15] ERROR [frontend_logs:223] resultStr: {'000': 0, '001': 256, '010': 35, '011': 211, '100': 130, '101': 138, '110': 219, '111': 35}
+[17/Feb/2025 17:24:08] ERROR [frontend_logs:223] Response ok: {
+  "test_image.png": "{\"000\": 0, \"001\": 256, \"010\": 41, \"011\": 224, \"100\": 110, \"101\": 131, \"110\": 231, \"111\": 31}"
+}
+[17/Feb/2025 17:24:08] ERROR [frontend_logs:223] resultStr: {"000": 0, "001": 256, "010": 41, "011": 224, "100": 110, "101": 131, "110": 231, "111": 31}
+[17/Feb/2025 17:24:37] ERROR [frontend_logs:223] Response ok: {
+  "test_image.png": "{\"000\": 0, \"001\": 235, \"010\": 33, \"011\": 236, \"100\": 121, \"101\": 138, \"110\": 216, \"111\": 45}"
+}
+[17/Feb/2025 17:24:37] ERROR [frontend_logs:223] resultStr: {"000": 0, "001": 235, "010": 33, "011": 236, "100": 121, "101": 138, "110": 216, "111": 45}
+[17/Feb/2025 17:25:28] ERROR [frontend_logs:223] Response ok: {
+  "test_image.png": "{\"000\": 0, \"001\": 234, \"010\": 43, \"011\": 215, \"100\": 138, \"101\": 125, \"110\": 231, \"111\": 38}",
+  "test_flag_4x4.png": "{\"00000\": 0, \"00001\": 64, \"00010\": 0, \"00011\": 53, \"00100\": 0, \"00101\": 62, \"00110\": 0, \"00111\": 69, \"01000\": 38, \"01001\": 36, \"01010\": 16, \"01011\": 39, \"01100\": 41, \"01101\": 22, \"01110\": 32, \"01111\": 28, \"10000\": 39, \"10001\": 25, \"10010\": 44, \"10011\": 28, \"10100\": 40, \"10101\": 29, \"10110\": 37, \"10111\": 29, \"11000\": 60, \"11001\": 0, \"11010\": 66, \"11011\": 0, \"11100\": 63, \"11101\": 0, \"11110\": 64, \"11111\": 0}"
+}
+[17/Feb/2025 17:25:31] ERROR [frontend_logs:223] Response ok: {
+  "test_flag_4x4.png": "{\"00000\": 0, \"00001\": 73, \"00010\": 0, \"00011\": 65, \"00100\": 0, \"00101\": 65, \"00110\": 0, \"00111\": 69, \"01000\": 40, \"01001\": 32, \"01010\": 34, \"01011\": 31, \"01100\": 39, \"01101\": 36, \"01110\": 29, \"01111\": 38, \"10000\": 29, \"10001\": 28, \"10010\": 30, \"10011\": 24, \"10100\": 26, \"10101\": 36, \"10110\": 35, \"10111\": 23, \"11000\": 50, \"11001\": 0, \"11010\": 64, \"11011\": 0, \"11100\": 65, \"11101\": 0, \"11110\": 63, \"11111\": 0}",
+  "test_image.png": "{\"000\": 0, \"001\": 255, \"010\": 37, \"011\": 204, \"100\": 146, \"101\": 130, \"110\": 211, \"111\": 41}"
+}
