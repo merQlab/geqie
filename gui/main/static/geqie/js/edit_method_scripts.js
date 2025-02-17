@@ -74,10 +74,10 @@ document.getElementById("addNewMethod").addEventListener("click", function () {
     saveMethod(true, true, document.getElementById("methodName").value, "methodName", "addInitContent", "addMapContent", "addDataContent");
 });
 
-document.getElementById("save").addEventListener("click", function () {
-    logToServer('info', 'Method saved.');
-    saveMethod(false, false, document.getElementById("methodSelect").value, "methodSelect", "initContent", "mapContent", "dataContent");
-});
+// document.getElementById("save").addEventListener("click", function () {
+//     logToServer('info', 'Method saved.');
+//     saveMethod(false, false, document.getElementById("methodSelect").value, "methodSelect", "initContent", "mapContent", "dataContent");
+// });
 
 document.getElementById("saveAsNew").addEventListener("click", function () {
     let userInput = prompt("Method name:");
@@ -109,6 +109,7 @@ async function saveMethod(addNew, isNew, saveName, method, init, map, data) {
 
     fetch("/save-method/", {
         method: "POST",
+        credentials: "same-origin",
         headers: {
             "Content-Type": "application/json",
             "X-CSRFToken": getCSRFToken(),
@@ -126,14 +127,14 @@ async function saveMethod(addNew, isNew, saveName, method, init, map, data) {
     .then(response => response.json())
     .then(data => {
         if (data.error) {
-            logToServer('warning', 'Error: ${data.error}')
+            logToServer('warning', `Error: ${data.error}`);
             alert("Error: " + data.error);
         } else {
-            logToServer('info', 'Method saved successfully!')
+            logToServer('info', 'Method saved successfully!');
             alert("Method saved successfully!");
         }
     })
-    .catch(error => logToServer('critical', 'Fetch error: ${error}'));
+    .catch(error => logToServer('critical', `Fetch error: ${error}`));
 }
 
 function getCSRFToken() {
@@ -156,12 +157,13 @@ function checkFolderExists(methodName) {
         .then(data => {
             if (data.exists) {
                 alert("Folder already exists! Change method name.");
+                logToServer('info', 'Folder already exists.');
                 return false;
             }
             return true;
         })
         .catch(error => {
-            console.error("Error:", error);
+            logToServer('error', `Check folder exist error: ${error}`);
             return false;
         });
 }

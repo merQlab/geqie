@@ -304,3 +304,138 @@ FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\Admin\\Deskt
 [12/Feb/2025 16:05:56] CRITICAL [main.views:90] Error processing file: Command failed: Command '['geqie', 'simulate', '--encoding', 'sss', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\7422553d-3da1-427c-9e0c-2b2e93321cea_test_image.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1.
 [12/Feb/2025 16:05:56] ERROR [django.request:248] Internal Server Error: /start-Experiment/
 [12/Feb/2025 16:05:56] ERROR [django.server:213] "POST /start-Experiment/ HTTP/1.1" 500 335
+[17/Feb/2025 11:09:53] ERROR [frontend_logs:218] Error starting experiment 1: 
+[17/Feb/2025 14:32:16] CRITICAL [main.views:65] Command failed with return code 1. Stderr: Simulation failed and returned the following error message:
+ERROR:  [Experiment 0] vector too long
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\Admin\Desktop\geqie\.venv\Scripts\geqie.exe\__main__.py", line 7, in <module>
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1161, in __call__
+    return self.main(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1082, in main
+    rv = self.invoke(ctx)
+         ^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1697, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1443, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 106, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\cloup\_context.py", line 47, in new_func
+    return f(get_current_context(), *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 117, in simulate
+    print(json.dumps(main.simulate(circuit, **cli_params)))
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\main.py", line 79, in simulate
+    counts = result.get_counts(circuit)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\qiskit\result\result.py", line 264, in get_counts
+    exp = self._get_experiment(key)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\qiskit\result\result.py", line 375, in _get_experiment
+    raise QiskitError(f'Data for experiment "{key}" could not be found.')
+qiskit.exceptions.QiskitError: 'Data for experiment "circuit-162" could not be found.'
+
+[17/Feb/2025 14:32:16] CRITICAL [main.views:65] Command failed with return code 1. Stderr: Simulation failed and returned the following error message:
+ERROR:  [Experiment 0] vector too long
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\Admin\Desktop\geqie\.venv\Scripts\geqie.exe\__main__.py", line 7, in <module>
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1161, in __call__
+    return self.main(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1082, in main
+    rv = self.invoke(ctx)
+         ^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1697, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1443, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 106, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\cloup\_context.py", line 47, in new_func
+    return f(get_current_context(), *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 117, in simulate
+    print(json.dumps(main.simulate(circuit, **cli_params)))
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\main.py", line 79, in simulate
+    counts = result.get_counts(circuit)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\qiskit\result\result.py", line 264, in get_counts
+    exp = self._get_experiment(key)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\qiskit\result\result.py", line 375, in _get_experiment
+    raise QiskitError(f'Data for experiment "{key}" could not be found.')
+qiskit.exceptions.QiskitError: 'Data for experiment "circuit-162" could not be found.'
+
+[17/Feb/2025 14:32:16] CRITICAL [main.views:89] Error processing file: Command failed: Command '['geqie', 'simulate', '--encoding', 'frqi', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\3797b292-65f9-4614-9a02-0702a13772d2_test_image.png', '--n-shots', '10000000000000000000', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+[17/Feb/2025 14:32:16] CRITICAL [main.views:65] Command failed with return code 1. Stderr: Simulation failed and returned the following error message:
+ERROR:  [Experiment 0] vector too long
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\Admin\Desktop\geqie\.venv\Scripts\geqie.exe\__main__.py", line 7, in <module>
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1161, in __call__
+    return self.main(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1082, in main
+    rv = self.invoke(ctx)
+         ^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1697, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1443, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 106, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\cloup\_context.py", line 47, in new_func
+    return f(get_current_context(), *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 117, in simulate
+    print(json.dumps(main.simulate(circuit, **cli_params)))
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\main.py", line 79, in simulate
+    counts = result.get_counts(circuit)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\qiskit\result\result.py", line 264, in get_counts
+    exp = self._get_experiment(key)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\qiskit\result\result.py", line 375, in _get_experiment
+    raise QiskitError(f'Data for experiment "{key}" could not be found.')
+qiskit.exceptions.QiskitError: 'Data for experiment "circuit-162" could not be found.'
+
+[17/Feb/2025 14:32:16] ERROR [django.request:248] Internal Server Error: /start-Experiment/
+[17/Feb/2025 14:32:17] ERROR [django.server:213] "POST /start-Experiment/ HTTP/1.1" 500 352
+[17/Feb/2025 14:32:17] ERROR [frontend_logs:218] Received errorData: [object Object]
+[17/Feb/2025 14:32:17] ERROR [frontend_logs:218] Extracted errorMessage: Command failed: Command '['geqie', 'simulate', '--encoding', 'frqi', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\3797b292-65f9-4614-9a02-0702a13772d2_test_image.png', '--n-shots', '10000000000000000000', '--return-padded-counts', 'true']' returned non-zero exit status 1.

@@ -1,6 +1,5 @@
 let formData = new FormData();
 let experiments = [];
-let resultFolderPath = '';
 let animationFrameId;
 let isResponseOk;
 
@@ -121,13 +120,10 @@ document.getElementById('startExperiment').addEventListener('click', async funct
         return;
     }
 
-    // if (!resultFolderPath) {
-    //     alert("Please select result folder!");
-    //     return;
-    // }
-
     const startExperimentBtn = document.getElementById('startExperiment');
     startExperimentBtn.disabled = true;
+
+    let allResults = [];
 
     try {
         const totalImages = experiments.reduce((sum, experiment) => sum + experiment.images.length, 0);
@@ -138,7 +134,6 @@ document.getElementById('startExperiment').addEventListener('click', async funct
 
         for (const [index, experiment] of experiments.entries()) {
             const formData = new FormData();
-            formData.append('result_folder', resultFolderPath);
             formData.append('selected_method', experiment.method);
             experiment.images.forEach(image => {
                 formData.append('images[]', image);
@@ -150,6 +145,7 @@ document.getElementById('startExperiment').addEventListener('click', async funct
             try {
                 const response = await fetch(startExperimentUrl, {
                     method: "POST",
+                    credentials: "same-origin",
                     body: formData,
                     headers: {
                         "X-CSRFToken": "{{ csrf_token }}",
@@ -161,7 +157,6 @@ document.getElementById('startExperiment').addEventListener('click', async funct
                     headerItem.className = "list-group-item fw-bold";
                     headerItem.textContent = `Experiment ${index + 1}:`;
                     resultsList.appendChild(headerItem);
-
                     const data = await response.json();
                     if (data && Object.keys(data).length > 0) {
                         for (const [fileName, result] of Object.entries(data)) {
@@ -182,6 +177,11 @@ document.getElementById('startExperiment').addEventListener('click', async funct
                             listItem.appendChild(strongResultText);
                             listItem.appendChild(resultValueText);
                             resultsList.appendChild(listItem);
+
+                            allResults.push({
+                                file: fileName,
+                                result: JSON.stringify(result)
+                            });
                         }
                     } else {
                         const noResultsItem = document.createElement("li");
@@ -193,10 +193,10 @@ document.getElementById('startExperiment').addEventListener('click', async funct
                 } else {
                     isResponseOk = false;
                     const errorData = await response.json();
-                    console.log("Received errorData:", errorData);
+                    logToServer('error', `Received errorData: ${errorData}`);
 
                     const errorMessage = errorData.error || "";
-                    console.log("Extracted errorMessage:", errorMessage);
+                    logToServer('error', `Extracted errorMessage: ${errorMessage}`);
 
                     if (errorMessage.includes("Command failed")) {
                         alert("Experiment " + (index + 1) + " failed due to a command execution error. Please check your method implementation.");
@@ -205,7 +205,7 @@ document.getElementById('startExperiment').addEventListener('click', async funct
                     }
                 }
             } catch (error) {
-                console.error("Error starting experiment " + (index + 1) + ":", error);
+                logToServer('error', `Error starting experiment ${index + 1}: ${error}`);
             }
         }
 
@@ -216,20 +216,35 @@ document.getElementById('startExperiment').addEventListener('click', async funct
             cancelAnimationFrame(animationFrameId);
             updateProgress(0);
         }
+
+        const saveToCSV = document.getElementById("saveToCSV").checked;
+        if (saveToCSV && allResults.length > 0) {
+          const csvData = convertToCSV(allResults);
+          downloadCSV(csvData, 'results.csv');
+        }
+        
     } finally {
         startExperimentBtn.disabled = false;
     }
 });
 
-document.getElementById('resultFolder').addEventListener('click', async () => {
-    try {
-        const directoryHandle = await window.showDirectoryPicker();
-        resultFolderPath = directoryHandle.name;
-        alert(`Folder selected: ${resultFolderPath}`);
-    } catch (error) {
-        console.error("Folder selection cancelled:", error);
-    }
-});
+function convertToCSV(data) {
+    if (data.length === 0) return '';
+    const header = Object.keys(data[0]).join(',') + '\n';
+    const rows = data.map(row => Object.values(row).join(',')).join('\n');
+    return header + rows;
+}
+
+function downloadCSV(csvData, filename = 'results.csv') {
+    const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+}
 
 function updateProgress(value) {
     const progressBar = document.getElementById('progress-bar');

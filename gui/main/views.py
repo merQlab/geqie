@@ -1,6 +1,5 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-
 from gui.settings import ENCODINGS_DIR
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from .models import QuantumMethod, QuantumComputer

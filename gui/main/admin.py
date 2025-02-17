@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import QuantumMethod, QuantumComputer, QuantumSubComputer
-import os, logging
+import os, logging, shutil
 from gui.settings import ENCODINGS_DIR
 from .views import all_methods
 
@@ -49,6 +49,12 @@ class QuantumMethodAdmin(admin.ModelAdmin):
                     "data": file_contents.get("data", "")
                 }
             )
+
+    def delete_model(self, request, obj):
+        method_folder = os.path.join(ENCODINGS_DIR, obj.name)
+        if os.path.exists(method_folder):
+            shutil.rmtree(method_folder)
+        super().delete_model(request, obj)
 
 class QuantumSubComputerInline(admin.TabularInline):
     model = QuantumSubComputer

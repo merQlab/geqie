@@ -72,8 +72,7 @@
                             <form id="uploadForm" enctype="multipart/form-data" style="display: none;">
                                 <input type="file" id="imageFile" name="images[]" accept="image/*" multiple required />
                             </form>
-                            <button class="btn btn-primary" id="selectImage">Select Image</button>
-                            <button class="btn btn-primary" id="resultFolder">Result folder</button>
+                            <button class="btn btn-primary" id="selectImage">Select images</button>
                         </div>
                         <div class="my-3">
                             <p class="d-inline">Selected method:</p>
@@ -112,11 +111,16 @@
                                             </th>
                                         </tr>
                                     </thead>
-                                    <tbody id="experimentsTableBody">
-                                    </tbody>
+                                    <tbody id="experimentsTableBody"></tbody>
                                 </table>
                             </div>
-                            <button class="btn btn-success" type="submit" id="startExperiment">Start experiments</button>
+                            <div style="display: flex; justify-content: center; align-items: center; position: relative;">
+                                <button class="btn btn-success" type="submit" id="startExperiment" style="position: relative; z-index: 1;">Start experiments</button>
+                                <label style="display: flex; align-items: center; gap: 5px; margin-left: 15px;">
+                                  <input type="checkbox" id="saveToCSV" />
+                                  Save to CSV
+                                </label>
+                            </div>
                         </form>
                         <script>
                             const startExperimentUrl = "{% url 'start_experiment' %}";
