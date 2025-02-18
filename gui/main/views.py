@@ -67,10 +67,10 @@ def start_experiment(request):
                     
                     return uploaded_file.name, ordered_output
                 except subprocess.CalledProcessError as e:
-                    logger.critical("Command failed with return code %s. Stderr: %s", e.returncode, e.stderr)
+                    logger.exception("Command failed with return code %s. Stderr: %s", e.returncode, e.stderr)
                     raise Exception(f"Command failed: {e}")
                 except json.JSONDecodeError as e:
-                    logger.critical("JSON decoding error: %s", e)
+                    logger.exception("JSON decoding error: %s", e)
                     raise Exception("Invalid JSON returned by the command.")
                 finally:
                     if os.path.exists(file_path):
@@ -91,14 +91,14 @@ def start_experiment(request):
                         file_name, output = future.result()
                         results[file_name] = output
                     except Exception as e:
-                        logger.critical("Error processing file: %s", e)
+                        logger.exception("Error processing file: %s", e)
                         return JsonResponse({"success": False, "error": str(e)}, status=500)
 
             logger.info("Returned results: %s", results)
             return JsonResponse(results)
 
         except Exception as e:
-            logger.critical("Unexpected error: %s", e)
+            logger.exception("Unexpected error: %s", e)
             return JsonResponse({"success": False, "error": f"Unexpected error: {e}"}, status=500)
 
     return JsonResponse({"success": False, "error": "Invalid request."}, status=400)
@@ -191,7 +191,7 @@ from .map import map as map_function""",
             return JsonResponse({"message": "Method saved successfully"})
 
         except Exception as e:
-            logger.critical("Error: %s", str(e))
+            logger.exception("Error: %s", str(e))
             return JsonResponse({"error": str(e)}, status=500)
 
     return JsonResponse({"error": "Invalid request"}, status=400)
@@ -228,7 +228,7 @@ def log_from_js(request):
 
             return JsonResponse({'status': 'success'})
         except Exception as e:
-            loggerFront.error(f"Failed to process JS log: {str(e)}")
+            loggerFront.exception(f"Failed to process JS log: {str(e)}")
             return JsonResponse({'status': 'error'}, status=400)
     return JsonResponse({'error': 'Invalid request'}, status=405)
 

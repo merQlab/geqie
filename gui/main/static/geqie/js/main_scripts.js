@@ -36,6 +36,8 @@ document.getElementById('imageFile').addEventListener('change', async () => {
 
     if (!files.length) return;
 
+    logToServer('debug', `Selected ${files.length} images: ${[...files].map(f => f.name).join(', ')}`);
+
     for (let i = 0; i < files.length; i++) {
         formData.append('images[]', files[i]);
     }
@@ -46,6 +48,8 @@ document.getElementById('addExperiment').addEventListener('click', () => {
     const selectedMethod = document.getElementById('selected-submethod').textContent.trim();
     const selectedComputer = document.getElementById('selected-computer').textContent.trim();
     const shots = document.getElementById('shots').value;
+
+    logToServer('debug', `Trying to add an experiment: method=${selectedMethod}, computer=${selectedComputer}, shots=${shots}, number of files=${files.length}`);
 
     if (files.length === 0) {
         alert("Please select an image first!");
@@ -104,9 +108,11 @@ function updateExperimentsTable() {
         `;
         tableBody.appendChild(row);
     });
+    logToServer('debug', `Experiment table updated, number of experiments: ${experiments.length}`);
 }
 
 function removeExperiment(index) {
+    logToServer('debug', `Deleting an experiment by index ${index}`);
     experiments.splice(index, 1);
     updateExperimentsTable();
 }
@@ -133,6 +139,7 @@ document.getElementById('startExperiment').addEventListener('click', async funct
         resultsList.innerHTML = '';
 
         for (const [index, experiment] of experiments.entries()) {
+            logToServer('info', `Starting experiment ${index + 1}: method=${experiment.method}, computer=${experiment.computer}, shots=${experiment.shots}`);
             const formData = new FormData();
             formData.append('selected_method', experiment.method);
             experiment.images.forEach(image => {
@@ -194,10 +201,10 @@ document.getElementById('startExperiment').addEventListener('click', async funct
                 } else {
                     isResponseOk = false;
                     const errorData = await response.json();
-                    logToServer('error', `Received errorData: ${errorData}`);
+                    logToServer('error', `Received errorData: ${JSON.stringify(errorData)}`);
 
                     const errorMessage = errorData.error || "";
-                    logToServer('error', `Extracted errorMessage: ${errorMessage}`);
+                    logToServer('error', `Extracted errorMessage: ${JSON.stringify(errorMessage)}`);
 
                     if (errorMessage.includes("Command failed")) {
                         alert("Experiment " + (index + 1) + " failed due to a command execution error. Please check your method implementation.");
@@ -206,7 +213,7 @@ document.getElementById('startExperiment').addEventListener('click', async funct
                     }
                 }
             } catch (error) {
-                logToServer('error', `Error starting experiment ${index + 1}: ${error}`);
+                logToServer('error', `Error starting experiment ${index + 1}: ${error.message || error}`);
             }
         }
 
@@ -225,26 +232,36 @@ document.getElementById('startExperiment').addEventListener('click', async funct
         }
         
     } finally {
+        logToServer('info', `The experimentation process is complete. Results: ${JSON.stringify(allResults)}`);
         startExperimentBtn.disabled = false;
     }
 });
 
 function convertToCSV(data) {
-    if (data.length === 0) return '';
+    if (data.length === 0) {
+        logToServer('debug', 'No data to convert to CSV.');
+        return '';
+    }
     const header = Object.keys(data[0]).join(',') + '\n';
     const rows = data.map(row => Object.values(row).join(',')).join('\n');
+    logToServer('debug', `CSV generated, length: ${csvContent.length}`);
     return header + rows;
 }
 
 function downloadCSV(csvData, filename = 'results.csv') {
-    const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    try {
+        const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        logToServer('debug', `CSV downloaded: ${filename}`);
+    } catch (error) {
+        logToServer('error', `Error downloading CSV: ${error.message}`);
+    }
 }
 
 function updateProgress(value) {
@@ -255,6 +272,7 @@ function updateProgress(value) {
 }
 
 function animateProgress(from, to, duration) {
+    logToServer('debug', `Progress animation started: ${from}% -> ${to}% przez ${duration} ms`);
     const startTime = performance.now();
     function animate(currentTime) {
         const elapsed = currentTime - startTime;
@@ -263,6 +281,8 @@ function animateProgress(from, to, duration) {
         updateProgress(Math.floor(progress));
         if (elapsed < duration) {
             animationFrameId = requestAnimationFrame(animate);
+        } else {
+            logToServer('debug', `Progress animation finished on ${to}%`);
         }
     }
     animationFrameId = requestAnimationFrame(animate);
