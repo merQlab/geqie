@@ -26,7 +26,7 @@ def experiment_config(request):
     return render(request, 'experiment_config.html', {'methods': methods, 'computers': computers})
 
 def edit_method(request):
-    methods =  approved_methods()
+    methods =  all_methods()
     logger.info("Edit_method card")
     return render(request, 'edit_method.html', {'methods': methods})
 

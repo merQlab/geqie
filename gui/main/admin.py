@@ -50,6 +50,13 @@ class QuantumMethodAdmin(admin.ModelAdmin):
                 }
             )
 
+    def delete_queryset(self, request, queryset):
+        for obj in queryset:
+            method_folder = os.path.join(ENCODINGS_DIR, obj.name)
+            if os.path.exists(method_folder):
+                shutil.rmtree(method_folder)
+        queryset.delete()
+
     def delete_model(self, request, obj):
         method_folder = os.path.join(ENCODINGS_DIR, obj.name)
         if os.path.exists(method_folder):

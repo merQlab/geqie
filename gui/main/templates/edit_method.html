@@ -129,15 +129,30 @@
                                     </select>
                                 </div>
                                 <div class="mb-3 d-flex align-items-center">
-                                    <input type="text" id="filePath" class="form-control me-3" placeholder="Selected file path" readonly>
+                                    <input type="text" id="filePath" class="form-control me-3" placeholder="Selected image" readonly>
                                     <form id="uploadForm" enctype="multipart/form-data"style="display: none;">
                                         <input type="file" id="fileInput" accept="image/*">
                                     </form>
                                     <button type="button" class="btn btn-primary btn-sm-md" id="imagePath" style="min-width: 120px;">Select image</button>
                                 </div>
-                                <ul class="list-group" id="resultsList"></ul>
+                                <div class="my-3 number-container">
+                                    <label class="number-label" for="shots">Number of shots:</label>
+                                    <input class="number-input" type="number" id="shots" min="1" value="1024">
+                                </div>
                                 <div class="text-center my-3">
-                                    <button type="button" class="btn btn-primary" id="startTest">Start</button>
+                                    <button type="button" class="btn btn-success" id="startTest">Start</button>
+                                </div>
+
+                                <div class="d-flex my-4 custom-section">
+                                    <div class="box-left">
+                                        <p>Source photo</p>
+                                    </div>
+                                    <div class="arrow-container">
+                                        <span class="arrow">➔</span>
+                                    </div>
+                                    <div class="box-right">
+                                        <p>Resulting photo</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>

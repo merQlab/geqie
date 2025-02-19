@@ -123,3 +123,36 @@ textarea:focus, select:focus {
     max-height: 340px;
     overflow-y: auto;
 }
+
+.box-left, .box-right {
+    flex: 1;
+    width: 200px;
+    aspect-ratio: 1 / 1;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+    position: relative;
+}
+
+.box-left img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    position: absolute;
+}
+
+.arrow-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.arrow {
+    font-size: 40px;
+    font-weight: bold;
+    color: #007bff;
+}

@@ -195,3 +195,25 @@ function checkFolderExists(methodName) {
             return false;
         });
 }
+
+document.getElementById("startTest").addEventListener("click", function () {
+    if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+
+        reader.onload = function (e) {
+            const img = document.createElement("img");
+            img.src = e.target.result;
+            img.alt = "Uploaded Image";
+
+            // Wyczyść box-left i dodaj nowy obrazek
+            const boxLeft = document.querySelector(".box-left");
+            boxLeft.innerHTML = "<p>Source photo</p>";
+            boxLeft.appendChild(img);
+        };
+
+        reader.readAsDataURL(file);
+    } else {
+        alert("Please select an image first.");
+    }
+});

@@ -117,7 +117,6 @@ function removeExperiment(index) {
     updateExperimentsTable();
 }
 
-
 document.getElementById('startExperiment').addEventListener('click', async function(event) {
     event.preventDefault();
 
@@ -128,8 +127,23 @@ document.getElementById('startExperiment').addEventListener('click', async funct
 
     const startExperimentBtn = document.getElementById('startExperiment');
     startExperimentBtn.disabled = true;
+    const saveToCSV = document.getElementById('saveToCSV');
+    saveToCSV.disabled = true;
 
     let allResults = [];
+
+    let directoryHandle = null;
+    if (saveToCSV.checked) {
+        try {
+            directoryHandle = await window.showDirectoryPicker();
+        } catch (error) {
+            console.error("Failed to select folder:", error);
+            alert("Failed to select folder.");
+            startExperimentBtn.disabled = false;
+            csvCheckbox.disabled = false;
+            return;
+        }
+    }
 
     try {
         const totalImages = experiments.reduce((sum, experiment) => sum + experiment.images.length, 0);
@@ -188,7 +202,8 @@ document.getElementById('startExperiment').addEventListener('click', async funct
 
                             allResults.push({
                                 file: fileName,
-                                result: result
+                                result: result,
+                                method: experiment.method
                             });
                         }
                     } else {
@@ -217,6 +232,10 @@ document.getElementById('startExperiment').addEventListener('click', async funct
             }
         }
 
+        if (saveToCSV.checked && allResults.length > 0 && directoryHandle) {
+            await saveResultsToFolder(allResults, directoryHandle);
+        }
+
         if (isResponseOk) {
             cancelAnimationFrame(animationFrameId);
             updateProgress(100);
@@ -225,43 +244,44 @@ document.getElementById('startExperiment').addEventListener('click', async funct
             updateProgress(0);
         }
 
-        const saveToCSV = document.getElementById("saveToCSV").checked;
-        if (saveToCSV && allResults.length > 0) {
-          const csvData = convertToCSV(allResults);
-          downloadCSV(csvData, 'results.csv');
-        }
-        
     } finally {
         logToServer('info', `The experimentation process is complete. Results: ${JSON.stringify(allResults)}`);
         startExperimentBtn.disabled = false;
+        saveToCSV.disabled = false;
     }
 });
 
-function convertToCSV(data) {
-    if (data.length === 0) {
-        logToServer('debug', 'No data to convert to CSV.');
-        return '';
+async function getUniqueFileHandle(dirHandle, baseName, extension) {
+    let fileName = baseName + extension;
+    let counter = 0;
+    while (true) {
+      try {
+        await dirHandle.getFileHandle(fileName, { create: false });
+        counter++;
+        fileName = `${baseName} (${counter})${extension}`;
+      } catch (error) {
+        return await dirHandle.getFileHandle(fileName, { create: true });
+      }
     }
-    const header = Object.keys(data[0]).join(',') + '\n';
-    const rows = data.map(row => Object.values(row).join(',')).join('\n');
-    logToServer('debug', `CSV generated, length: ${csvContent.length}`);
-    return header + rows;
-}
+  }
+  
+async function saveResultsToFolder(results, dirHandle) {
+    for (const result of results) {
+        const baseName = result.file.replace(/\.[^/.]+$/, "");
+        const csvContent = `file,result\n${result.file},${result.result}`;
 
-function downloadCSV(csvData, filename = 'results.csv') {
-    try {
-        const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        logToServer('debug', `CSV downloaded: ${filename}`);
-    } catch (error) {
-        logToServer('error', `Error downloading CSV: ${error.message}`);
+        try {
+        const methodDirHandle = await dirHandle.getDirectoryHandle(result.method, { create: true });
+        const methodFileHandle = await getUniqueFileHandle(methodDirHandle, baseName, ".csv");
+        const writableMethod = await methodFileHandle.createWritable();
+        await writableMethod.write(csvContent);
+        await writableMethod.close();
+        } catch (error) {
+        console.error(`Error saving file ${baseName}.csv:`, error);
+        alert("An error occurred while saving the CSV files: " + error.message);
+        }
     }
+    alert("CSV files saved successfully!");
 }
 
 function updateProgress(value) {
