@@ -127,20 +127,31 @@ document.getElementById('startExperiment').addEventListener('click', async funct
 
     const startExperimentBtn = document.getElementById('startExperiment');
     startExperimentBtn.disabled = true;
-    const saveToCSV = document.getElementById('saveToCSV');
-    saveToCSV.disabled = true;
+    const saveToCSVCheckbox = document.getElementById('saveToCSV');
+    saveToCSVCheckbox.disabled = true;
 
     let allResults = [];
+    let mainDirHandle = null;
+    let methodDirHandles = {};
 
-    let directoryHandle = null;
-    if (saveToCSV.checked) {
+    if (saveToCSVCheckbox.checked) {
         try {
-            directoryHandle = await window.showDirectoryPicker();
+            mainDirHandle = await window.showDirectoryPicker();
+            const uniqueMethods = [...new Set(experiments.map(exp => exp.method))];
+            
+            for (const method of uniqueMethods) {
+                try {
+                    methodDirHandles[method] = await mainDirHandle.getDirectoryHandle(method, { create: true });
+                } catch (error) {
+                    console.error(`Error creating subfolder for method ${method}:`, error);
+                    alert(`Failed to create a subfolder for the method ${method}.`);
+                }
+            }
         } catch (error) {
             console.error("Failed to select folder:", error);
             alert("Failed to select folder.");
             startExperimentBtn.disabled = false;
-            csvCheckbox.disabled = false;
+            saveToCSVCheckbox.disabled = false;
             return;
         }
     }
@@ -232,8 +243,8 @@ document.getElementById('startExperiment').addEventListener('click', async funct
             }
         }
 
-        if (saveToCSV.checked && allResults.length > 0 && directoryHandle) {
-            await saveResultsToFolder(allResults, directoryHandle);
+        if (saveToCSVCheckbox.checked && allResults.length > 0 && mainDirHandle) {
+            await saveResultsToFolder(allResults, mainDirHandle, methodDirHandles);
         }
 
         if (isResponseOk) {
@@ -247,7 +258,7 @@ document.getElementById('startExperiment').addEventListener('click', async funct
     } finally {
         logToServer('info', `The experimentation process is complete. Results: ${JSON.stringify(allResults)}`);
         startExperimentBtn.disabled = false;
-        saveToCSV.disabled = false;
+        saveToCSVCheckbox.disabled = false;
     }
 });
 
@@ -263,22 +274,25 @@ async function getUniqueFileHandle(dirHandle, baseName, extension) {
         return await dirHandle.getFileHandle(fileName, { create: true });
       }
     }
-  }
+}
   
-async function saveResultsToFolder(results, dirHandle) {
+async function saveResultsToFolder(results, mainDirHandle, methodDirHandles) {
     for (const result of results) {
         const baseName = result.file.replace(/\.[^/.]+$/, "");
         const csvContent = `file,result\n${result.file},${result.result}`;
 
         try {
-        const methodDirHandle = await dirHandle.getDirectoryHandle(result.method, { create: true });
-        const methodFileHandle = await getUniqueFileHandle(methodDirHandle, baseName, ".csv");
-        const writableMethod = await methodFileHandle.createWritable();
-        await writableMethod.write(csvContent);
-        await writableMethod.close();
+            const methodHandle = methodDirHandles[result.method];
+            if (!methodHandle) {
+                throw new Error(`No handle for methods ${result.method}`);
+            }
+            const fileHandle = await getUniqueFileHandle(methodHandle, baseName, ".csv");
+            const writable = await fileHandle.createWritable();
+            await writable.write(csvContent);
+            await writable.close();
         } catch (error) {
-        console.error(`Error saving file ${baseName}.csv:`, error);
-        alert("An error occurred while saving the CSV files: " + error.message);
+            console.error(`Error saving file ${baseName}.csv:`, error);
+            alert("An error occurred while saving the CSV files: " + error.message);
         }
     }
     alert("CSV files saved successfully!");

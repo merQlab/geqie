@@ -115,6 +115,10 @@ async function saveMethod(addNew, isNew, saveName, method, init, map, data) {
 
     logToServer('debug', `saveMethod called with methodName="${methodName}", isNew=${isNew}, addNew=${addNew}, saveName="${saveName}"`);
 
+    if(!addNew && isNew) {
+        methodName = saveName;
+    }
+
     if (!methodName) {
         alert("Please select a method first.");
         logToServer('warning', 'saveMethod aborted: no method selected.');
@@ -206,7 +210,6 @@ document.getElementById("startTest").addEventListener("click", function () {
             img.src = e.target.result;
             img.alt = "Uploaded Image";
 
-            // Wyczyść box-left i dodaj nowy obrazek
             const boxLeft = document.querySelector(".box-left");
             boxLeft.innerHTML = "<p>Source photo</p>";
             boxLeft.appendChild(img);
