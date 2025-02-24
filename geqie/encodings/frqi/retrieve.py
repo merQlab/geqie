@@ -38,6 +38,5 @@ def retrieve(results: str) -> np.ndarray:
         image_reconstructed = np.where(total > 0, ones / total, 0)
     except ZeroDivisionError:
         print("Error during FRQI image retrieval. Division by zero!")
-
-    print(image_reconstructed)
+        
     return image_reconstructed
