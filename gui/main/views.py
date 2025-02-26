@@ -185,8 +185,11 @@ from .map import map as map_function""",
                 }
 
             for filename, content in files.items():
-                with open(os.path.join(method_path, filename), "w", encoding="utf-8") as f:
+                file_path = os.path.join(method_path, filename)
+                with open(file_path, "w", encoding="utf-8") as f:
                     f.write(content)
+
+                os.chmod(file_path, 0o755)
 
             return JsonResponse({"message": "Method saved successfully"})
 

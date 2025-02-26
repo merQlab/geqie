@@ -869,3 +869,145 @@ qiskit.exceptions.QiskitError: 'Data for experiment "circuit-162" could not be f
   "test_image.png": "{\"000\": 0, \"001\": 255, \"010\": 37, \"011\": 204, \"100\": 146, \"101\": 130, \"110\": 211, \"111\": 41}"
 }
 [19/Feb/2025 13:40:56] ERROR [main.views:132] Method not found
+[26/Feb/2025 14:27:54] ERROR [main.views:70] Command failed with return code 1. Stderr: Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\Admin\Desktop\geqie\.venv\Scripts\geqie.exe\__main__.py", line 7, in <module>
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1161, in __call__
+    return self.main(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1082, in main
+    rv = self.invoke(ctx)
+         ^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1697, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1443, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 106, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\cloup\_context.py", line 47, in new_func
+    return f(get_current_context(), *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 115, in simulate
+    circuit = ctx.invoke(encode, **params)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 96, in encode
+    e = _get_encoding_functions(params)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 48, in _get_encoding_functions
+    init_function = getattr(_import_module("init", init_path), "init")
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 32, in _import_module
+    spec.loader.exec_module(module)
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 1132, in get_code
+  File "<frozen importlib._bootstrap_external>", line 1190, in get_data
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\Admin\\Desktop\\geqie\\.venv\\Lib\\site-packages\\geqie\\encodings\\nowa\\init.py'
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\geqie\gui\main\views.py", line 60, in process_file
+    result = subprocess.run(command, capture_output=True, text=True, check=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['geqie', 'simulate', '--encoding', 'nowa', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\3348ee48-8f64-40b6-9f8a-67f31113d205_test_image.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+[26/Feb/2025 14:27:54] ERROR [main.views:70] Command failed with return code 1. Stderr: Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\Admin\Desktop\geqie\.venv\Scripts\geqie.exe\__main__.py", line 7, in <module>
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1161, in __call__
+    return self.main(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1082, in main
+    rv = self.invoke(ctx)
+         ^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1697, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1443, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 106, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\cloup\_context.py", line 47, in new_func
+    return f(get_current_context(), *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 115, in simulate
+    circuit = ctx.invoke(encode, **params)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 96, in encode
+    e = _get_encoding_functions(params)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 48, in _get_encoding_functions
+    init_function = getattr(_import_module("init", init_path), "init")
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\geqie\cli.py", line 32, in _import_module
+    spec.loader.exec_module(module)
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 1132, in get_code
+  File "<frozen importlib._bootstrap_external>", line 1190, in get_data
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\Admin\\Desktop\\geqie\\.venv\\Lib\\site-packages\\geqie\\encodings\\nowa\\init.py'
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\geqie\gui\main\views.py", line 60, in process_file
+    result = subprocess.run(command, capture_output=True, text=True, check=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['geqie', 'simulate', '--encoding', 'nowa', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\19991f91-dc5f-43f2-bce9-0a68194902f4_test_flag_4x4.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+[26/Feb/2025 14:27:54] ERROR [main.views:94] Error processing file: Command failed: Command '['geqie', 'simulate', '--encoding', 'nowa', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\3348ee48-8f64-40b6-9f8a-67f31113d205_test_image.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\geqie\gui\main\views.py", line 60, in process_file
+    result = subprocess.run(command, capture_output=True, text=True, check=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['geqie', 'simulate', '--encoding', 'nowa', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\3348ee48-8f64-40b6-9f8a-67f31113d205_test_image.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\geqie\gui\main\views.py", line 91, in start_experiment
+    file_name, output = future.result()
+                        ^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\concurrent\futures\_base.py", line 449, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\concurrent\futures\_base.py", line 401, in __get_result
+    raise self._exception
+  File "C:\Program Files\Python312\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\gui\main\views.py", line 71, in process_file
+    raise Exception(f"Command failed: {e}")
+Exception: Command failed: Command '['geqie', 'simulate', '--encoding', 'nowa', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\3348ee48-8f64-40b6-9f8a-67f31113d205_test_image.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+[26/Feb/2025 14:27:54] ERROR [django.request:248] Internal Server Error: /start-Experiment/
+[26/Feb/2025 14:27:54] ERROR [django.server:213] "POST /start-Experiment/ HTTP/1.1" 500 336
+[26/Feb/2025 14:27:54] ERROR [frontend_logs:226] Received errorData: {"success":false,"error":"Command failed: Command '['geqie', 'simulate', '--encoding', 'nowa', '--image', 'C:\\\\Users\\\\Admin\\\\Desktop\\\\geqie\\\\gui\\\\..\\\\assets\\\\test_images\\\\3348ee48-8f64-40b6-9f8a-67f31113d205_test_image.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1."}
+[26/Feb/2025 14:27:54] ERROR [frontend_logs:226] Extracted errorMessage: "Command failed: Command '['geqie', 'simulate', '--encoding', 'nowa', '--image', 'C:\\\\Users\\\\Admin\\\\Desktop\\\\geqie\\\\gui\\\\..\\\\assets\\\\test_images\\\\3348ee48-8f64-40b6-9f8a-67f31113d205_test_image.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1."

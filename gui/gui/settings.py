@@ -134,13 +134,11 @@ LOGGING = {
         },
     },
     'handlers': {
-        # Handler wypisujący logi na konsolę
         'console': {
             'class': 'logging.StreamHandler',
             'formatter': 'simple',
             'level': 'DEBUG',
         },
-        # Handler zapisujący błędy do pliku
         'file': {
             'class': 'logging.FileHandler',
             'formatter': 'verbose',
@@ -149,19 +147,16 @@ LOGGING = {
         },
     },
     'loggers': {
-        # Logger ogólny, obejmujący Django
         'django': {
             'handlers': ['console', 'file'],
             'level': 'DEBUG' if DEBUG else 'INFO',
             'propagate': True,
         },
-        # Logger dla main
         'main': {
             'handlers': ['console', 'file'],
             'level': 'DEBUG',
             'propagate': False,
         },
-        
         'frontend_logs': {
             'handlers': ['file'],
             'level': 'DEBUG',
@@ -184,5 +179,5 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'assets', 'test_images')
 #MEDIA_ROOT = os.path.join(BASE_DIR, '..', 'assets', 'test_images')
 
 #Docker path
-ENCODINGS_DIR = os.path.abspath(os.path.join(BASE_DIR, "encodings"))
+ENCODINGS_DIR = os.path.abspath(os.path.join(BASE_DIR, "geqie", "encodings"))
 #ENCODINGS_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "geqie", "encodings"))

@@ -12,7 +12,7 @@ COPY ./requirements/requirements_dev.in .
 
 COPY . .
 
-RUN pip install .
+RUN pip install -e .
 
 EXPOSE 8000
 
