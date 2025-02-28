@@ -29,7 +29,10 @@ def encode(
     for u, v in itertools.product(range(image.shape[0]), range(image.shape[1])):
         data_vector = data_function(u, v, R, image)
         map_operator = map_function(u, v, R, image)
-        product = data_vector.to_operator() ^ map_operator
+        if isinstance(data_vector, Statevector):
+            product = data_vector.to_operator() ^ map_operator
+        elif isinstance(data_vector, Operator):
+            product = data_vector + map_operator
         products.append(product)
         data_vectors.append(data_vector)
         map_operators.append(map_operator)
@@ -41,8 +44,13 @@ def encode(
             print(f"{product=}")
             print("===========")
 
-    G = np.sum(products, axis=0)
+    if isinstance(data_vector, Statevector):
+        G = np.sum(products, axis=0)
+    elif isinstance(data_vector, Operator):
+        reshaped_products = np.array(products).reshape(-1, 4, products[0].dim[0])
+        G = np.vstack(reshaped_products)
     U, _ = np.linalg.qr(G)
+
     if verbosity_level > 1:
         print(f"G=\n{tabulate_complex(G)}")
         print(f"U=\n{tabulate_complex(U)}")
