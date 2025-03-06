@@ -266,16 +266,16 @@ async function getUniqueFileHandle(dirHandle, baseName, extension) {
     let fileName = baseName + extension;
     let counter = 0;
     while (true) {
-      try {
-        await dirHandle.getFileHandle(fileName, { create: false });
-        counter++;
-        fileName = `${baseName} (${counter})${extension}`;
-      } catch (error) {
-        return await dirHandle.getFileHandle(fileName, { create: true });
-      }
+        try {
+            await dirHandle.getFileHandle(fileName, { create: false });
+            counter++;
+            fileName = `${baseName} (${counter})${extension}`;
+        } catch (error) {
+            return await dirHandle.getFileHandle(fileName, { create: true });
+        }
     }
 }
-  
+
 async function saveResultsToFolder(results, mainDirHandle, methodDirHandles) {
     for (const result of results) {
         const baseName = result.file.replace(/\.[^/.]+$/, "");

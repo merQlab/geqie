@@ -1011,3 +1011,1732 @@ Exception: Command failed: Command '['geqie', 'simulate', '--encoding', 'nowa', 
 [26/Feb/2025 14:27:54] ERROR [django.server:213] "POST /start-Experiment/ HTTP/1.1" 500 336
 [26/Feb/2025 14:27:54] ERROR [frontend_logs:226] Received errorData: {"success":false,"error":"Command failed: Command '['geqie', 'simulate', '--encoding', 'nowa', '--image', 'C:\\\\Users\\\\Admin\\\\Desktop\\\\geqie\\\\gui\\\\..\\\\assets\\\\test_images\\\\3348ee48-8f64-40b6-9f8a-67f31113d205_test_image.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1."}
 [26/Feb/2025 14:27:54] ERROR [frontend_logs:226] Extracted errorMessage: "Command failed: Command '['geqie', 'simulate', '--encoding', 'nowa', '--image', 'C:\\\\Users\\\\Admin\\\\Desktop\\\\geqie\\\\gui\\\\..\\\\assets\\\\test_images\\\\3348ee48-8f64-40b6-9f8a-67f31113d205_test_image.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1."
+[03/Mar/2025 13:29:08] ERROR [django.request:248] Internal Server Error: /list-images/
+[03/Mar/2025 13:29:08] ERROR [django.server:213] "GET /list-images/ HTTP/1.1" 500 179
+[03/Mar/2025 13:30:48] ERROR [django.request:248] Internal Server Error: /list-images/
+[03/Mar/2025 13:30:48] ERROR [django.server:213] "GET /list-images/ HTTP/1.1" 500 179
+[03/Mar/2025 13:31:34] ERROR [django.request:248] Internal Server Error: /list-images/
+[03/Mar/2025 13:31:34] ERROR [django.server:213] "GET /list-images/ HTTP/1.1" 500 179
+[03/Mar/2025 13:32:14] ERROR [django.request:248] Internal Server Error: /list-images/
+[03/Mar/2025 13:32:14] ERROR [django.server:213] "GET /list-images/ HTTP/1.1" 500 179
+[03/Mar/2025 13:34:41] ERROR [django.request:248] Internal Server Error: /list-images/
+[03/Mar/2025 13:34:41] ERROR [django.server:213] "GET /list-images/ HTTP/1.1" 500 179
+[03/Mar/2025 15:49:16] ERROR [frontend_logs:250] Received errorData: {"success":false,"error":"Invalid request."}
+[03/Mar/2025 15:49:16] ERROR [frontend_logs:250] Extracted errorMessage: "Invalid request."
+[03/Mar/2025 15:50:41] ERROR [frontend_logs:250] Received errorData: {"success":false,"error":"Invalid request."}
+[03/Mar/2025 15:50:41] ERROR [frontend_logs:250] Extracted errorMessage: "Invalid request."
+[03/Mar/2025 15:52:26] ERROR [frontend_logs:250] Received errorData: {"success":false,"error":"Invalid request."}
+[03/Mar/2025 15:52:26] ERROR [frontend_logs:250] Extracted errorMessage: "Invalid request."
+[03/Mar/2025 15:53:26] ERROR [frontend_logs:250] Received errorData: {"success":false,"error":"Invalid request."}
+[03/Mar/2025 15:53:26] ERROR [frontend_logs:250] Extracted errorMessage: "Invalid request."
+[03/Mar/2025 15:54:37] ERROR [frontend_logs:250] Received errorData: {"success":false,"error":"Invalid request."}
+[03/Mar/2025 15:54:37] ERROR [frontend_logs:250] Extracted errorMessage: "Invalid request."
+[03/Mar/2025 15:55:53] ERROR [frontend_logs:250] Form: method=[object FormData]
+[03/Mar/2025 15:55:53] ERROR [frontend_logs:250] Received errorData: {"success":false,"error":"Invalid request."}
+[03/Mar/2025 15:55:53] ERROR [frontend_logs:250] Extracted errorMessage: "Invalid request."
+[03/Mar/2025 15:56:59] ERROR [frontend_logs:250] Form: method={}
+[03/Mar/2025 15:56:59] ERROR [frontend_logs:250] Received errorData: {"success":false,"error":"Invalid request."}
+[03/Mar/2025 15:56:59] ERROR [frontend_logs:250] Extracted errorMessage: "Invalid request."
+[03/Mar/2025 16:24:08] ERROR [main.views:77] Command failed with return code 1. Stderr: Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\Admin\Desktop\geqie\.venv\Scripts\geqie.exe\__main__.py", line 7, in <module>
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1161, in __call__
+    return self.main(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1082, in main
+    rv = self.invoke(ctx)
+         ^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1697, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1443, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 106, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\cloup\_context.py", line 47, in new_func
+    return f(get_current_context(), *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 115, in simulate
+    circuit = ctx.invoke(encode, **params)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 96, in encode
+    e = _get_encoding_functions(params)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 48, in _get_encoding_functions
+    init_function = getattr(_import_module("init", init_path), "init")
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 32, in _import_module
+    spec.loader.exec_module(module)
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 1132, in get_code
+  File "<frozen importlib._bootstrap_external>", line 1190, in get_data
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\init.py'
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\geqie\gui\main\views.py", line 67, in process_file
+    result = subprocess.run(command, capture_output=True, text=True, check=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['geqie', 'simulate', '--encoding', '', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\2c4e3269-7113-413b-b1bd-4c044bf3efcf_full_white.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+[03/Mar/2025 16:24:08] ERROR [main.views:102] Error processing file: Command failed: Command '['geqie', 'simulate', '--encoding', '', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\2c4e3269-7113-413b-b1bd-4c044bf3efcf_full_white.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\geqie\gui\main\views.py", line 67, in process_file
+    result = subprocess.run(command, capture_output=True, text=True, check=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['geqie', 'simulate', '--encoding', '', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\2c4e3269-7113-413b-b1bd-4c044bf3efcf_full_white.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\geqie\gui\main\views.py", line 98, in start_experiment
+    file_name, output = future.result()
+                        ^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\concurrent\futures\_base.py", line 449, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\concurrent\futures\_base.py", line 401, in __get_result
+    raise self._exception
+  File "C:\Program Files\Python312\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\gui\main\views.py", line 78, in process_file
+    raise Exception(f"Command failed: {e}")
+Exception: Command failed: Command '['geqie', 'simulate', '--encoding', '', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\2c4e3269-7113-413b-b1bd-4c044bf3efcf_full_white.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+[03/Mar/2025 16:24:08] ERROR [main.views:77] Command failed with return code 1. Stderr: Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\Admin\Desktop\geqie\.venv\Scripts\geqie.exe\__main__.py", line 7, in <module>
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1161, in __call__
+    return self.main(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1082, in main
+    rv = self.invoke(ctx)
+         ^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1697, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1443, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 106, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\cloup\_context.py", line 47, in new_func
+    return f(get_current_context(), *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 115, in simulate
+    circuit = ctx.invoke(encode, **params)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 96, in encode
+    e = _get_encoding_functions(params)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 48, in _get_encoding_functions
+    init_function = getattr(_import_module("init", init_path), "init")
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 32, in _import_module
+    spec.loader.exec_module(module)
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 1132, in get_code
+  File "<frozen importlib._bootstrap_external>", line 1190, in get_data
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\init.py'
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\geqie\gui\main\views.py", line 67, in process_file
+    result = subprocess.run(command, capture_output=True, text=True, check=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['geqie', 'simulate', '--encoding', '', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\4aa7dcb8-b5c7-43f9-a96b-26b8d93113be_test_image.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+[03/Mar/2025 16:24:08] ERROR [main.views:77] Command failed with return code 1. Stderr: Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\Admin\Desktop\geqie\.venv\Scripts\geqie.exe\__main__.py", line 7, in <module>
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1161, in __call__
+    return self.main(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1082, in main
+    rv = self.invoke(ctx)
+         ^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1697, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1443, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 106, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\cloup\_context.py", line 47, in new_func
+    return f(get_current_context(), *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 115, in simulate
+    circuit = ctx.invoke(encode, **params)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 96, in encode
+    e = _get_encoding_functions(params)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 48, in _get_encoding_functions
+    init_function = getattr(_import_module("init", init_path), "init")
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 32, in _import_module
+    spec.loader.exec_module(module)
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 1132, in get_code
+  File "<frozen importlib._bootstrap_external>", line 1190, in get_data
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\init.py'
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\geqie\gui\main\views.py", line 67, in process_file
+    result = subprocess.run(command, capture_output=True, text=True, check=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['geqie', 'simulate', '--encoding', '', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\aa92632a-443f-4c02-ad5c-a6a95fb07c60_test_2x4.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+[03/Mar/2025 16:24:08] ERROR [main.views:77] Command failed with return code 1. Stderr: Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\Admin\Desktop\geqie\.venv\Scripts\geqie.exe\__main__.py", line 7, in <module>
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1161, in __call__
+    return self.main(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1082, in main
+    rv = self.invoke(ctx)
+         ^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1697, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1443, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 106, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\cloup\_context.py", line 47, in new_func
+    return f(get_current_context(), *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 115, in simulate
+    circuit = ctx.invoke(encode, **params)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 96, in encode
+    e = _get_encoding_functions(params)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 48, in _get_encoding_functions
+    init_function = getattr(_import_module("init", init_path), "init")
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 32, in _import_module
+    spec.loader.exec_module(module)
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 1132, in get_code
+  File "<frozen importlib._bootstrap_external>", line 1190, in get_data
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\init.py'
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\geqie\gui\main\views.py", line 67, in process_file
+    result = subprocess.run(command, capture_output=True, text=True, check=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['geqie', 'simulate', '--encoding', '', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\874148e7-76be-4580-a2cc-a92c05957880_test_flag_4x4.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+[03/Mar/2025 16:24:08] ERROR [main.views:77] Command failed with return code 1. Stderr: Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\Admin\Desktop\geqie\.venv\Scripts\geqie.exe\__main__.py", line 7, in <module>
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1161, in __call__
+    return self.main(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1082, in main
+    rv = self.invoke(ctx)
+         ^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1697, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1443, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 106, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\cloup\_context.py", line 47, in new_func
+    return f(get_current_context(), *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 115, in simulate
+    circuit = ctx.invoke(encode, **params)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 96, in encode
+    e = _get_encoding_functions(params)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 48, in _get_encoding_functions
+    init_function = getattr(_import_module("init", init_path), "init")
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 32, in _import_module
+    spec.loader.exec_module(module)
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 1132, in get_code
+  File "<frozen importlib._bootstrap_external>", line 1190, in get_data
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\init.py'
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\geqie\gui\main\views.py", line 67, in process_file
+    result = subprocess.run(command, capture_output=True, text=True, check=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['geqie', 'simulate', '--encoding', '', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\b46d4241-3158-4b3d-a10c-2e102deb8125_test_image_4x4.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+[03/Mar/2025 16:24:08] ERROR [main.views:77] Command failed with return code 1. Stderr: Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\Admin\Desktop\geqie\.venv\Scripts\geqie.exe\__main__.py", line 7, in <module>
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1161, in __call__
+    return self.main(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1082, in main
+    rv = self.invoke(ctx)
+         ^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1697, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1443, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 106, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\cloup\_context.py", line 47, in new_func
+    return f(get_current_context(), *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 115, in simulate
+    circuit = ctx.invoke(encode, **params)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 96, in encode
+    e = _get_encoding_functions(params)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 48, in _get_encoding_functions
+    init_function = getattr(_import_module("init", init_path), "init")
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 32, in _import_module
+    spec.loader.exec_module(module)
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 1132, in get_code
+  File "<frozen importlib._bootstrap_external>", line 1190, in get_data
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\init.py'
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\geqie\gui\main\views.py", line 67, in process_file
+    result = subprocess.run(command, capture_output=True, text=True, check=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['geqie', 'simulate', '--encoding', '', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\5348767a-680a-44ce-85f1-2e7bb997d5d4_test_image0xf0.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+[03/Mar/2025 16:24:08] ERROR [main.views:77] Command failed with return code 1. Stderr: Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\Admin\Desktop\geqie\.venv\Scripts\geqie.exe\__main__.py", line 7, in <module>
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1161, in __call__
+    return self.main(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1082, in main
+    rv = self.invoke(ctx)
+         ^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1697, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1443, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 106, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\cloup\_context.py", line 47, in new_func
+    return f(get_current_context(), *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 115, in simulate
+    circuit = ctx.invoke(encode, **params)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 96, in encode
+    e = _get_encoding_functions(params)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 48, in _get_encoding_functions
+    init_function = getattr(_import_module("init", init_path), "init")
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 32, in _import_module
+    spec.loader.exec_module(module)
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 1132, in get_code
+  File "<frozen importlib._bootstrap_external>", line 1190, in get_data
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\init.py'
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\geqie\gui\main\views.py", line 67, in process_file
+    result = subprocess.run(command, capture_output=True, text=True, check=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['geqie', 'simulate', '--encoding', '', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\a8a375b5-23b6-4a71-b3a3-fbf01439e138_test_image_1010.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+[03/Mar/2025 16:24:08] ERROR [django.request:248] Internal Server Error: /start-Experiment/
+[03/Mar/2025 16:24:08] ERROR [django.server:213] "POST /start-Experiment/ HTTP/1.1" 500 332
+[03/Mar/2025 16:24:08] ERROR [frontend_logs:266] Form: {}
+[03/Mar/2025 16:24:08] ERROR [frontend_logs:266] Received errorData: {"success":false,"error":"Command failed: Command '['geqie', 'simulate', '--encoding', '', '--image', 'C:\\\\Users\\\\Admin\\\\Desktop\\\\geqie\\\\gui\\\\..\\\\assets\\\\test_images\\\\2c4e3269-7113-413b-b1bd-4c044bf3efcf_full_white.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1."}
+[03/Mar/2025 16:24:08] ERROR [frontend_logs:266] Extracted errorMessage: "Command failed: Command '['geqie', 'simulate', '--encoding', '', '--image', 'C:\\\\Users\\\\Admin\\\\Desktop\\\\geqie\\\\gui\\\\..\\\\assets\\\\test_images\\\\2c4e3269-7113-413b-b1bd-4c044bf3efcf_full_white.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1."
+[03/Mar/2025 16:41:34] ERROR [frontend_logs:266] Form: {}
+[03/Mar/2025 16:41:34] ERROR [frontend_logs:266] Received errorData: {"success":false,"error":"Invalid request."}
+[03/Mar/2025 16:41:34] ERROR [frontend_logs:266] Extracted errorMessage: "Invalid request."
+[03/Mar/2025 16:45:43] ERROR [frontend_logs:266] Form: {}
+[03/Mar/2025 16:45:43] ERROR [frontend_logs:266] Received errorData: {"success":false,"error":"Invalid request."}
+[03/Mar/2025 16:45:43] ERROR [frontend_logs:266] Extracted errorMessage: "Invalid request."
+[03/Mar/2025 16:46:34] ERROR [frontend_logs:266] images: []
+[03/Mar/2025 16:46:34] ERROR [frontend_logs:266] Start test: method=, computer=simulate, shots=1024
+[03/Mar/2025 16:46:34] ERROR [frontend_logs:266] Form: {}
+[03/Mar/2025 16:46:34] ERROR [frontend_logs:266] Received errorData: {"success":false,"error":"Invalid request."}
+[03/Mar/2025 16:46:34] ERROR [frontend_logs:266] Extracted errorMessage: "Invalid request."
+[03/Mar/2025 16:47:56] ERROR [frontend_logs:266] images: []
+[03/Mar/2025 16:47:56] ERROR [frontend_logs:266] Start test: method=[object HTMLSelectElement], computer=simulate, shots=1024
+[03/Mar/2025 16:47:56] ERROR [frontend_logs:266] Form: {}
+[03/Mar/2025 16:47:56] ERROR [frontend_logs:266] Received errorData: {"success":false,"error":"Invalid request."}
+[03/Mar/2025 16:47:56] ERROR [frontend_logs:266] Extracted errorMessage: "Invalid request."
+[03/Mar/2025 16:50:12] ERROR [frontend_logs:266] images: []
+[03/Mar/2025 16:50:12] ERROR [frontend_logs:266] Start test: method=[object HTMLCollection], computer=simulate, shots=1024
+[03/Mar/2025 16:50:12] ERROR [frontend_logs:266] Form: {}
+[03/Mar/2025 16:50:12] ERROR [frontend_logs:266] Received errorData: {"success":false,"error":"Invalid request."}
+[03/Mar/2025 16:50:12] ERROR [frontend_logs:266] Extracted errorMessage: "Invalid request."
+[03/Mar/2025 16:50:51] ERROR [frontend_logs:266] images: []
+[03/Mar/2025 16:50:51] ERROR [frontend_logs:266] Start test: method=undefined, computer=simulate, shots=1024
+[03/Mar/2025 16:50:51] ERROR [frontend_logs:266] Form: {}
+[03/Mar/2025 16:50:51] ERROR [frontend_logs:266] Received errorData: {"success":false,"error":"Invalid request."}
+[03/Mar/2025 16:50:51] ERROR [frontend_logs:266] Extracted errorMessage: "Invalid request."
+[03/Mar/2025 16:51:30] ERROR [frontend_logs:266] images: []
+[03/Mar/2025 16:51:30] ERROR [frontend_logs:266] Start test: method=undefined, computer=simulate, shots=1024
+[03/Mar/2025 16:51:30] ERROR [frontend_logs:266] Form: {}
+[03/Mar/2025 16:51:30] ERROR [frontend_logs:266] Received errorData: {"success":false,"error":"Invalid request."}
+[03/Mar/2025 16:51:30] ERROR [frontend_logs:266] Extracted errorMessage: "Invalid request."
+[03/Mar/2025 16:52:22] ERROR [frontend_logs:266] images: []
+[03/Mar/2025 16:53:47] ERROR [frontend_logs:266] images: []
+[03/Mar/2025 16:57:24] ERROR [frontend_logs:266] Start test: method=undefined, computer=simulate, shots=1024
+[03/Mar/2025 16:57:24] ERROR [frontend_logs:266] Form: {}
+[03/Mar/2025 16:57:24] ERROR [frontend_logs:266] Received errorData: {"success":false,"error":"Invalid request."}
+[03/Mar/2025 16:57:24] ERROR [frontend_logs:266] Extracted errorMessage: "Invalid request."
+[03/Mar/2025 16:58:39] ERROR [frontend_logs:266] Start test: method=undefined, computer=simulate, shots=1024
+[03/Mar/2025 16:58:39] ERROR [frontend_logs:266] Form: {}
+[03/Mar/2025 16:58:39] ERROR [frontend_logs:266] Received errorData: {"success":false,"error":"Invalid request."}
+[03/Mar/2025 16:58:39] ERROR [frontend_logs:266] Extracted errorMessage: "Invalid request."
+[03/Mar/2025 17:00:02] ERROR [frontend_logs:266] Start test: method=
+                                        -- Select method --
+                                        
+                                        
+                                            frqi
+                                        
+                                        
+                                        
+                                            ifrqi
+                                        
+                                        
+                                        
+                                            lpiqe
+                                        
+                                        
+                                        
+                                            mcqi
+                                        
+                                        
+                                        
+                                            ncqi
+                                        
+                                        
+                                        
+                                            neqr
+                                        
+                                        
+                                        
+                                            qrci
+                                        
+                                        
+                                        
+                                            qualpi
+                                        
+                                        
+                                    , computer=simulate, shots=1024
+[03/Mar/2025 17:00:02] ERROR [frontend_logs:266] Form: {}
+[03/Mar/2025 17:00:02] ERROR [frontend_logs:266] Received errorData: {"success":false,"error":"Invalid request."}
+[03/Mar/2025 17:00:02] ERROR [frontend_logs:266] Extracted errorMessage: "Invalid request."
+[03/Mar/2025 17:01:08] ERROR [frontend_logs:266] Start test: method=undefined, computer=simulate, shots=1024
+[03/Mar/2025 17:01:08] ERROR [frontend_logs:266] Form: {}
+[03/Mar/2025 17:01:08] ERROR [frontend_logs:266] Received errorData: {"success":false,"error":"Invalid request."}
+[03/Mar/2025 17:01:08] ERROR [frontend_logs:266] Extracted errorMessage: "Invalid request."
+[03/Mar/2025 17:07:23] ERROR [frontend_logs:266] Start test: method=frqi, computer=simulate, shots=1024
+[03/Mar/2025 17:07:23] ERROR [frontend_logs:266] Form: {}
+[03/Mar/2025 17:07:23] ERROR [frontend_logs:266] Received errorData: {"success":false,"error":"Invalid request."}
+[03/Mar/2025 17:07:23] ERROR [frontend_logs:266] Extracted errorMessage: "Invalid request."
+[03/Mar/2025 17:11:29] ERROR [frontend_logs:266] Start test: method=frqi, computer=simulate, shots=1024
+[03/Mar/2025 17:11:29] ERROR [frontend_logs:266] Form: {}
+[03/Mar/2025 17:11:29] ERROR [frontend_logs:266] Received errorData: {"success":false,"error":"Invalid request."}
+[03/Mar/2025 17:11:29] ERROR [frontend_logs:266] Extracted errorMessage: "Invalid request."
+[03/Mar/2025 17:19:13] ERROR [frontend_logs:266] Start test: method=frqi, computer=simulate, shots=1024
+[03/Mar/2025 17:19:13] ERROR [frontend_logs:266] Received errorData: {"success":false,"error":"Invalid request."}
+[03/Mar/2025 17:19:13] ERROR [frontend_logs:266] Extracted errorMessage: "Invalid request."
+[03/Mar/2025 17:21:57] ERROR [frontend_logs:266] Start test: method=frqi, computer=simulate, shots=1024
+[03/Mar/2025 17:21:57] ERROR [frontend_logs:266] Received errorData: {"success":false,"error":"Invalid request."}
+[03/Mar/2025 17:21:57] ERROR [frontend_logs:266] Extracted errorMessage: "Invalid request."
+[03/Mar/2025 17:24:16] ERROR [frontend_logs:266] Start test: method=frqi, images=0, computer=simulate, shots=1024
+[03/Mar/2025 17:24:16] ERROR [frontend_logs:266] Received errorData: {"success":false,"error":"Invalid request."}
+[03/Mar/2025 17:24:16] ERROR [frontend_logs:266] Extracted errorMessage: "Invalid request."
+[03/Mar/2025 17:26:49] ERROR [frontend_logs:266] Start test: method=frqi, images=0, computer=simulate, shots=1024
+[03/Mar/2025 17:26:49] ERROR [frontend_logs:266] Received errorData: {"success":false,"error":"Invalid request."}
+[03/Mar/2025 17:26:49] ERROR [frontend_logs:266] Extracted errorMessage: "Invalid request."
+[03/Mar/2025 17:32:55] ERROR [frontend_logs:266] Start test: method=frqi, images=0, computer=simulate, shots=1024
+[03/Mar/2025 17:32:55] ERROR [frontend_logs:266] Received errorData: {"success":false,"error":"Invalid request."}
+[03/Mar/2025 17:32:55] ERROR [frontend_logs:266] Extracted errorMessage: "Invalid request."
+[03/Mar/2025 17:35:04] ERROR [frontend_logs:265] Start test: method=frqi, images=0, computer=simulate, shots=1024
+[03/Mar/2025 17:35:04] ERROR [frontend_logs:265] Received errorData: {"success":false,"error":"Invalid request."}
+[03/Mar/2025 17:35:04] ERROR [frontend_logs:265] Extracted errorMessage: "Invalid request."
+[03/Mar/2025 17:36:18] ERROR [frontend_logs:265] Start test: method=frqi, images=0, computer=simulate, shots=1024
+[03/Mar/2025 17:36:18] ERROR [frontend_logs:265] Received errorData: {"success":false,"error":"Invalid request."}
+[03/Mar/2025 17:36:18] ERROR [frontend_logs:265] Extracted errorMessage: "Invalid request."
+[03/Mar/2025 17:37:43] ERROR [frontend_logs:265] Start test: method=frqi, images=0, computer=simulate, shots=1024
+[03/Mar/2025 17:37:43] ERROR [frontend_logs:265] Received errorData: {"success":false,"error":"Invalid request."}
+[03/Mar/2025 17:37:43] ERROR [frontend_logs:265] Extracted errorMessage: "Invalid request."
+[03/Mar/2025 17:38:55] ERROR [main.views:229] C:\Users\Admin\Desktop\geqie\gui\..\assets\test_images\grayscale
+[03/Mar/2025 17:38:55] ERROR [frontend_logs:266] Start test: method=frqi, images=0, computer=simulate, shots=1024
+[03/Mar/2025 17:38:55] ERROR [frontend_logs:266] Received errorData: {"success":false,"error":"Invalid request."}
+[03/Mar/2025 17:38:55] ERROR [frontend_logs:266] Extracted errorMessage: "Invalid request."
+[03/Mar/2025 17:44:26] ERROR [main.views:229] C:\Users\Admin\Desktop\geqie\gui\..\assets\test_images\grayscale
+[03/Mar/2025 17:44:26] ERROR [frontend_logs:266] Start test: method=frqi, images=0, computer=simulate, shots=1024
+[03/Mar/2025 17:44:26] ERROR [frontend_logs:266] Received errorData: {"success":false,"error":"Invalid request."}
+[03/Mar/2025 17:44:26] ERROR [frontend_logs:266] Extracted errorMessage: "Invalid request."
+[03/Mar/2025 17:46:45] ERROR [main.views:229] C:\Users\Admin\Desktop\geqie\gui\..\assets\test_images\grayscale
+[03/Mar/2025 17:46:45] ERROR [frontend_logs:266] Start test: method=frqi, images=0, computer=simulate, shots=1024
+[03/Mar/2025 17:46:45] ERROR [frontend_logs:266] Received errorData: {"success":false,"error":"Invalid request."}
+[03/Mar/2025 17:46:45] ERROR [frontend_logs:266] Extracted errorMessage: "Invalid request."
+[04/Mar/2025 10:22:00] ERROR [frontend_logs:267] Start test: method=frqi, images=7, computer=simulate, shots=1024
+[04/Mar/2025 10:22:00] ERROR [main.views:102] Error processing file: expected str, bytes or os.PathLike object, not NoneType
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\geqie\gui\main\views.py", line 98, in start_experiment
+    file_name, output = future.result()
+                        ^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\concurrent\futures\_base.py", line 449, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\concurrent\futures\_base.py", line 401, in __get_result
+    raise self._exception
+  File "C:\Program Files\Python312\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\gui\main\views.py", line 67, in process_file
+    result = subprocess.run(command, capture_output=True, text=True, check=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\subprocess.py", line 548, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\subprocess.py", line 1026, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "C:\Program Files\Python312\Lib\subprocess.py", line 1462, in _execute_child
+    args = list2cmdline(args)
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\subprocess.py", line 608, in list2cmdline
+    for arg in map(os.fsdecode, seq):
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen os>", line 859, in fsdecode
+TypeError: expected str, bytes or os.PathLike object, not NoneType
+[04/Mar/2025 10:22:00] ERROR [django.request:248] Internal Server Error: /start-Experiment/
+[04/Mar/2025 10:22:00] ERROR [django.server:213] "POST /start-Experiment/ HTTP/1.1" 500 86
+[04/Mar/2025 10:22:00] ERROR [frontend_logs:267] Received errorData: {"success":false,"error":"expected str, bytes or os.PathLike object, not NoneType"}
+[04/Mar/2025 10:22:00] ERROR [frontend_logs:267] Extracted errorMessage: "expected str, bytes or os.PathLike object, not NoneType"
+[04/Mar/2025 10:29:11] ERROR [frontend_logs:267] Start test: method=frqi, images=7, computer=simulate, shots=1024
+[04/Mar/2025 10:29:11] ERROR [main.views:102] Error processing file: expected str, bytes or os.PathLike object, not NoneType
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\geqie\gui\main\views.py", line 98, in start_experiment
+    file_name, output = future.result()
+                        ^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\concurrent\futures\_base.py", line 449, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\concurrent\futures\_base.py", line 401, in __get_result
+    raise self._exception
+  File "C:\Program Files\Python312\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\gui\main\views.py", line 67, in process_file
+    result = subprocess.run(command, capture_output=True, text=True, check=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\subprocess.py", line 548, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\subprocess.py", line 1026, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "C:\Program Files\Python312\Lib\subprocess.py", line 1462, in _execute_child
+    args = list2cmdline(args)
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\subprocess.py", line 608, in list2cmdline
+    for arg in map(os.fsdecode, seq):
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen os>", line 859, in fsdecode
+TypeError: expected str, bytes or os.PathLike object, not NoneType
+[04/Mar/2025 10:29:11] ERROR [django.request:248] Internal Server Error: /start-Experiment/
+[04/Mar/2025 10:29:11] ERROR [django.server:213] "POST /start-Experiment/ HTTP/1.1" 500 86
+[04/Mar/2025 10:29:11] ERROR [frontend_logs:267] Received errorData: {"success":false,"error":"expected str, bytes or os.PathLike object, not NoneType"}
+[04/Mar/2025 10:29:11] ERROR [frontend_logs:267] Extracted errorMessage: "expected str, bytes or os.PathLike object, not NoneType"
+[04/Mar/2025 10:41:44] ERROR [frontend_logs:267] Start test: method=frqi, images=7, computer=simulate, shots=1024
+[04/Mar/2025 10:41:44] ERROR [main.views:102] Error processing file: expected str, bytes or os.PathLike object, not NoneType
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\geqie\gui\main\views.py", line 98, in start_experiment
+    file_name, output = future.result()
+                        ^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\concurrent\futures\_base.py", line 449, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\concurrent\futures\_base.py", line 401, in __get_result
+    raise self._exception
+  File "C:\Program Files\Python312\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\gui\main\views.py", line 67, in process_file
+    result = subprocess.run(command, capture_output=True, text=True, check=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\subprocess.py", line 548, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\subprocess.py", line 1026, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "C:\Program Files\Python312\Lib\subprocess.py", line 1462, in _execute_child
+    args = list2cmdline(args)
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\subprocess.py", line 608, in list2cmdline
+    for arg in map(os.fsdecode, seq):
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen os>", line 859, in fsdecode
+TypeError: expected str, bytes or os.PathLike object, not NoneType
+[04/Mar/2025 10:41:44] ERROR [django.request:248] Internal Server Error: /start-Experiment/
+[04/Mar/2025 10:41:44] ERROR [django.server:213] "POST /start-Experiment/ HTTP/1.1" 500 86
+[04/Mar/2025 10:41:44] ERROR [frontend_logs:267] Received errorData: {"success":false,"error":"expected str, bytes or os.PathLike object, not NoneType"}
+[04/Mar/2025 10:41:44] ERROR [frontend_logs:267] Extracted errorMessage: "expected str, bytes or os.PathLike object, not NoneType"
+[04/Mar/2025 10:44:24] ERROR [frontend_logs:267] Start test: method=frqi, images=7, computer=simulate, shots=1024
+[04/Mar/2025 10:44:24] ERROR [main.views:102] Error processing file: expected str, bytes or os.PathLike object, not NoneType
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\geqie\gui\main\views.py", line 98, in start_experiment
+    file_name, output = future.result()
+                        ^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\concurrent\futures\_base.py", line 449, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\concurrent\futures\_base.py", line 401, in __get_result
+    raise self._exception
+  File "C:\Program Files\Python312\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\gui\main\views.py", line 67, in process_file
+    result = subprocess.run(command, capture_output=True, text=True, check=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\subprocess.py", line 548, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\subprocess.py", line 1026, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "C:\Program Files\Python312\Lib\subprocess.py", line 1462, in _execute_child
+    args = list2cmdline(args)
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\subprocess.py", line 608, in list2cmdline
+    for arg in map(os.fsdecode, seq):
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen os>", line 859, in fsdecode
+TypeError: expected str, bytes or os.PathLike object, not NoneType
+[04/Mar/2025 10:44:24] ERROR [django.request:248] Internal Server Error: /start-Experiment/
+[04/Mar/2025 10:44:24] ERROR [django.server:213] "POST /start-Experiment/ HTTP/1.1" 500 86
+[04/Mar/2025 10:44:24] ERROR [frontend_logs:267] Received errorData: {"success":false,"error":"expected str, bytes or os.PathLike object, not NoneType"}
+[04/Mar/2025 10:44:24] ERROR [frontend_logs:267] Extracted errorMessage: "expected str, bytes or os.PathLike object, not NoneType"
+[04/Mar/2025 10:45:22] ERROR [frontend_logs:267] Start test: method=frqi, images=7, computer=simulate, shots=1024
+[04/Mar/2025 10:45:34] ERROR [frontend_logs:267] Response ok: {
+  "full_white.png": "{\"000\": 0, \"001\": 251, \"010\": 0, \"011\": 238, \"100\": 0, \"101\": 300, \"110\": 0, \"111\": 235}",
+  "test_image.png": "{\"000\": 0, \"001\": 243, \"010\": 44, \"011\": 217, \"100\": 136, \"101\": 130, \"110\": 210, \"111\": 44}",
+  "test_2x4.png": "{\"00000\": 0, \"00001\": 70, \"00010\": 0, \"00011\": 68, \"00100\": 8, \"00101\": 51, \"00110\": 14, \"00111\": 57, \"01000\": 33, \"01001\": 28, \"01010\": 30, \"01011\": 27, \"01100\": 60, \"01101\": 0, \"01110\": 59, \"01111\": 0, \"10000\": 55, \"10001\": 0, \"10010\": 77, \"10011\": 0, \"10100\": 80, \"10101\": 0, \"10110\": 72, \"10111\": 0, \"11000\": 55, \"11001\": 0, \"11010\": 66, \"11011\": 0, \"11100\": 60, \"11101\": 0, \"11110\": 54, \"11111\": 0}",
+  "test_image_1010.png": "{\"000\": 0, \"001\": 262, \"010\": 89, \"011\": 160, \"100\": 189, \"101\": 85, \"110\": 231, \"111\": 8}",
+  "test_flag_4x4.png": "{\"00000\": 0, \"00001\": 62, \"00010\": 0, \"00011\": 80, \"00100\": 0, \"00101\": 64, \"00110\": 0, \"00111\": 61, \"01000\": 25, \"01001\": 35, \"01010\": 40, \"01011\": 27, \"01100\": 26, \"01101\": 34, \"01110\": 36, \"01111\": 30, \"10000\": 26, \"10001\": 31, \"10010\": 36, \"10011\": 23, \"10100\": 23, \"10101\": 46, \"10110\": 38, \"10111\": 40, \"11000\": 76, \"11001\": 0, \"11010\": 59, \"11011\": 0, \"11100\": 48, \"11101\": 0, \"11110\": 58, \"11111\": 0}",
+  "test_image_4x4.png": "{\"00000\": 0, \"00001\": 62, \"00010\": 64, \"00011\": 0, \"00100\": 0, \"00101\": 63, \"00110\": 33, \"00111\": 33, \"01000\": 0, \"01001\": 69, \"01010\": 69, \"01011\": 0, \"01100\": 72, \"01101\": 0, \"01110\": 0, \"01111\": 66, \"10000\": 9, \"10001\": 52, \"10010\": 0, \"10011\": 71, \"10100\": 0, \"10101\": 64, \"10110\": 0, \"10111\": 61, \"11000\": 0, \"11001\": 79, \"11010\": 8, \"11011\": 39, \"11100\": 49, \"11101\": 0, \"11110\": 0, \"11111\": 61}",
+  "test_image0xf0.png": "{\"000\": 124, \"001\": 125, \"010\": 136, \"011\": 139, \"100\": 126, \"101\": 120, \"110\": 134, \"111\": 120}"
+}
+[04/Mar/2025 10:53:21] ERROR [frontend_logs:267] Start test: method=ifrqi, images=7, computer=simulate, shots=1024
+[04/Mar/2025 10:53:32] ERROR [frontend_logs:267] Response ok: {
+  "test_image.png": "{\"000000\": 0, \"000001\": 0, \"000010\": 0, \"000011\": 0, \"000100\": 0, \"000101\": 0, \"000110\": 0, \"000111\": 0, \"001000\": 0, \"001001\": 0, \"001010\": 0, \"001011\": 0, \"001100\": 0, \"001101\": 0, \"001110\": 0, \"001111\": 248, \"010000\": 0, \"010001\": 0, \"010010\": 0, \"010011\": 0, \"010100\": 0, \"010101\": 0, \"010110\": 0, \"010111\": 0, \"011000\": 281, \"011001\": 0, \"011010\": 0, \"011011\": 0, \"011100\": 0, \"011101\": 0, \"011110\": 0, \"011111\": 0, \"100000\": 160, \"100001\": 0, \"100010\": 0, \"100011\": 0, \"100100\": 0, \"100101\": 0, \"100110\": 0, \"100111\": 0, \"101000\": 88, \"101001\": 0, \"101010\": 0, \"101011\": 0, \"101100\": 0, \"101101\": 0, \"101110\": 0, \"101111\": 0, \"110000\": 87, \"110001\": 0, \"110010\": 0, \"110011\": 0, \"110100\": 0, \"110101\": 0, \"110110\": 0, \"110111\": 0, \"111000\": 160, \"111001\": 0, \"111010\": 0, \"111011\": 0, \"111100\": 0, \"111101\": 0, \"111110\": 0, \"111111\": 0}",
+  "full_white.png": "{\"000000\": 0, \"000001\": 0, \"000010\": 0, \"000011\": 0, \"000100\": 0, \"000101\": 0, \"000110\": 0, \"000111\": 0, \"001000\": 0, \"001001\": 0, \"001010\": 0, \"001011\": 0, \"001100\": 0, \"001101\": 0, \"001110\": 0, \"001111\": 256, \"010000\": 0, \"010001\": 0, \"010010\": 0, \"010011\": 0, \"010100\": 0, \"010101\": 0, \"010110\": 0, \"010111\": 0, \"011000\": 0, \"011001\": 0, \"011010\": 0, \"011011\": 0, \"011100\": 0, \"011101\": 0, \"011110\": 0, \"011111\": 247, \"100000\": 0, \"100001\": 0, \"100010\": 0, \"100011\": 0, \"100100\": 0, \"100101\": 0, \"100110\": 0, \"100111\": 0, \"101000\": 0, \"101001\": 0, \"101010\": 0, \"101011\": 0, \"101100\": 0, \"101101\": 0, \"101110\": 0, \"101111\": 264, \"110000\": 0, \"110001\": 0, \"110010\": 0, \"110011\": 0, \"110100\": 0, \"110101\": 0, \"110110\": 0, \"110111\": 0, \"111000\": 0, \"111001\": 0, \"111010\": 0, \"111011\": 0, \"111100\": 0, \"111101\": 0, \"111110\": 0, \"111111\": 257}",
+  "test_flag_4x4.png": "{\"00000000\": 0, \"00000001\": 0, \"00000010\": 0, \"00000011\": 0, \"00000100\": 0, \"00000101\": 0, \"00000110\": 0, \"00000111\": 0, \"00001000\": 0, \"00001001\": 0, \"00001010\": 0, \"00001011\": 0, \"00001100\": 0, \"00001101\": 0, \"00001110\": 0, \"00001111\": 60, \"00010000\": 0, \"00010001\": 0, \"00010010\": 0, \"00010011\": 0, \"00010100\": 0, \"00010101\": 0, \"00010110\": 0, \"00010111\": 0, \"00011000\": 0, \"00011001\": 0, \"00011010\": 0, \"00011011\": 0, \"00011100\": 0, \"00011101\": 0, \"00011110\": 0, \"00011111\": 61, \"00100000\": 0, \"00100001\": 0, \"00100010\": 0, \"00100011\": 0, \"00100100\": 0, \"00100101\": 0, \"00100110\": 0, \"00100111\": 0, \"00101000\": 0, \"00101001\": 0, \"00101010\": 0, \"00101011\": 0, \"00101100\": 0, \"00101101\": 0, \"00101110\": 0, \"00101111\": 47, \"00110000\": 0, \"00110001\": 0, \"00110010\": 0, \"00110011\": 0, \"00110100\": 0, \"00110101\": 0, \"00110110\": 0, \"00110111\": 0, \"00111000\": 0, \"00111001\": 0, \"00111010\": 0, \"00111011\": 0, \"00111100\": 0, \"00111101\": 0, \"00111110\": 0, \"00111111\": 71, \"01000000\": 52, \"01000001\": 0, \"01000010\": 0, \"01000011\": 0, \"01000100\": 0, \"01000101\": 0, \"01000110\": 0, \"01000111\": 0, \"01001000\": 23, \"01001001\": 0, \"01001010\": 0, \"01001011\": 0, \"01001100\": 0, \"01001101\": 0, \"01001110\": 0, \"01001111\": 0, \"01010000\": 42, \"01010001\": 0, \"01010010\": 0, \"01010011\": 0, \"01010100\": 0, \"01010101\": 0, \"01010110\": 0, \"01010111\": 0, \"01011000\": 21, \"01011001\": 0, \"01011010\": 0, \"01011011\": 0, \"01011100\": 0, \"01011101\": 0, \"01011110\": 0, \"01011111\": 0, \"01100000\": 46, \"01100001\": 0, \"01100010\": 0, \"01100011\": 0, \"01100100\": 0, \"01100101\": 0, \"01100110\": 0, \"01100111\": 0, \"01101000\": 17, \"01101001\": 0, \"01101010\": 0, \"01101011\": 0, \"01101100\": 0, \"01101101\": 0, \"01101110\": 0, \"01101111\": 0, \"01110000\": 47, \"01110001\": 0, \"01110010\": 0, \"01110011\": 0, \"01110100\": 0, \"01110101\": 0, \"01110110\": 0, \"01110111\": 0, \"01111000\": 19, \"01111001\": 0, \"01111010\": 0, \"01111011\": 0, \"01111100\": 0, \"01111101\": 0, \"01111110\": 0, \"01111111\": 0, \"10000000\": 41, \"10000001\": 0, \"10000010\": 0, \"10000011\": 0, \"10000100\": 0, \"10000101\": 0, \"10000110\": 0, \"10000111\": 0, \"10001000\": 33, \"10001001\": 0, \"10001010\": 0, \"10001011\": 0, \"10001100\": 0, \"10001101\": 0, \"10001110\": 0, \"10001111\": 0, \"10010000\": 49, \"10010001\": 0, \"10010010\": 0, \"10010011\": 0, \"10010100\": 0, \"10010101\": 0, \"10010110\": 0, \"10010111\": 0, \"10011000\": 26, \"10011001\": 0, \"10011010\": 0, \"10011011\": 0, \"10011100\": 0, \"10011101\": 0, \"10011110\": 0, \"10011111\": 0, \"10100000\": 34, \"10100001\": 0, \"10100010\": 0, \"10100011\": 0, \"10100100\": 0, \"10100101\": 0, \"10100110\": 0, \"10100111\": 0, \"10101000\": 21, \"10101001\": 0, \"10101010\": 0, \"10101011\": 0, \"10101100\": 0, \"10101101\": 0, \"10101110\": 0, \"10101111\": 0, \"10110000\": 37, \"10110001\": 0, \"10110010\": 0, \"10110011\": 0, \"10110100\": 0, \"10110101\": 0, \"10110110\": 0, \"10110111\": 0, \"10111000\": 18, \"10111001\": 0, \"10111010\": 0, \"10111011\": 0, \"10111100\": 0, \"10111101\": 0, \"10111110\": 0, \"10111111\": 0, \"11000000\": 61, \"11000001\": 0, \"11000010\": 0, \"11000011\": 0, \"11000100\": 0, \"11000101\": 0, \"11000110\": 0, \"11000111\": 0, \"11001000\": 0, \"11001001\": 0, \"11001010\": 0, \"11001011\": 0, \"11001100\": 0, \"11001101\": 0, \"11001110\": 0, \"11001111\": 0, \"11010000\": 69, \"11010001\": 0, \"11010010\": 0, \"11010011\": 0, \"11010100\": 0, \"11010101\": 0, \"11010110\": 0, \"11010111\": 0, \"11011000\": 0, \"11011001\": 0, \"11011010\": 0, \"11011011\": 0, \"11011100\": 0, \"11011101\": 0, \"11011110\": 0, \"11011111\": 0, \"11100000\": 61, \"11100001\": 0, \"11100010\": 0, \"11100011\": 0, \"11100100\": 0, \"11100101\": 0, \"11100110\": 0, \"11100111\": 0, \"11101000\": 0, \"11101001\": 0, \"11101010\": 0, \"11101011\": 0, \"11101100\": 0, \"11101101\": 0, \"11101110\": 0, \"11101111\": 0, \"11110000\": 68, \"11110001\": 0, \"11110010\": 0, \"11110011\": 0, \"11110100\": 0, \"11110101\": 0, \"11110110\": 0, \"11110111\": 0, \"11111000\": 0, \"11111001\": 0, \"11111010\": 0, \"11111011\": 0, \"11111100\": 0, \"11111101\": 0, \"11111110\": 0, \"11111111\": 0}",
+  "test_image0xf0.png": "{\"000000\": 0, \"000001\": 0, \"000010\": 0, \"000011\": 0, \"000100\": 0, \"000101\": 0, \"000110\": 0, \"000111\": 88, \"001000\": 0, \"001001\": 0, \"001010\": 0, \"001011\": 0, \"001100\": 0, \"001101\": 0, \"001110\": 0, \"001111\": 145, \"010000\": 0, \"010001\": 0, \"010010\": 0, \"010011\": 0, \"010100\": 0, \"010101\": 0, \"010110\": 0, \"010111\": 90, \"011000\": 0, \"011001\": 0, \"011010\": 0, \"011011\": 0, \"011100\": 0, \"011101\": 0, \"011110\": 0, \"011111\": 162, \"100000\": 0, \"100001\": 0, \"100010\": 0, \"100011\": 0, \"100100\": 0, \"100101\": 0, \"100110\": 0, \"100111\": 93, \"101000\": 0, \"101001\": 0, \"101010\": 0, \"101011\": 0, \"101100\": 0, \"101101\": 0, \"101110\": 0, \"101111\": 179, \"110000\": 0, \"110001\": 0, \"110010\": 0, \"110011\": 0, \"110100\": 0, \"110101\": 0, \"110110\": 0, \"110111\": 83, \"111000\": 0, \"111001\": 0, \"111010\": 0, \"111011\": 0, \"111100\": 0, \"111101\": 0, \"111110\": 0, \"111111\": 184}",
+  "test_2x4.png": "{\"00000000\": 0, \"00000001\": 0, \"00000010\": 0, \"00000011\": 0, \"00000100\": 0, \"00000101\": 0, \"00000110\": 0, \"00000111\": 0, \"00001000\": 0, \"00001001\": 0, \"00001010\": 0, \"00001011\": 0, \"00001100\": 0, \"00001101\": 0, \"00001110\": 0, \"00001111\": 85, \"00010000\": 0, \"00010001\": 0, \"00010010\": 0, \"00010011\": 0, \"00010100\": 0, \"00010101\": 0, \"00010110\": 0, \"00010111\": 0, \"00011000\": 0, \"00011001\": 0, \"00011010\": 0, \"00011011\": 0, \"00011100\": 0, \"00011101\": 0, \"00011110\": 0, \"00011111\": 68, \"00100000\": 22, \"00100001\": 0, \"00100010\": 0, \"00100011\": 0, \"00100100\": 0, \"00100101\": 0, \"00100110\": 0, \"00100111\": 0, \"00101000\": 8, \"00101001\": 0, \"00101010\": 0, \"00101011\": 0, \"00101100\": 0, \"00101101\": 0, \"00101110\": 0, \"00101111\": 28, \"00110000\": 20, \"00110001\": 0, \"00110010\": 0, \"00110011\": 0, \"00110100\": 0, \"00110101\": 0, \"00110110\": 0, \"00110111\": 0, \"00111000\": 14, \"00111001\": 0, \"00111010\": 0, \"00111011\": 0, \"00111100\": 0, \"00111101\": 0, \"00111110\": 0, \"00111111\": 28, \"01000000\": 32, \"01000001\": 0, \"01000010\": 0, \"01000011\": 0, \"01000100\": 0, \"01000101\": 0, \"01000110\": 0, \"01000111\": 0, \"01001000\": 15, \"01001001\": 0, \"01001010\": 0, \"01001011\": 0, \"01001100\": 0, \"01001101\": 0, \"01001110\": 0, \"01001111\": 0, \"01010000\": 48, \"01010001\": 0, \"01010010\": 0, \"01010011\": 0, \"01010100\": 0, \"01010101\": 0, \"01010110\": 0, \"01010111\": 0, \"01011000\": 17, \"01011001\": 0, \"01011010\": 0, \"01011011\": 0, \"01011100\": 0, \"01011101\": 0, \"01011110\": 0, \"01011111\": 0, \"01100000\": 74, \"01100001\": 0, \"01100010\": 0, \"01100011\": 0, \"01100100\": 0, \"01100101\": 0, \"01100110\": 0, \"01100111\": 0, \"01101000\": 0, \"01101001\": 0, \"01101010\": 0, \"01101011\": 0, \"01101100\": 0, \"01101101\": 0, \"01101110\": 0, \"01101111\": 0, \"01110000\": 68, \"01110001\": 0, \"01110010\": 0, \"01110011\": 0, \"01110100\": 0, \"01110101\": 0, \"01110110\": 0, \"01110111\": 0, \"01111000\": 0, \"01111001\": 0, \"01111010\": 0, \"01111011\": 0, \"01111100\": 0, \"01111101\": 0, \"01111110\": 0, \"01111111\": 0, \"10000000\": 65, \"10000001\": 0, \"10000010\": 0, \"10000011\": 0, \"10000100\": 0, \"10000101\": 0, \"10000110\": 0, \"10000111\": 0, \"10001000\": 0, \"10001001\": 0, \"10001010\": 0, \"10001011\": 0, \"10001100\": 0, \"10001101\": 0, \"10001110\": 0, \"10001111\": 0, \"10010000\": 53, \"10010001\": 0, \"10010010\": 0, \"10010011\": 0, \"10010100\": 0, \"10010101\": 0, \"10010110\": 0, \"10010111\": 0, \"10011000\": 0, \"10011001\": 0, \"10011010\": 0, \"10011011\": 0, \"10011100\": 0, \"10011101\": 0, \"10011110\": 0, \"10011111\": 0, \"10100000\": 61, \"10100001\": 0, \"10100010\": 0, \"10100011\": 0, \"10100100\": 0, \"10100101\": 0, \"10100110\": 0, \"10100111\": 0, \"10101000\": 0, \"10101001\": 0, \"10101010\": 0, \"10101011\": 0, \"10101100\": 0, \"10101101\": 0, \"10101110\": 0, \"10101111\": 0, \"10110000\": 74, \"10110001\": 0, \"10110010\": 0, \"10110011\": 0, \"10110100\": 0, \"10110101\": 0, \"10110110\": 0, \"10110111\": 0, \"10111000\": 0, \"10111001\": 0, \"10111010\": 0, \"10111011\": 0, \"10111100\": 0, \"10111101\": 0, \"10111110\": 0, \"10111111\": 0, \"11000000\": 66, \"11000001\": 0, \"11000010\": 0, \"11000011\": 0, \"11000100\": 0, \"11000101\": 0, \"11000110\": 0, \"11000111\": 0, \"11001000\": 0, \"11001001\": 0, \"11001010\": 0, \"11001011\": 0, \"11001100\": 0, \"11001101\": 0, \"11001110\": 0, \"11001111\": 0, \"11010000\": 60, \"11010001\": 0, \"11010010\": 0, \"11010011\": 0, \"11010100\": 0, \"11010101\": 0, \"11010110\": 0, \"11010111\": 0, \"11011000\": 0, \"11011001\": 0, \"11011010\": 0, \"11011011\": 0, \"11011100\": 0, \"11011101\": 0, \"11011110\": 0, \"11011111\": 0, \"11100000\": 60, \"11100001\": 0, \"11100010\": 0, \"11100011\": 0, \"11100100\": 0, \"11100101\": 0, \"11100110\": 0, \"11100111\": 0, \"11101000\": 0, \"11101001\": 0, \"11101010\": 0, \"11101011\": 0, \"11101100\": 0, \"11101101\": 0, \"11101110\": 0, \"11101111\": 0, \"11110000\": 58, \"11110001\": 0, \"11110010\": 0, \"11110011\": 0, \"11110100\": 0, \"11110101\": 0, \"11110110\": 0, \"11110111\": 0, \"11111000\": 0, \"11111001\": 0, \"11111010\": 0, \"11111011\": 0, \"11111100\": 0, \"11111101\": 0, \"11111110\": 0, \"11111111\": 0}",
+  "test_image_1010.png": "{\"000000\": 0, \"000001\": 0, \"000010\": 0, \"000011\": 0, \"000100\": 0, \"000101\": 0, \"000110\": 0, \"000111\": 0, \"001000\": 0, \"001001\": 0, \"001010\": 0, \"001011\": 0, \"001100\": 0, \"001101\": 0, \"001110\": 0, \"001111\": 265, \"010000\": 116, \"010001\": 0, \"010010\": 0, \"010011\": 0, \"010100\": 65, \"010101\": 0, \"010110\": 0, \"010111\": 0, \"011000\": 63, \"011001\": 0, \"011010\": 0, \"011011\": 0, \"011100\": 39, \"011101\": 0, \"011110\": 0, \"011111\": 0, \"100000\": 56, \"100001\": 0, \"100010\": 0, \"100011\": 0, \"100100\": 30, \"100101\": 0, \"100110\": 0, \"100111\": 0, \"101000\": 101, \"101001\": 0, \"101010\": 0, \"101011\": 0, \"101100\": 56, \"101101\": 0, \"101110\": 0, \"101111\": 0, \"110000\": 0, \"110001\": 0, \"110010\": 0, \"110011\": 81, \"110100\": 0, \"110101\": 0, \"110110\": 0, \"110111\": 152, \"111000\": 0, \"111001\": 0, \"111010\": 0, \"111011\": 0, \"111100\": 0, \"111101\": 0, \"111110\": 0, \"111111\": 0}",
+  "test_image_4x4.png": "{\"00000000\": 0, \"00000001\": 0, \"00000010\": 0, \"00000011\": 0, \"00000100\": 0, \"00000101\": 0, \"00000110\": 0, \"00000111\": 0, \"00001000\": 0, \"00001001\": 0, \"00001010\": 0, \"00001011\": 0, \"00001100\": 0, \"00001101\": 0, \"00001110\": 0, \"00001111\": 62, \"00010000\": 61, \"00010001\": 0, \"00010010\": 0, \"00010011\": 0, \"00010100\": 0, \"00010101\": 0, \"00010110\": 0, \"00010111\": 0, \"00011000\": 0, \"00011001\": 0, \"00011010\": 0, \"00011011\": 0, \"00011100\": 0, \"00011101\": 0, \"00011110\": 0, \"00011111\": 0, \"00100000\": 0, \"00100001\": 0, \"00100010\": 0, \"00100011\": 0, \"00100100\": 0, \"00100101\": 0, \"00100110\": 0, \"00100111\": 0, \"00101000\": 0, \"00101001\": 0, \"00101010\": 0, \"00101011\": 0, \"00101100\": 0, \"00101101\": 0, \"00101110\": 0, \"00101111\": 72, \"00110000\": 0, \"00110001\": 0, \"00110010\": 0, \"00110011\": 0, \"00110100\": 0, \"00110101\": 0, \"00110110\": 0, \"00110111\": 18, \"00111000\": 0, \"00111001\": 0, \"00111010\": 0, \"00111011\": 0, \"00111100\": 0, \"00111101\": 0, \"00111110\": 0, \"00111111\": 46, \"01000000\": 0, \"01000001\": 0, \"01000010\": 0, \"01000011\": 0, \"01000100\": 0, \"01000101\": 0, \"01000110\": 0, \"01000111\": 0, \"01001000\": 0, \"01001001\": 0, \"01001010\": 0, \"01001011\": 0, \"01001100\": 0, \"01001101\": 0, \"01001110\": 0, \"01001111\": 59, \"01010000\": 77, \"01010001\": 0, \"01010010\": 0, \"01010011\": 0, \"01010100\": 0, \"01010101\": 0, \"01010110\": 0, \"01010111\": 0, \"01011000\": 0, \"01011001\": 0, \"01011010\": 0, \"01011011\": 0, \"01011100\": 0, \"01011101\": 0, \"01011110\": 0, \"01011111\": 0, \"01100000\": 73, \"01100001\": 0, \"01100010\": 0, \"01100011\": 0, \"01100100\": 0, \"01100101\": 0, \"01100110\": 0, \"01100111\": 0, \"01101000\": 0, \"01101001\": 0, \"01101010\": 0, \"01101011\": 0, \"01101100\": 0, \"01101101\": 0, \"01101110\": 0, \"01101111\": 0, \"01110000\": 0, \"01110001\": 0, \"01110010\": 0, \"01110011\": 0, \"01110100\": 0, \"01110101\": 0, \"01110110\": 0, \"01110111\": 0, \"01111000\": 0, \"01111001\": 0, \"01111010\": 0, \"01111011\": 0, \"01111100\": 0, \"01111101\": 0, \"01111110\": 0, \"01111111\": 68, \"10000000\": 0, \"10000001\": 0, \"10000010\": 0, \"10000011\": 0, \"10000100\": 0, \"10000101\": 0, \"10000110\": 0, \"10000111\": 0, \"10001000\": 0, \"10001001\": 65, \"10001010\": 0, \"10001011\": 0, \"10001100\": 0, \"10001101\": 0, \"10001110\": 0, \"10001111\": 0, \"10010000\": 0, \"10010001\": 0, \"10010010\": 0, \"10010011\": 0, \"10010100\": 0, \"10010101\": 0, \"10010110\": 0, \"10010111\": 0, \"10011000\": 0, \"10011001\": 0, \"10011010\": 0, \"10011011\": 0, \"10011100\": 0, \"10011101\": 0, \"10011110\": 0, \"10011111\": 57, \"10100000\": 0, \"10100001\": 0, \"10100010\": 0, \"10100011\": 0, \"10100100\": 0, \"10100101\": 0, \"10100110\": 0, \"10100111\": 0, \"10101000\": 0, \"10101001\": 0, \"10101010\": 0, \"10101011\": 0, \"10101100\": 0, \"10101101\": 0, \"10101110\": 0, \"10101111\": 62, \"10110000\": 0, \"10110001\": 0, \"10110010\": 0, \"10110011\": 0, \"10110100\": 0, \"10110101\": 0, \"10110110\": 0, \"10110111\": 0, \"10111000\": 0, \"10111001\": 0, \"10111010\": 0, \"10111011\": 0, \"10111100\": 0, \"10111101\": 0, \"10111110\": 0, \"10111111\": 66, \"11000000\": 0, \"11000001\": 0, \"11000010\": 0, \"11000011\": 0, \"11000100\": 0, \"11000101\": 0, \"11000110\": 0, \"11000111\": 0, \"11001000\": 0, \"11001001\": 0, \"11001010\": 0, \"11001011\": 0, \"11001100\": 0, \"11001101\": 0, \"11001110\": 0, \"11001111\": 61, \"11010000\": 0, \"11010001\": 0, \"11010010\": 0, \"11010011\": 0, \"11010100\": 0, \"11010101\": 0, \"11010110\": 0, \"11010111\": 0, \"11011000\": 0, \"11011001\": 54, \"11011010\": 0, \"11011011\": 0, \"11011100\": 0, \"11011101\": 0, \"11011110\": 0, \"11011111\": 0, \"11100000\": 59, \"11100001\": 0, \"11100010\": 0, \"11100011\": 0, \"11100100\": 0, \"11100101\": 0, \"11100110\": 0, \"11100111\": 0, \"11101000\": 0, \"11101001\": 0, \"11101010\": 0, \"11101011\": 0, \"11101100\": 0, \"11101101\": 0, \"11101110\": 0, \"11101111\": 0, \"11110000\": 0, \"11110001\": 0, \"11110010\": 0, \"11110011\": 0, \"11110100\": 0, \"11110101\": 0, \"11110110\": 0, \"11110111\": 0, \"11111000\": 0, \"11111001\": 0, \"11111010\": 0, \"11111011\": 0, \"11111100\": 0, \"11111101\": 0, \"11111110\": 0, \"11111111\": 64}"
+}
+[04/Mar/2025 10:54:54] ERROR [frontend_logs:267] Start test: method=lpiqe, images=7, computer=simulate, shots=1024
+[04/Mar/2025 10:55:04] ERROR [main.views:77] Command failed with return code 1. Stderr: Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\Admin\Desktop\geqie\.venv\Scripts\geqie.exe\__main__.py", line 7, in <module>
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1161, in __call__
+    return self.main(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1082, in main
+    rv = self.invoke(ctx)
+         ^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1697, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1443, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 106, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\cloup\_context.py", line 47, in new_func
+    return f(get_current_context(), *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 115, in simulate
+    circuit = ctx.invoke(encode, **params)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 96, in encode
+    e = _get_encoding_functions(params)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 48, in _get_encoding_functions
+    init_function = getattr(_import_module("init", init_path), "init")
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 32, in _import_module
+    spec.loader.exec_module(module)
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 1132, in get_code
+  File "<frozen importlib._bootstrap_external>", line 1190, in get_data
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\Admin\\Desktop\\geqie\\geqie\\encodings\\lpiqe\\init.py'
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\geqie\gui\main\views.py", line 67, in process_file
+    result = subprocess.run(command, capture_output=True, text=True, check=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['geqie', 'simulate', '--encoding', 'lpiqe', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\6ae66f07-325d-46af-8646-07a2371cfab9_test_flag_4x4.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+[04/Mar/2025 10:55:04] ERROR [main.views:102] Error processing file: Command failed: Command '['geqie', 'simulate', '--encoding', 'lpiqe', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\6ae66f07-325d-46af-8646-07a2371cfab9_test_flag_4x4.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\geqie\gui\main\views.py", line 67, in process_file
+    result = subprocess.run(command, capture_output=True, text=True, check=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['geqie', 'simulate', '--encoding', 'lpiqe', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\6ae66f07-325d-46af-8646-07a2371cfab9_test_flag_4x4.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\geqie\gui\main\views.py", line 98, in start_experiment
+    file_name, output = future.result()
+                        ^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\concurrent\futures\_base.py", line 449, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\concurrent\futures\_base.py", line 401, in __get_result
+    raise self._exception
+  File "C:\Program Files\Python312\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\gui\main\views.py", line 78, in process_file
+    raise Exception(f"Command failed: {e}")
+Exception: Command failed: Command '['geqie', 'simulate', '--encoding', 'lpiqe', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\6ae66f07-325d-46af-8646-07a2371cfab9_test_flag_4x4.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+[04/Mar/2025 10:55:04] ERROR [main.views:77] Command failed with return code 1. Stderr: Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\Admin\Desktop\geqie\.venv\Scripts\geqie.exe\__main__.py", line 7, in <module>
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1161, in __call__
+    return self.main(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1082, in main
+    rv = self.invoke(ctx)
+         ^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1697, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1443, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 106, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\cloup\_context.py", line 47, in new_func
+    return f(get_current_context(), *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 115, in simulate
+    circuit = ctx.invoke(encode, **params)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 96, in encode
+    e = _get_encoding_functions(params)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 48, in _get_encoding_functions
+    init_function = getattr(_import_module("init", init_path), "init")
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 32, in _import_module
+    spec.loader.exec_module(module)
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 1132, in get_code
+  File "<frozen importlib._bootstrap_external>", line 1190, in get_data
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\Admin\\Desktop\\geqie\\geqie\\encodings\\lpiqe\\init.py'
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\geqie\gui\main\views.py", line 67, in process_file
+    result = subprocess.run(command, capture_output=True, text=True, check=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['geqie', 'simulate', '--encoding', 'lpiqe', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\1b85c3d7-2cbb-49fb-908d-97480d6b93ee_full_white.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+[04/Mar/2025 10:55:04] ERROR [main.views:77] Command failed with return code 1. Stderr: Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\Admin\Desktop\geqie\.venv\Scripts\geqie.exe\__main__.py", line 7, in <module>
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1161, in __call__
+    return self.main(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1082, in main
+    rv = self.invoke(ctx)
+         ^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1697, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1443, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 106, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\cloup\_context.py", line 47, in new_func
+    return f(get_current_context(), *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 115, in simulate
+    circuit = ctx.invoke(encode, **params)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 96, in encode
+    e = _get_encoding_functions(params)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 48, in _get_encoding_functions
+    init_function = getattr(_import_module("init", init_path), "init")
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 32, in _import_module
+    spec.loader.exec_module(module)
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 1132, in get_code
+  File "<frozen importlib._bootstrap_external>", line 1190, in get_data
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\Admin\\Desktop\\geqie\\geqie\\encodings\\lpiqe\\init.py'
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\geqie\gui\main\views.py", line 67, in process_file
+    result = subprocess.run(command, capture_output=True, text=True, check=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['geqie', 'simulate', '--encoding', 'lpiqe', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\6cb1a601-038a-4969-9c39-11f07379058c_test_image.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+[04/Mar/2025 10:55:05] ERROR [main.views:77] Command failed with return code 1. Stderr: Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\Admin\Desktop\geqie\.venv\Scripts\geqie.exe\__main__.py", line 7, in <module>
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1161, in __call__
+    return self.main(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1082, in main
+    rv = self.invoke(ctx)
+         ^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1697, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1443, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 106, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\cloup\_context.py", line 47, in new_func
+    return f(get_current_context(), *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 115, in simulate
+    circuit = ctx.invoke(encode, **params)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 96, in encode
+    e = _get_encoding_functions(params)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 48, in _get_encoding_functions
+    init_function = getattr(_import_module("init", init_path), "init")
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 32, in _import_module
+    spec.loader.exec_module(module)
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 1132, in get_code
+  File "<frozen importlib._bootstrap_external>", line 1190, in get_data
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\Admin\\Desktop\\geqie\\geqie\\encodings\\lpiqe\\init.py'
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\geqie\gui\main\views.py", line 67, in process_file
+    result = subprocess.run(command, capture_output=True, text=True, check=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['geqie', 'simulate', '--encoding', 'lpiqe', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\261db103-3b91-4927-ba18-d50bcc2e4640_test_image0xf0.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+[04/Mar/2025 10:55:05] ERROR [main.views:77] Command failed with return code 1. Stderr: Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\Admin\Desktop\geqie\.venv\Scripts\geqie.exe\__main__.py", line 7, in <module>
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1161, in __call__
+    return self.main(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1082, in main
+    rv = self.invoke(ctx)
+         ^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1697, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1443, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 106, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\cloup\_context.py", line 47, in new_func
+    return f(get_current_context(), *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 115, in simulate
+    circuit = ctx.invoke(encode, **params)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 96, in encode
+    e = _get_encoding_functions(params)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 48, in _get_encoding_functions
+    init_function = getattr(_import_module("init", init_path), "init")
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 32, in _import_module
+    spec.loader.exec_module(module)
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 1132, in get_code
+  File "<frozen importlib._bootstrap_external>", line 1190, in get_data
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\Admin\\Desktop\\geqie\\geqie\\encodings\\lpiqe\\init.py'
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\geqie\gui\main\views.py", line 67, in process_file
+    result = subprocess.run(command, capture_output=True, text=True, check=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['geqie', 'simulate', '--encoding', 'lpiqe', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\8ccc9983-f4c5-4716-90ca-ef94b2ee7643_test_image_1010.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+[04/Mar/2025 10:55:05] ERROR [main.views:77] Command failed with return code 1. Stderr: Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\Admin\Desktop\geqie\.venv\Scripts\geqie.exe\__main__.py", line 7, in <module>
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1161, in __call__
+    return self.main(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1082, in main
+    rv = self.invoke(ctx)
+         ^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1697, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1443, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 106, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\cloup\_context.py", line 47, in new_func
+    return f(get_current_context(), *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 115, in simulate
+    circuit = ctx.invoke(encode, **params)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 96, in encode
+    e = _get_encoding_functions(params)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 48, in _get_encoding_functions
+    init_function = getattr(_import_module("init", init_path), "init")
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 32, in _import_module
+    spec.loader.exec_module(module)
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 1132, in get_code
+  File "<frozen importlib._bootstrap_external>", line 1190, in get_data
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\Admin\\Desktop\\geqie\\geqie\\encodings\\lpiqe\\init.py'
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\geqie\gui\main\views.py", line 67, in process_file
+    result = subprocess.run(command, capture_output=True, text=True, check=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['geqie', 'simulate', '--encoding', 'lpiqe', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\644ade3e-ce59-440b-8554-5d341acb2ba3_test_2x4.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+[04/Mar/2025 10:55:05] ERROR [main.views:77] Command failed with return code 1. Stderr: Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\Admin\Desktop\geqie\.venv\Scripts\geqie.exe\__main__.py", line 7, in <module>
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1161, in __call__
+    return self.main(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1082, in main
+    rv = self.invoke(ctx)
+         ^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1697, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1443, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 106, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\cloup\_context.py", line 47, in new_func
+    return f(get_current_context(), *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 115, in simulate
+    circuit = ctx.invoke(encode, **params)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 96, in encode
+    e = _get_encoding_functions(params)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 48, in _get_encoding_functions
+    init_function = getattr(_import_module("init", init_path), "init")
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 32, in _import_module
+    spec.loader.exec_module(module)
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 1132, in get_code
+  File "<frozen importlib._bootstrap_external>", line 1190, in get_data
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\Admin\\Desktop\\geqie\\geqie\\encodings\\lpiqe\\init.py'
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\geqie\gui\main\views.py", line 67, in process_file
+    result = subprocess.run(command, capture_output=True, text=True, check=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['geqie', 'simulate', '--encoding', 'lpiqe', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\c18710d3-5646-4049-9c40-f39d1bf45ba1_test_image_4x4.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+[04/Mar/2025 10:55:05] ERROR [django.request:248] Internal Server Error: /start-Experiment/
+[04/Mar/2025 10:55:05] ERROR [django.server:213] "POST /start-Experiment/ HTTP/1.1" 500 340
+[04/Mar/2025 10:55:05] ERROR [frontend_logs:267] Received errorData: {"success":false,"error":"Command failed: Command '['geqie', 'simulate', '--encoding', 'lpiqe', '--image', 'C:\\\\Users\\\\Admin\\\\Desktop\\\\geqie\\\\gui\\\\..\\\\assets\\\\test_images\\\\6ae66f07-325d-46af-8646-07a2371cfab9_test_flag_4x4.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1."}
+[04/Mar/2025 10:55:05] ERROR [frontend_logs:267] Extracted errorMessage: "Command failed: Command '['geqie', 'simulate', '--encoding', 'lpiqe', '--image', 'C:\\\\Users\\\\Admin\\\\Desktop\\\\geqie\\\\gui\\\\..\\\\assets\\\\test_images\\\\6ae66f07-325d-46af-8646-07a2371cfab9_test_flag_4x4.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1."
+[04/Mar/2025 11:39:51] ERROR [frontend_logs:267] Start test: method=frqi, images=7, computer=simulate, shots=1024
+[04/Mar/2025 11:40:02] ERROR [frontend_logs:267] Response ok: {
+  "test_image_1010.png": "{\"000\": 0, \"001\": 262, \"010\": 58, \"011\": 169, \"100\": 197, \"101\": 74, \"110\": 256, \"111\": 8}",
+  "full_white.png": "{\"000\": 0, \"001\": 250, \"010\": 0, \"011\": 232, \"100\": 0, \"101\": 248, \"110\": 0, \"111\": 294}",
+  "test_flag_4x4.png": "{\"00000\": 0, \"00001\": 65, \"00010\": 0, \"00011\": 59, \"00100\": 0, \"00101\": 67, \"00110\": 0, \"00111\": 67, \"01000\": 31, \"01001\": 41, \"01010\": 34, \"01011\": 37, \"01100\": 28, \"01101\": 46, \"01110\": 30, \"01111\": 21, \"10000\": 27, \"10001\": 38, \"10010\": 34, \"10011\": 33, \"10100\": 31, \"10101\": 38, \"10110\": 30, \"10111\": 24, \"11000\": 65, \"11001\": 0, \"11010\": 60, \"11011\": 0, \"11100\": 49, \"11101\": 0, \"11110\": 69, \"11111\": 0}",
+  "test_image0xf0.png": "{\"000\": 144, \"001\": 149, \"010\": 119, \"011\": 134, \"100\": 133, \"101\": 104, \"110\": 113, \"111\": 128}",
+  "test_image.png": "{\"000\": 0, \"001\": 251, \"010\": 29, \"011\": 220, \"100\": 125, \"101\": 129, \"110\": 230, \"111\": 40}",
+  "test_2x4.png": "{\"00000\": 0, \"00001\": 58, \"00010\": 0, \"00011\": 75, \"00100\": 7, \"00101\": 50, \"00110\": 11, \"00111\": 44, \"01000\": 26, \"01001\": 33, \"01010\": 39, \"01011\": 48, \"01100\": 57, \"01101\": 0, \"01110\": 63, \"01111\": 0, \"10000\": 66, \"10001\": 0, \"10010\": 69, \"10011\": 0, \"10100\": 78, \"10101\": 0, \"10110\": 64, \"10111\": 0, \"11000\": 50, \"11001\": 0, \"11010\": 66, \"11011\": 0, \"11100\": 67, \"11101\": 0, \"11110\": 53, \"11111\": 0}",
+  "test_image_4x4.png": "{\"00000\": 0, \"00001\": 57, \"00010\": 64, \"00011\": 0, \"00100\": 0, \"00101\": 79, \"00110\": 28, \"00111\": 30, \"01000\": 0, \"01001\": 66, \"01010\": 57, \"01011\": 0, \"01100\": 73, \"01101\": 0, \"01110\": 0, \"01111\": 64, \"10000\": 13, \"10001\": 50, \"10010\": 0, \"10011\": 61, \"10100\": 0, \"10101\": 58, \"10110\": 0, \"10111\": 71, \"11000\": 0, \"11001\": 70, \"11010\": 9, \"11011\": 59, \"11100\": 52, \"11101\": 0, \"11110\": 0, \"11111\": 63}"
+}
+[04/Mar/2025 11:40:07] ERROR [frontend_logs:267] Start test: method=frqi, images=7, computer=simulate, shots=1024
+[04/Mar/2025 11:40:16] ERROR [frontend_logs:267] Response ok: {
+  "test_image_4x4.png": "{\"00000\": 0, \"00001\": 65, \"00010\": 67, \"00011\": 0, \"00100\": 0, \"00101\": 61, \"00110\": 34, \"00111\": 31, \"01000\": 0, \"01001\": 53, \"01010\": 70, \"01011\": 0, \"01100\": 58, \"01101\": 0, \"01110\": 0, \"01111\": 61, \"10000\": 7, \"10001\": 54, \"10010\": 0, \"10011\": 79, \"10100\": 0, \"10101\": 62, \"10110\": 0, \"10111\": 50, \"11000\": 0, \"11001\": 78, \"11010\": 12, \"11011\": 68, \"11100\": 52, \"11101\": 0, \"11110\": 0, \"11111\": 62}",
+  "test_flag_4x4.png": "{\"00000\": 0, \"00001\": 69, \"00010\": 0, \"00011\": 57, \"00100\": 0, \"00101\": 61, \"00110\": 0, \"00111\": 61, \"01000\": 36, \"01001\": 25, \"01010\": 25, \"01011\": 33, \"01100\": 26, \"01101\": 30, \"01110\": 37, \"01111\": 25, \"10000\": 37, \"10001\": 29, \"10010\": 21, \"10011\": 32, \"10100\": 32, \"10101\": 30, \"10110\": 41, \"10111\": 24, \"11000\": 73, \"11001\": 0, \"11010\": 76, \"11011\": 0, \"11100\": 73, \"11101\": 0, \"11110\": 71, \"11111\": 0}",
+  "test_image.png": "{\"000\": 0, \"001\": 235, \"010\": 33, \"011\": 227, \"100\": 132, \"101\": 124, \"110\": 243, \"111\": 30}",
+  "test_image_1010.png": "{\"000\": 0, \"001\": 259, \"010\": 70, \"011\": 176, \"100\": 197, \"101\": 83, \"110\": 229, \"111\": 10}",
+  "full_white.png": "{\"000\": 0, \"001\": 250, \"010\": 0, \"011\": 256, \"100\": 0, \"101\": 272, \"110\": 0, \"111\": 246}",
+  "test_2x4.png": "{\"00000\": 0, \"00001\": 48, \"00010\": 0, \"00011\": 68, \"00100\": 4, \"00101\": 56, \"00110\": 9, \"00111\": 74, \"01000\": 21, \"01001\": 32, \"01010\": 31, \"01011\": 34, \"01100\": 53, \"01101\": 0, \"01110\": 73, \"01111\": 0, \"10000\": 52, \"10001\": 0, \"10010\": 54, \"10011\": 0, \"10100\": 73, \"10101\": 0, \"10110\": 72, \"10111\": 0, \"11000\": 52, \"11001\": 0, \"11010\": 72, \"11011\": 0, \"11100\": 74, \"11101\": 0, \"11110\": 72, \"11111\": 0}",
+  "test_image0xf0.png": "{\"000\": 140, \"001\": 135, \"010\": 122, \"011\": 117, \"100\": 132, \"101\": 121, \"110\": 131, \"111\": 126}"
+}
+[04/Mar/2025 14:47:33] ERROR [frontend_logs:267] Start test: method=frqi, images=7, computer=simulate, shots=1024
+[04/Mar/2025 14:47:45] ERROR [frontend_logs:267] Response ok: {
+  "test_image_4x4.png": "{\"00000\": 0, \"00001\": 66, \"00010\": 70, \"00011\": 0, \"00100\": 0, \"00101\": 73, \"00110\": 29, \"00111\": 38, \"01000\": 0, \"01001\": 63, \"01010\": 51, \"01011\": 0, \"01100\": 74, \"01101\": 0, \"01110\": 0, \"01111\": 63, \"10000\": 8, \"10001\": 73, \"10010\": 0, \"10011\": 70, \"10100\": 0, \"10101\": 50, \"10110\": 0, \"10111\": 62, \"11000\": 0, \"11001\": 59, \"11010\": 5, \"11011\": 48, \"11100\": 62, \"11101\": 0, \"11110\": 0, \"11111\": 60}",
+  "full_white.png": "{\"000\": 0, \"001\": 257, \"010\": 0, \"011\": 255, \"100\": 0, \"101\": 288, \"110\": 0, \"111\": 224}",
+  "test_image0xf0.png": "{\"000\": 141, \"001\": 117, \"010\": 120, \"011\": 134, \"100\": 131, \"101\": 119, \"110\": 126, \"111\": 136}",
+  "test_2x4.png": "{\"00000\": 0, \"00001\": 78, \"00010\": 0, \"00011\": 68, \"00100\": 9, \"00101\": 52, \"00110\": 8, \"00111\": 57, \"01000\": 34, \"01001\": 37, \"01010\": 37, \"01011\": 32, \"01100\": 73, \"01101\": 0, \"01110\": 55, \"01111\": 0, \"10000\": 60, \"10001\": 0, \"10010\": 68, \"10011\": 0, \"10100\": 56, \"10101\": 0, \"10110\": 59, \"10111\": 0, \"11000\": 61, \"11001\": 0, \"11010\": 65, \"11011\": 0, \"11100\": 50, \"11101\": 0, \"11110\": 65, \"11111\": 0}",
+  "test_flag_4x4.png": "{\"00000\": 0, \"00001\": 68, \"00010\": 0, \"00011\": 68, \"00100\": 0, \"00101\": 51, \"00110\": 0, \"00111\": 59, \"01000\": 35, \"01001\": 26, \"01010\": 25, \"01011\": 34, \"01100\": 39, \"01101\": 39, \"01110\": 24, \"01111\": 36, \"10000\": 39, \"10001\": 25, \"10010\": 35, \"10011\": 41, \"10100\": 32, \"10101\": 28, \"10110\": 34, \"10111\": 23, \"11000\": 48, \"11001\": 0, \"11010\": 80, \"11011\": 0, \"11100\": 74, \"11101\": 0, \"11110\": 61, \"11111\": 0}",
+  "test_image.png": "{\"000\": 0, \"001\": 260, \"010\": 32, \"011\": 221, \"100\": 131, \"101\": 135, \"110\": 213, \"111\": 32}",
+  "test_image_1010.png": "{\"000\": 0, \"001\": 270, \"010\": 74, \"011\": 176, \"100\": 173, \"101\": 80, \"110\": 243, \"111\": 8}"
+}
+[06/Mar/2025 11:59:36] ERROR [main.views:110] Unexpected error: QuantumMethod matching query does not exist.
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\geqie\gui\main\views.py", line 101, in start_experiment
+    method_obj = QuantumMethod.objects.get(name=selected_method)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\django\db\models\query.py", line 649, in get
+    raise self.model.DoesNotExist(
+main.models.QuantumMethod.DoesNotExist: QuantumMethod matching query does not exist.
+[06/Mar/2025 11:59:36] ERROR [django.request:248] Internal Server Error: /start-Experiment/
+[06/Mar/2025 11:59:36] ERROR [django.server:213] "POST /start-Experiment/ HTTP/1.1" 500 93
+[06/Mar/2025 11:59:36] ERROR [frontend_logs:262] Received errorData: {"success":false,"error":"Unexpected error: QuantumMethod matching query does not exist."}
+[06/Mar/2025 11:59:36] ERROR [frontend_logs:262] Extracted errorMessage: "Unexpected error: QuantumMethod matching query does not exist."
+[06/Mar/2025 12:39:52] ERROR [frontend_logs:262] saveMethod called with methodName="nowa2", isNew=true, addNew=true, saveName="nowa2"
+[06/Mar/2025 12:40:04] ERROR [main.views:110] Unexpected error: QuantumMethod matching query does not exist.
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\geqie\gui\main\views.py", line 101, in start_experiment
+    method_obj = QuantumMethod.objects.get(name=selected_method)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\django\db\models\query.py", line 649, in get
+    raise self.model.DoesNotExist(
+main.models.QuantumMethod.DoesNotExist: QuantumMethod matching query does not exist.
+[06/Mar/2025 12:40:04] ERROR [django.request:248] Internal Server Error: /start-Experiment/
+[06/Mar/2025 12:40:04] ERROR [django.server:213] "POST /start-Experiment/ HTTP/1.1" 500 93
+[06/Mar/2025 12:40:04] ERROR [frontend_logs:262] Received errorData: {"success":false,"error":"Unexpected error: QuantumMethod matching query does not exist."}
+[06/Mar/2025 12:40:04] ERROR [frontend_logs:262] Extracted errorMessage: "Unexpected error: QuantumMethod matching query does not exist."
+[06/Mar/2025 14:39:52] ERROR [frontend_logs:240] saveMethod called with methodName="Nowa", isNew=true, addNew=true, saveName="Nowa"
+[06/Mar/2025 14:40:05] ERROR [main.views:111] Unexpected error: QuantumMethod matching query does not exist.
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\geqie\gui\main\views.py", line 102, in start_experiment
+    method_obj = QuantumMethod.objects.get(name=selected_method)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\django\db\models\query.py", line 649, in get
+    raise self.model.DoesNotExist(
+main.models.QuantumMethod.DoesNotExist: QuantumMethod matching query does not exist.
+[06/Mar/2025 14:40:05] ERROR [django.request:248] Internal Server Error: /start-Experiment/
+[06/Mar/2025 14:40:05] ERROR [django.server:213] "POST /start-Experiment/ HTTP/1.1" 500 93
+[06/Mar/2025 14:40:05] ERROR [frontend_logs:240] Received errorData: {"success":false,"error":"Unexpected error: QuantumMethod matching query does not exist."}
+[06/Mar/2025 14:40:05] ERROR [frontend_logs:240] Extracted errorMessage: "Unexpected error: QuantumMethod matching query does not exist."
+[06/Mar/2025 14:41:56] ERROR [frontend_logs:243] saveMethod called with methodName="Nowa", isNew=true, addNew=true, saveName="Nowa"
+[06/Mar/2025 14:48:55] ERROR [frontend_logs:243] saveMethod called with methodName="Nowa", isNew=true, addNew=true, saveName="Nowa"
+[06/Mar/2025 14:58:54] ERROR [frontend_logs:243] saveMethod called with methodName="Nowa2", isNew=true, addNew=true, saveName="Nowa2"
+[06/Mar/2025 14:59:05] ERROR [main.views:79] Command failed with return code 1. Stderr: Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\Admin\Desktop\geqie\.venv\Scripts\geqie.exe\__main__.py", line 7, in <module>
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1161, in __call__
+    return self.main(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1082, in main
+    rv = self.invoke(ctx)
+         ^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1697, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1443, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 106, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\cloup\_context.py", line 47, in new_func
+    return f(get_current_context(), *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 115, in simulate
+    circuit = ctx.invoke(encode, **params)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 96, in encode
+    e = _get_encoding_functions(params)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 48, in _get_encoding_functions
+    init_function = getattr(_import_module("init", init_path), "init")
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 32, in _import_module
+    spec.loader.exec_module(module)
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 1133, in get_code
+  File "<frozen importlib._bootstrap_external>", line 1063, in source_to_code
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "C:\Users\Admin\Desktop\geqie\geqie\encodings\Nowa2\init.py", line 5
+    qubits_in_superposition = # place number of qubits in superposition
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+SyntaxError: invalid syntax
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\geqie\gui\main\views.py", line 69, in process_file
+    result = subprocess.run(command, capture_output=True, text=True, check=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['geqie', 'simulate', '--encoding', 'Nowa2', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\e06f4013-0198-4b6c-ba45-b0df6ad10db6_test_2x4.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+[06/Mar/2025 14:59:05] ERROR [main.views:100] Error processing file: Command failed: Command '['geqie', 'simulate', '--encoding', 'Nowa2', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\e06f4013-0198-4b6c-ba45-b0df6ad10db6_test_2x4.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\geqie\gui\main\views.py", line 69, in process_file
+    result = subprocess.run(command, capture_output=True, text=True, check=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['geqie', 'simulate', '--encoding', 'Nowa2', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\e06f4013-0198-4b6c-ba45-b0df6ad10db6_test_2x4.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\geqie\gui\main\views.py", line 96, in start_experiment
+    file_name, output = future.result()
+                        ^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\concurrent\futures\_base.py", line 449, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\concurrent\futures\_base.py", line 401, in __get_result
+    raise self._exception
+  File "C:\Program Files\Python312\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\gui\main\views.py", line 80, in process_file
+    raise Exception(f"Command failed: {e}")
+Exception: Command failed: Command '['geqie', 'simulate', '--encoding', 'Nowa2', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\e06f4013-0198-4b6c-ba45-b0df6ad10db6_test_2x4.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+[06/Mar/2025 14:59:05] ERROR [main.views:79] Command failed with return code 1. Stderr: Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\Admin\Desktop\geqie\.venv\Scripts\geqie.exe\__main__.py", line 7, in <module>
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1161, in __call__
+    return self.main(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1082, in main
+    rv = self.invoke(ctx)
+         ^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1697, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1443, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 106, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\cloup\_context.py", line 47, in new_func
+    return f(get_current_context(), *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 115, in simulate
+    circuit = ctx.invoke(encode, **params)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 96, in encode
+    e = _get_encoding_functions(params)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 48, in _get_encoding_functions
+    init_function = getattr(_import_module("init", init_path), "init")
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 32, in _import_module
+    spec.loader.exec_module(module)
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 1133, in get_code
+  File "<frozen importlib._bootstrap_external>", line 1063, in source_to_code
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "C:\Users\Admin\Desktop\geqie\geqie\encodings\Nowa2\init.py", line 5
+    qubits_in_superposition = # place number of qubits in superposition
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+SyntaxError: invalid syntax
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\geqie\gui\main\views.py", line 69, in process_file
+    result = subprocess.run(command, capture_output=True, text=True, check=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['geqie', 'simulate', '--encoding', 'Nowa2', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\8b5195b6-fb60-4e15-aef5-cdf35559de99_test_image_4x4.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+[06/Mar/2025 14:59:05] ERROR [main.views:79] Command failed with return code 1. Stderr: Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\Admin\Desktop\geqie\.venv\Scripts\geqie.exe\__main__.py", line 7, in <module>
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1161, in __call__
+    return self.main(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1082, in main
+    rv = self.invoke(ctx)
+         ^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1697, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1443, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 106, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\cloup\_context.py", line 47, in new_func
+    return f(get_current_context(), *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 115, in simulate
+    circuit = ctx.invoke(encode, **params)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 96, in encode
+    e = _get_encoding_functions(params)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 48, in _get_encoding_functions
+    init_function = getattr(_import_module("init", init_path), "init")
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 32, in _import_module
+    spec.loader.exec_module(module)
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 1133, in get_code
+  File "<frozen importlib._bootstrap_external>", line 1063, in source_to_code
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "C:\Users\Admin\Desktop\geqie\geqie\encodings\Nowa2\init.py", line 5
+    qubits_in_superposition = # place number of qubits in superposition
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+SyntaxError: invalid syntax
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\geqie\gui\main\views.py", line 69, in process_file
+    result = subprocess.run(command, capture_output=True, text=True, check=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['geqie', 'simulate', '--encoding', 'Nowa2', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\ecf9b5fa-2692-46b3-98a8-47a4d98ca5b4_test_image.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+[06/Mar/2025 14:59:06] ERROR [main.views:79] Command failed with return code 1. Stderr: Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\Admin\Desktop\geqie\.venv\Scripts\geqie.exe\__main__.py", line 7, in <module>
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1161, in __call__
+    return self.main(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1082, in main
+    rv = self.invoke(ctx)
+         ^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1697, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1443, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 106, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\cloup\_context.py", line 47, in new_func
+    return f(get_current_context(), *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 115, in simulate
+    circuit = ctx.invoke(encode, **params)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 96, in encode
+    e = _get_encoding_functions(params)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 48, in _get_encoding_functions
+    init_function = getattr(_import_module("init", init_path), "init")
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 32, in _import_module
+    spec.loader.exec_module(module)
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 1133, in get_code
+  File "<frozen importlib._bootstrap_external>", line 1063, in source_to_code
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "C:\Users\Admin\Desktop\geqie\geqie\encodings\Nowa2\init.py", line 5
+    qubits_in_superposition = # place number of qubits in superposition
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+SyntaxError: invalid syntax
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\geqie\gui\main\views.py", line 69, in process_file
+    result = subprocess.run(command, capture_output=True, text=True, check=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['geqie', 'simulate', '--encoding', 'Nowa2', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\1d39f0a5-554e-4900-9ec8-d4d701ec52a9_test_image0xf0.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+[06/Mar/2025 14:59:06] ERROR [main.views:79] Command failed with return code 1. Stderr: Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\Admin\Desktop\geqie\.venv\Scripts\geqie.exe\__main__.py", line 7, in <module>
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1161, in __call__
+    return self.main(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1082, in main
+    rv = self.invoke(ctx)
+         ^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1697, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1443, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 106, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\cloup\_context.py", line 47, in new_func
+    return f(get_current_context(), *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 115, in simulate
+    circuit = ctx.invoke(encode, **params)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 96, in encode
+    e = _get_encoding_functions(params)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 48, in _get_encoding_functions
+    init_function = getattr(_import_module("init", init_path), "init")
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 32, in _import_module
+    spec.loader.exec_module(module)
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 1133, in get_code
+  File "<frozen importlib._bootstrap_external>", line 1063, in source_to_code
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "C:\Users\Admin\Desktop\geqie\geqie\encodings\Nowa2\init.py", line 5
+    qubits_in_superposition = # place number of qubits in superposition
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+SyntaxError: invalid syntax
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\geqie\gui\main\views.py", line 69, in process_file
+    result = subprocess.run(command, capture_output=True, text=True, check=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['geqie', 'simulate', '--encoding', 'Nowa2', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\e12b274e-8c29-4917-a3c8-8d47b2cb3f69_test_image_1010.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+[06/Mar/2025 14:59:06] ERROR [main.views:79] Command failed with return code 1. Stderr: Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\Admin\Desktop\geqie\.venv\Scripts\geqie.exe\__main__.py", line 7, in <module>
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1161, in __call__
+    return self.main(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1082, in main
+    rv = self.invoke(ctx)
+         ^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1697, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1443, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 106, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\cloup\_context.py", line 47, in new_func
+    return f(get_current_context(), *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 115, in simulate
+    circuit = ctx.invoke(encode, **params)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 96, in encode
+    e = _get_encoding_functions(params)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 48, in _get_encoding_functions
+    init_function = getattr(_import_module("init", init_path), "init")
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 32, in _import_module
+    spec.loader.exec_module(module)
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 1133, in get_code
+  File "<frozen importlib._bootstrap_external>", line 1063, in source_to_code
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "C:\Users\Admin\Desktop\geqie\geqie\encodings\Nowa2\init.py", line 5
+    qubits_in_superposition = # place number of qubits in superposition
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+SyntaxError: invalid syntax
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\geqie\gui\main\views.py", line 69, in process_file
+    result = subprocess.run(command, capture_output=True, text=True, check=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['geqie', 'simulate', '--encoding', 'Nowa2', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\ba0443f4-9c03-49de-a6ae-b3ca526d7e9e_test_flag_4x4.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+[06/Mar/2025 14:59:06] ERROR [main.views:79] Command failed with return code 1. Stderr: Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\Admin\Desktop\geqie\.venv\Scripts\geqie.exe\__main__.py", line 7, in <module>
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1161, in __call__
+    return self.main(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1082, in main
+    rv = self.invoke(ctx)
+         ^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1697, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 1443, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 106, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\cloup\_context.py", line 47, in new_func
+    return f(get_current_context(), *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 115, in simulate
+    circuit = ctx.invoke(encode, **params)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Admin\Desktop\geqie\.venv\Lib\site-packages\click\core.py", line 788, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 88, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 96, in encode
+    e = _get_encoding_functions(params)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 48, in _get_encoding_functions
+    init_function = getattr(_import_module("init", init_path), "init")
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\geqie\geqie\cli.py", line 32, in _import_module
+    spec.loader.exec_module(module)
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 1133, in get_code
+  File "<frozen importlib._bootstrap_external>", line 1063, in source_to_code
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "C:\Users\Admin\Desktop\geqie\geqie\encodings\Nowa2\init.py", line 5
+    qubits_in_superposition = # place number of qubits in superposition
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+SyntaxError: invalid syntax
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\geqie\gui\main\views.py", line 69, in process_file
+    result = subprocess.run(command, capture_output=True, text=True, check=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['geqie', 'simulate', '--encoding', 'Nowa2', '--image', 'C:\\Users\\Admin\\Desktop\\geqie\\gui\\..\\assets\\test_images\\bdf26245-4c27-4dfd-836d-a824f7120d05_full_white.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1.
+[06/Mar/2025 14:59:06] ERROR [django.request:248] Internal Server Error: /start-Experiment/
+[06/Mar/2025 14:59:06] ERROR [django.server:213] "POST /start-Experiment/ HTTP/1.1" 500 335
+[06/Mar/2025 14:59:06] ERROR [frontend_logs:243] Received errorData: {"success":false,"error":"Command failed: Command '['geqie', 'simulate', '--encoding', 'Nowa2', '--image', 'C:\\\\Users\\\\Admin\\\\Desktop\\\\geqie\\\\gui\\\\..\\\\assets\\\\test_images\\\\e06f4013-0198-4b6c-ba45-b0df6ad10db6_test_2x4.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1."}
+[06/Mar/2025 14:59:06] ERROR [frontend_logs:243] Extracted errorMessage: "Command failed: Command '['geqie', 'simulate', '--encoding', 'Nowa2', '--image', 'C:\\\\Users\\\\Admin\\\\Desktop\\\\geqie\\\\gui\\\\..\\\\assets\\\\test_images\\\\e06f4013-0198-4b6c-ba45-b0df6ad10db6_test_2x4.png', '--n-shots', '1024', '--return-padded-counts', 'true']' returned non-zero exit status 1."
+[06/Mar/2025 15:14:40] ERROR [frontend_logs:243] saveMethod called with methodName="Nowa3", isNew=true, addNew=true, saveName="Nowa3"
+[06/Mar/2025 15:14:41] ERROR [frontend_logs:243] Error starting experiment: startTestUrl is not defined
+[06/Mar/2025 15:15:24] ERROR [frontend_logs:243] saveMethod called with methodName="frqi", isNew=true, addNew=false, saveName="Nowa4"
+[06/Mar/2025 15:15:25] ERROR [frontend_logs:243] Error starting experiment: startTestUrl is not defined
+[06/Mar/2025 15:19:31] ERROR [frontend_logs:243] saveMethod called with methodName="frqi", isNew=true, addNew=false, saveName="Nowa5"
+[06/Mar/2025 15:19:31] ERROR [frontend_logs:243] Error starting experiment: Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+[06/Mar/2025 15:23:32] ERROR [frontend_logs:243] saveMethod called with methodName="frqi", isNew=true, addNew=false, saveName="Nowa6"
+[06/Mar/2025 16:10:22] ERROR [frontend_logs:243] Received errorData: {"success":false,"error":"Invalid request."}
+[06/Mar/2025 16:10:22] ERROR [frontend_logs:243] Extracted errorMessage: "Invalid request."
+[06/Mar/2025 16:12:34] ERROR [frontend_logs:243] Start test: method=frqi, images=undefined, shots=1024
+[06/Mar/2025 16:12:34] ERROR [frontend_logs:243] Received errorData: {"success":false,"error":"Invalid request."}
+[06/Mar/2025 16:12:34] ERROR [frontend_logs:243] Extracted errorMessage: "Invalid request."
+[06/Mar/2025 16:13:10] ERROR [frontend_logs:243] Start test: method=frqi, images=, shots=1024
+[06/Mar/2025 16:13:10] ERROR [frontend_logs:243] Received errorData: {"success":false,"error":"Invalid request."}
+[06/Mar/2025 16:13:10] ERROR [frontend_logs:243] Extracted errorMessage: "Invalid request."
+[06/Mar/2025 16:13:54] ERROR [frontend_logs:243] Start test: method=frqi, images=, shots=1024
+[06/Mar/2025 16:13:54] ERROR [frontend_logs:243] Extracted errorMessage: "Invalid request."
+[06/Mar/2025 16:13:54] ERROR [frontend_logs:243] Received errorData: {"success":false,"error":"Invalid request."}
+[06/Mar/2025 16:17:45] ERROR [frontend_logs:243] Start test: method=frqi, images=, shots=1024
+[06/Mar/2025 16:17:45] ERROR [frontend_logs:243] Received errorData: {"success":false,"error":"Invalid request."}
+[06/Mar/2025 16:17:45] ERROR [frontend_logs:243] Extracted errorMessage: "Invalid request."
+[06/Mar/2025 16:17:50] ERROR [frontend_logs:243] Start test: method=frqi, images=, shots=1024
+[06/Mar/2025 16:17:50] ERROR [frontend_logs:243] Received errorData: {"success":false,"error":"Invalid request."}
+[06/Mar/2025 16:17:50] ERROR [frontend_logs:243] Extracted errorMessage: "Invalid request."
+[06/Mar/2025 16:22:24] ERROR [frontend_logs:243] Start test: method=frqi, images=[object File], shots=1024
+[06/Mar/2025 16:22:24] ERROR [frontend_logs:243] Received errorData: {"success":false,"error":"Invalid request."}
+[06/Mar/2025 16:22:24] ERROR [frontend_logs:243] Extracted errorMessage: "Invalid request."
+[06/Mar/2025 16:23:03] ERROR [frontend_logs:243] Start test: method=frqi, images=undefined, shots=1024
+[06/Mar/2025 16:23:03] ERROR [frontend_logs:243] Received errorData: {"success":false,"error":"Invalid request."}
+[06/Mar/2025 16:23:03] ERROR [frontend_logs:243] Extracted errorMessage: "Invalid request."
+[06/Mar/2025 16:23:35] ERROR [frontend_logs:243] Start test: method=frqi, images=1, shots=1024
+[06/Mar/2025 16:23:35] ERROR [frontend_logs:243] Received errorData: {"success":false,"error":"Invalid request."}
+[06/Mar/2025 16:23:35] ERROR [frontend_logs:243] Extracted errorMessage: "Invalid request."
+[06/Mar/2025 16:24:14] ERROR [frontend_logs:243] Start test: method=frqi, images=1, shots=1024
+[06/Mar/2025 16:27:03] ERROR [frontend_logs:243] Start test: method=frqi, images=1, shots=1024
+[06/Mar/2025 16:29:36] ERROR [frontend_logs:243] Start test: method=frqi, images=1, shots=1024
+[06/Mar/2025 16:30:59] ERROR [frontend_logs:243] Start test: method=frqi, images=1, shots=1024
+[06/Mar/2025 16:47:48] ERROR [frontend_logs:245] Start test: method=frqi, images=1, shots=1024
+[06/Mar/2025 16:55:40] ERROR [frontend_logs:245] saveMethod called with methodName="frqi", isNew=true, addNew=false, saveName="frqi2"
+[06/Mar/2025 16:56:30] ERROR [frontend_logs:245] saveMethod called with methodName="frqi", isNew=true, addNew=false, saveName="frqi2"
+[06/Mar/2025 16:58:15] ERROR [frontend_logs:245] saveMethod called with methodName="frqi", isNew=true, addNew=false, saveName="frqi2"
+[06/Mar/2025 16:59:03] ERROR [frontend_logs:246] saveMethod called with methodName="frqi", isNew=true, addNew=false, saveName="frqi3"
+[06/Mar/2025 16:59:16] ERROR [main.views:105] Returned results: false

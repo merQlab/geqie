@@ -1,14 +1,17 @@
 from django.shortcuts import render
 from django.http import JsonResponse
+from .utils import all_methods, approved_methods
 from gui.settings import ENCODINGS_DIR
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from .models import QuantumMethod, QuantumComputer
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import default_storage
 from django.conf import settings
+from .utils import refresh_quantum_methods
 import json
 import subprocess
 import os
+import base64
 import uuid
 import logging
 from collections import OrderedDict
@@ -38,6 +41,13 @@ def start_experiment(request):
         try:
             selected_method = request.POST.get('selected_method')
             shots = request.POST.get('shots')
+            is_test = request.POST.get('is_test', '').strip().lower() in ['true', '1', 't', 'y', 'yes']
+
+            file_list = request.FILES.getlist('images[]')
+            if not file_list:
+                file_list = list(request.FILES.values())
+            total = len(file_list)
+            passed = 0
 
             def process_file(uploaded_file):
                 unique_filename = f"{uuid.uuid4()}_{uploaded_file.name}"
@@ -77,10 +87,6 @@ def start_experiment(request):
                         os.remove(file_path)
                         logger.info("Deleted image at: %s", file_path)
 
-            file_list = request.FILES.getlist('images[]')
-            if not file_list:
-                file_list = list(request.FILES.values())
-
             with ThreadPoolExecutor() as executor:
                 futures = {
                     executor.submit(process_file, uploaded_file): uploaded_file
@@ -90,9 +96,17 @@ def start_experiment(request):
                     try:
                         file_name, output = future.result()
                         results[file_name] = output
+                        if is_test:
+                            passed += 1
                     except Exception as e:
                         logger.exception("Error processing file: %s", e)
                         return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+            logger.error("Returned results: %s", is_test)
+            method_obj = QuantumMethod.objects.get(name=selected_method)
+            method_obj.total_tests = total
+            method_obj.passed_tests = passed
+            method_obj.save()
 
             logger.info("Returned results: %s", results)
             return JsonResponse(results)
@@ -102,29 +116,6 @@ def start_experiment(request):
             return JsonResponse({"success": False, "error": f"Unexpected error: {e}"}, status=500)
 
     return JsonResponse({"success": False, "error": "Invalid request."}, status=400)
-
-def all_methods():
-    methods = []
-    if os.path.exists(ENCODINGS_DIR):
-        for method_name in os.listdir(ENCODINGS_DIR):
-            method_path = os.path.join(ENCODINGS_DIR, method_name)
-            if os.path.isdir(method_path):
-                methods.append({"name": method_name})
-    return methods
-
-def approved_methods():
-    methods = []
-    if os.path.exists(ENCODINGS_DIR):
-        for method_name in os.listdir(ENCODINGS_DIR):
-            method_path = os.path.join(ENCODINGS_DIR, method_name)
-            if os.path.isdir(method_path):
-                methods.append({"name": method_name})
-
-        approved_method_names = list(
-        QuantumMethod.objects.filter(approved=True).values_list('name', flat=True)
-        )
-        approved_methods = [m for m in methods if m["name"] in approved_method_names]
-    return approved_methods
 
 def read_method_files(request, method_name):
     method_path = os.path.join(ENCODINGS_DIR, method_name)
@@ -191,6 +182,8 @@ from .map import map as map_function""",
 
                 os.chmod(file_path, 0o755)
 
+            refresh_quantum_methods()
+
             return JsonResponse({"message": "Method saved successfully"})
 
         except Exception as e:
@@ -207,6 +200,33 @@ def check_folder_exists(request):
         return JsonResponse({"exists": True})
     else:
         return JsonResponse({"exists": False})
+
+def get_all_images(request):
+    images = []
+    try:
+        folder_path = os.path.join(settings.MEDIA_ROOT, 'grayscale')
+        image_files = [f for f in os.listdir(folder_path) if f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif'))]
+        
+        for file_name in image_files:
+            file_path = os.path.join(folder_path, file_name)
+            with open(file_path, "rb") as f:
+                encoded_data = base64.b64encode(f.read()).decode("utf-8")
+            if file_name.lower().endswith(('.jpg', '.jpeg')):
+                mime_type = "image/jpeg"
+            elif file_name.lower().endswith('.gif'):
+                mime_type = "image/gif"
+            else:
+                mime_type = "image/png"
+            images.append({
+                "name": file_name,
+                "data": encoded_data,
+                "type": mime_type,
+            })
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+    return JsonResponse({"images": images})
+
 
 @csrf_exempt
 def log_from_js(request):

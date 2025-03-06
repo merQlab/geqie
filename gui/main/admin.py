@@ -1,54 +1,32 @@
 from django.contrib import admin
+from .utils import refresh_quantum_methods
 from .models import QuantumMethod, QuantumComputer, QuantumSubComputer
 import os, logging, shutil
 from gui.settings import ENCODINGS_DIR
-from .views import all_methods
 
 logger = logging.getLogger(__name__)
 
-def read_method_files(method_name):
-    method_path = os.path.join(ENCODINGS_DIR, method_name)
-    files = {}
-    for filename in ["init.py", "map.py", "data.py"]:
-        key = filename.replace(".py", "")
-        file_path = os.path.join(method_path, filename)
-        if os.path.exists(file_path):
-            with open(file_path, "r", encoding="utf-8") as f:
-                files[key] = f.read()
-        else:
-            files[key] = ""
-    return files
-
 @admin.register(QuantumMethod)
 class QuantumMethodAdmin(admin.ModelAdmin):
-    list_display = ('name', 'description', 'approved')
+    list_display = ('name', 'description', 'test', 'approved')
     fields = ('name', 'description', 'init', 'map', 'data', 'approved')
 
     def get_queryset(self, request):
-        self.refresh_methods()
+        refresh_quantum_methods()
         return super().get_queryset(request)
 
-    def refresh_methods(self):
-        methods = all_methods()
-        for method in methods:
-            method_name = method["name"]
-            file_contents = read_method_files(method_name)
-            description = f"The implementation of the {method_name} method has been loaded from files."
-
-            qs = QuantumMethod.objects.filter(name=method_name)
-            if qs.count() > 1:
-                first = qs.first()
-                qs.exclude(pk=first.pk).delete()
-
-            QuantumMethod.objects.update_or_create(
-                name=method_name,
-                defaults={
-                    "description": description,
-                    "init": file_contents.get("init", ""),
-                    "map": file_contents.get("map", ""),
-                    "data": file_contents.get("data", "")
-                }
-            )
+    def test(self, obj):
+        try:
+            if obj.total_tests and obj.total_tests > 0:
+                percent = (obj.passed_tests / obj.total_tests) * 100
+                if percent.is_integer():
+                    return f"{int(percent)}%"
+                else:
+                    return f"{percent:.2f}%"
+        except AttributeError:
+            pass
+        return "0%"
+    test.short_description = "Test"
 
     def delete_queryset(self, request, queryset):
         for obj in queryset:

@@ -1,10 +1,11 @@
-const methodSelect = document.getElementById('methodSelect');
-const initContent = document.getElementById('initContent');
-const mapContent = document.getElementById('mapContent');
-const dataContent = document.getElementById('dataContent');
-
 document.addEventListener("DOMContentLoaded", function () {
     logToServer('debug', 'DOM fully loaded. Setting up event listeners for methodSelect.');
+
+    const methodSelect = document.getElementById('methodSelect');
+    const testMethodSelect = document.getElementById('testMethodSelect');
+    const initContent = document.getElementById('initContent');
+    const mapContent = document.getElementById('mapContent');
+    const dataContent = document.getElementById('dataContent');
 
     methodSelect.addEventListener("change", function () {
         const methodName = methodSelect.value;
@@ -29,6 +30,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 logToServer('info', `Fetched method data for ${methodName}`);
             })
             .catch(error => logToServer('critical', `Error fetching method data: ${error}`));
+    });
+
+    testMethodSelect.addEventListener('change', () => {
+        const selectedOption = testMethodSelect.options[testMethodSelect.selectedIndex];
+        displayedName = selectedOption.text;
     });
 });
 
@@ -67,6 +73,7 @@ def data(u: int, v: int, R: int, image: np.ndarray) -> Statevector:
 });
 
 let formData = new FormData();
+let displayedName;
 
 document.getElementById("imagePath").addEventListener("click", function() {
     document.getElementById("fileInput").click();
@@ -83,9 +90,26 @@ document.getElementById("fileInput").addEventListener("change", function() {
     }
 });
 
-document.getElementById("addNewMethod").addEventListener("click", function () {
+document.getElementById("addNewMethod").addEventListener("click", async function () {
     logToServer('info', 'User triggered addNewMethod.');
-    saveMethod(true, true, document.getElementById("methodName").value, "methodName", "addInitContent", "addMapContent", "addDataContent");
+    const methodName = document.getElementById("methodName").value;
+
+    const canProceed = await checkFolderExists(methodName);
+    if (!canProceed) {
+        logToServer('info', `Folder check failed for method: ${methodName}`);
+        return;
+    }
+
+    await saveMethod(true, true, methodName, "methodName", "addInitContent", "addMapContent", "addDataContent", canProceed);
+
+    const addNewMethodBtn = document.getElementById('addNewMethod');
+    addNewMethodBtn.disabled = true;
+    
+    const images = await fetchAllImageFiles();
+
+    await startTest(methodName, images, 'simulate', '1024', true);
+    
+    addNewMethodBtn.disabled = false;
 });
 
 // document.getElementById("save").addEventListener("click", function () {
@@ -93,7 +117,7 @@ document.getElementById("addNewMethod").addEventListener("click", function () {
 //     saveMethod(false, false, document.getElementById("methodSelect").value, "methodSelect", "initContent", "mapContent", "dataContent");
 // });
 
-document.getElementById("saveAsNew").addEventListener("click", function () {
+document.getElementById("saveAsNew").addEventListener("click", async function () {
     let userInput = prompt("Method name:");
     if (userInput === null) {
         alert("Canceled");
@@ -103,17 +127,34 @@ document.getElementById("saveAsNew").addEventListener("click", function () {
         logToServer('warning', 'User attempted to save as new with an empty name.');
     } else {
         logToServer('info', 'User triggered saveAsNew.');
-        saveMethod(false, true, userInput.trim(), "methodSelect", "initContent", "mapContent", "dataContent");
+        const methodName = userInput.trim()
+        const canProceed = await checkFolderExists(methodName);
+
+        if (!canProceed) {
+            logToServer('info', `Folder check failed for method: ${methodName}`);
+            return;
+        }
+        
+        await saveMethod(false, true, methodName, "methodSelect", "initContent", "mapContent", "dataContent", canProceed);
+
+        const addNewMethodBtn = document.getElementById('saveAsNew');
+        addNewMethodBtn.disabled = true;
+        
+        const images = await fetchAllImageFiles();
+
+        await startTest(methodName, images, 'simulate', '1024', true);
+        
+        addNewMethodBtn.disabled = false;
     }
 });
 
-async function saveMethod(addNew, isNew, saveName, method, init, map, data) {
+async function saveMethod(addNew, isNew, saveName, method, init, map, data, isFolderExist) {
     let methodName = document.getElementById(method).value;
     let initContent = document.getElementById(init).value;
     let mapContent = document.getElementById(map).value;
     let dataContent = document.getElementById(data).value;
 
-    logToServer('debug', `saveMethod called with methodName="${methodName}", isNew=${isNew}, addNew=${addNew}, saveName="${saveName}"`);
+    logToServer('error', `saveMethod called with methodName="${methodName}", isNew=${isNew}, addNew=${addNew}, saveName="${saveName}"`);
 
     if(!addNew && isNew) {
         methodName = saveName;
@@ -125,43 +166,40 @@ async function saveMethod(addNew, isNew, saveName, method, init, map, data) {
         return;
     }
 
-    const canProceed = await checkFolderExists(methodName);
-    if (!canProceed) {
-        logToServer('info', `Folder check failed for method: ${methodName}`);
+    if (!isFolderExist) {
         return;
     }
 
-    fetch("/save-method/", {
-        method: "POST",
-        credentials: "same-origin",
-        headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": getCSRFToken(),
-        },
-        body: JSON.stringify({
-            method_name: methodName,
-            init: initContent,
-            map: mapContent,
-            data: dataContent,
-            is_new: isNew,
-            save_name: saveName,
-            add_new: addNew,
-        }),
-    })
-    .then(response => {
+    try {
+        const response = await fetch("/save-method/", {
+            method: "POST",
+            credentials: "same-origin",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCSRFToken(),
+            },
+            body: JSON.stringify({
+                method_name: methodName,
+                init: initContent,
+                map: mapContent,
+                data: dataContent,
+                is_new: isNew,
+                save_name: saveName,
+                add_new: addNew,
+            }),
+        });
         logToServer('debug', `saveMethod response received for method: ${methodName}`);
-        return response.json();
-    })
-    .then(data => {
-        if (data.error) {
-            logToServer('warning', `Error saving method: ${data.error}`);
-            alert("Error: " + data.error);
+
+        const result = await response.json();
+        if (result.error) {
+            logToServer('warning', `Error saving method: ${result.error}`);
+            alert("Error: " + result.error);
         } else {
             logToServer('info', 'Method saved successfully.');
-            alert("Method saved successfully!");
         }
-    })
-    .catch(error => logToServer('critical', `Fetch error in saveMethod: ${error}`));
+    } catch (error) {
+        logToServer('critical', `Fetch error in saveMethod: ${error}`);
+    }
 }
 
 function getCSRFToken() {
@@ -200,9 +238,41 @@ function checkFolderExists(methodName) {
         });
 }
 
-document.getElementById("startTest").addEventListener("click", function () {
+async function fetchAllImageFiles() {
+    const response = await fetch('/get-all-images/');
+    if (!response.ok) {
+        logToServer('error', 'Error downloading images');
+        return;
+    }
+    const data = await response.json();
+    const imageFiles = [];
+
+    data.images.forEach(img => {
+        const binaryString = atob(img.data);
+        const len = binaryString.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+        }
+        const blob = new Blob([bytes], { type: img.type });
+        const file = new File([blob], img.name, { type: img.type });
+        imageFiles.push(file);
+    });
+
+    return imageFiles;
+}
+
+document.getElementById("startTest").addEventListener("click", async function () {
+    const startTestBtn = document.getElementById('startTest');
+    startTestBtn.disabled = true;
+    
+    const shotsElement = document.getElementById('shots');
+    const images = fileInput.files[0];
+
+    logToServer('info', `Start test: method=${displayedName}, images=${fileInput.files.length}, shots=${shotsElement.value}`);
+    await startTest(displayedName, [images], 'simulate', shotsElement.value, false);
+    
     if (fileInput.files.length > 0) {
-        const file = fileInput.files[0];
         const reader = new FileReader();
 
         reader.onload = function (e) {
@@ -215,8 +285,55 @@ document.getElementById("startTest").addEventListener("click", function () {
             boxLeft.appendChild(img);
         };
 
-        reader.readAsDataURL(file);
+        reader.readAsDataURL(images);
     } else {
         alert("Please select an image first.");
     }
+    
+    startTestBtn.disabled = false;
 });
+
+async function startTest(selected_method, images, computer, shots, is_test) {
+    logToServer('info', `Start test: method=${selected_method}, images=${images.length}, computer=${computer}, shots=${shots}, is_test=${is_test}`);
+    
+    const formData = new FormData();
+    images.forEach(image => {
+        formData.append('images[]', image);
+    });
+    formData.append('selected_method', selected_method);
+    formData.append('computer', computer);
+    formData.append('shots', shots);
+    formData.append('is_test', is_test);
+
+    try {
+        const response = await fetch(startTestUrl, {
+            method: "POST",
+            credentials: "same-origin",
+            body: formData,
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}",
+            },
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            logToServer('info', `Response ok: ${JSON.stringify(data, null, 2)}`);
+            isResponseOk = true;
+            alert("Method added successfully!");
+        } else {
+            isResponseOk = false;
+            const errorData = await response.json();
+            logToServer('error', `Received errorData: ${JSON.stringify(errorData)}`);
+            const errorMessage = errorData.error || "";
+            logToServer('error', `Extracted errorMessage: ${JSON.stringify(errorMessage)}`);
+
+            if (errorMessage.includes("Command failed")) {
+                alert("Experiment failed due to a command execution error. Please check your method implementation.");
+            } else {
+                alert("Failed to start experiment: " + errorMessage);
+            }
+        }
+    } catch (error) {
+        logToServer('error', `Error starting experiment: ${error.message || error}`);
+    }
+}
