@@ -93,23 +93,26 @@ document.getElementById("fileInput").addEventListener("change", function() {
 document.getElementById("addNewMethod").addEventListener("click", async function () {
     logToServer('info', 'User triggered addNewMethod.');
     const methodName = document.getElementById("methodName").value;
+    const addNewMethodBtn = document.getElementById('addNewMethod');
+    const loadingGif = document.getElementById('addLoadingGif');
 
     const canProceed = await checkFolderExists(methodName);
     if (!canProceed) {
         logToServer('info', `Folder check failed for method: ${methodName}`);
         return;
     }
+    
+    loadingGif.style.display = 'inline-block';
+    addNewMethodBtn.disabled = true;
 
     await saveMethod(true, true, methodName, "methodName", "addInitContent", "addMapContent", "addDataContent", canProceed);
 
-    const addNewMethodBtn = document.getElementById('addNewMethod');
-    addNewMethodBtn.disabled = true;
-    
     const images = await fetchAllImageFiles();
 
     await startTest(methodName, images, 'simulate', '1024', true);
     
     addNewMethodBtn.disabled = false;
+    loadingGif.style.display = 'none';
 });
 
 // document.getElementById("save").addEventListener("click", function () {
@@ -119,6 +122,9 @@ document.getElementById("addNewMethod").addEventListener("click", async function
 
 document.getElementById("saveAsNew").addEventListener("click", async function () {
     let userInput = prompt("Method name:");
+    const addNewMethodBtn = document.getElementById('saveAsNew');
+    const loadingGif = document.getElementById('editLoadingGif');
+
     if (userInput === null) {
         alert("Canceled");
         logToServer('info', 'Save as new cancelled by user.');
@@ -127,24 +133,28 @@ document.getElementById("saveAsNew").addEventListener("click", async function ()
         logToServer('warning', 'User attempted to save as new with an empty name.');
     } else {
         logToServer('info', 'User triggered saveAsNew.');
+
+        loadingGif.style.display = 'inline-block';
+        addNewMethodBtn.disabled = true;
+
         const methodName = userInput.trim()
         const canProceed = await checkFolderExists(methodName);
 
         if (!canProceed) {
             logToServer('info', `Folder check failed for method: ${methodName}`);
+            addNewMethodBtn.disabled = false;
+            loadingGif.style.display = 'none';
             return;
         }
         
         await saveMethod(false, true, methodName, "methodSelect", "initContent", "mapContent", "dataContent", canProceed);
 
-        const addNewMethodBtn = document.getElementById('saveAsNew');
-        addNewMethodBtn.disabled = true;
-        
         const images = await fetchAllImageFiles();
 
         await startTest(methodName, images, 'simulate', '1024', true);
         
         addNewMethodBtn.disabled = false;
+        loadingGif.style.display = 'none';
     }
 });
 
@@ -264,33 +274,66 @@ async function fetchAllImageFiles() {
 
 document.getElementById("startTest").addEventListener("click", async function () {
     const startTestBtn = document.getElementById('startTest');
-    startTestBtn.disabled = true;
-    
+    const loadingGif = document.getElementById('testLoadingGif');
     const shotsElement = document.getElementById('shots');
     const images = fileInput.files[0];
 
     logToServer('info', `Start test: method=${displayedName}, images=${fileInput.files.length}, shots=${shotsElement.value}`);
-    await startTest(displayedName, [images], 'simulate', shotsElement.value, false);
-    
-    if (fileInput.files.length > 0) {
-        const reader = new FileReader();
 
-        reader.onload = function (e) {
-            const img = document.createElement("img");
-            img.src = e.target.result;
-            img.alt = "Uploaded Image";
+    if (!displayedName) {
+        alert("Please select an method first.");
+        return;
+    }
 
-            const boxLeft = document.querySelector(".box-left");
-            boxLeft.innerHTML = "<p>Source photo</p>";
-            boxLeft.appendChild(img);
-        };
-
-        reader.readAsDataURL(images);
-    } else {
+    if (fileInput.files.length == 0) {
         alert("Please select an image first.");
+        return;
+    }
+
+    startTestBtn.disabled = true;
+    loadingGif.style.display = 'inline-block';
+
+    try {
+        const responseData = await startTest(displayedName, [images], 'simulate', shotsElement.value, false);
+        
+        if (responseData) {
+            logToServer('info', `Response data=${responseData}`);
+            const testResultInput = document.getElementById('testResult');
+
+            for (const result of Object.entries(responseData)) {
+                const listItem = document.createElement("li");
+                listItem.className = "list-group-item";
+
+                const strongResultText = document.createElement("strong");
+                strongResultText.textContent = "Result: ";
+                const resultValueText = document.createTextNode(result);
+
+                listItem.appendChild(strongResultText);
+                listItem.appendChild(resultValueText);
+                testResultInput.appendChild(listItem);
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const img = document.createElement("img");
+                img.src = e.target.result;
+                img.alt = "Uploaded Image";
+
+                const boxLeft = document.querySelector(".box-left");
+                boxLeft.innerHTML = "<p>Source photo</p>";
+                boxLeft.appendChild(img);
+            };
+            reader.readAsDataURL(images);
+            
+        } else {
+            logToServer('warning', "No data received or request failed");
+        }
+    } catch (error) {
+        logToServer('error', `Response data=${error}`);
     }
     
     startTestBtn.disabled = false;
+    loadingGif.style.display = 'none';
 });
 
 async function startTest(selected_method, images, computer, shots, is_test) {
@@ -319,7 +362,8 @@ async function startTest(selected_method, images, computer, shots, is_test) {
             const data = await response.json();
             logToServer('info', `Response ok: ${JSON.stringify(data, null, 2)}`);
             isResponseOk = true;
-            alert("Method added successfully!");
+            alert("Executed successfully!");
+            return data;
         } else {
             isResponseOk = false;
             const errorData = await response.json();
@@ -332,8 +376,10 @@ async function startTest(selected_method, images, computer, shots, is_test) {
             } else {
                 alert("Failed to start experiment: " + errorMessage);
             }
+            return null;
         }
     } catch (error) {
         logToServer('error', `Error starting experiment: ${error.message || error}`);
+        return null;
     }
 }

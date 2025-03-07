@@ -46,8 +46,10 @@ def start_experiment(request):
             file_list = request.FILES.getlist('images[]')
             if not file_list:
                 file_list = list(request.FILES.values())
-            total = len(file_list)
-            passed = 0
+
+            if is_test:
+                total = len(file_list)
+                passed = 0
 
             def process_file(uploaded_file):
                 unique_filename = f"{uuid.uuid4()}_{uploaded_file.name}"
@@ -102,11 +104,11 @@ def start_experiment(request):
                         logger.exception("Error processing file: %s", e)
                         return JsonResponse({"success": False, "error": str(e)}, status=500)
 
-            logger.error("Returned results: %s", is_test)
-            method_obj = QuantumMethod.objects.get(name=selected_method)
-            method_obj.total_tests = total
-            method_obj.passed_tests = passed
-            method_obj.save()
+            if is_test:
+                method_obj = QuantumMethod.objects.get(name=selected_method)
+                method_obj.total_tests = total
+                method_obj.passed_tests = passed
+                method_obj.save()
 
             logger.info("Returned results: %s", results)
             return JsonResponse(results)

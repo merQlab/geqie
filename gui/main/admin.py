@@ -9,24 +9,11 @@ logger = logging.getLogger(__name__)
 @admin.register(QuantumMethod)
 class QuantumMethodAdmin(admin.ModelAdmin):
     list_display = ('name', 'description', 'test', 'approved')
-    fields = ('name', 'description', 'init', 'map', 'data', 'approved')
+    fields = ('name', 'description', 'init', 'map', 'data', 'test', 'approved')
 
     def get_queryset(self, request):
         refresh_quantum_methods()
         return super().get_queryset(request)
-
-    def test(self, obj):
-        try:
-            if obj.total_tests and obj.total_tests > 0:
-                percent = (obj.passed_tests / obj.total_tests) * 100
-                if percent.is_integer():
-                    return f"{int(percent)}%"
-                else:
-                    return f"{percent:.2f}%"
-        except AttributeError:
-            pass
-        return "0%"
-    test.short_description = "Test"
 
     def delete_queryset(self, request, queryset):
         for obj in queryset:
@@ -40,6 +27,24 @@ class QuantumMethodAdmin(admin.ModelAdmin):
         if os.path.exists(method_folder):
             shutil.rmtree(method_folder)
         super().delete_model(request, obj)
+    
+    def compute_test_value(self, obj):
+        try:
+            if obj.total_tests and obj.total_tests > 0:
+                percent = (obj.passed_tests / obj.total_tests) * 100
+                return f"{int(percent)}%" if percent.is_integer() else f"{percent:.2f}%"
+        except (AttributeError, ZeroDivisionError):
+            pass
+        return "0%"
+
+    def changelist_view(self, request, extra_context=None):
+        qs = self.get_queryset(request)
+        for obj in qs:
+            computed = self.compute_test_value(obj)
+            if not obj.test or obj.test == computed:
+                obj.test = computed
+                obj.save(update_fields=['test'])
+        return super().changelist_view(request, extra_context=extra_context)
 
 class QuantumSubComputerInline(admin.TabularInline):
     model = QuantumSubComputer

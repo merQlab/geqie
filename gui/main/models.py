@@ -8,6 +8,7 @@ class QuantumMethod(models.Model):
     data = models.TextField(default='', blank=True)
     total_tests = models.PositiveIntegerField(default=0)
     passed_tests = models.PositiveIntegerField(default=0)
+    test = models.CharField(max_length=10, editable=True)
     approved = models.BooleanField("Approved", default=False)
 
     def __str__(self):
