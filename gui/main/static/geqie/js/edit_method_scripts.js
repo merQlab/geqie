@@ -299,6 +299,7 @@ document.getElementById("startTest").addEventListener("click", async function ()
         if (responseData) {
             logToServer('info', `Response data=${responseData}`);
             const testResultInput = document.getElementById('testResult');
+            testResultInput.innerHTML = "";
 
             for (const result of Object.entries(responseData)) {
                 const listItem = document.createElement("li");
