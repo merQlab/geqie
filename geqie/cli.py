@@ -52,7 +52,7 @@ def _get_encoding_functions(params: Dict):
     return EncodingFunctions(init_function, data_function, map_function)
 
 
-def _get_retrive_functions(params: Dict):
+def _get_retrive_function(params: Dict):
     encoding_path = params.get("encoding")
     retrieve_path = f"{encoding_path}/retrieve.py"
     retrieve_function = getattr(_import_module("retrieve", retrieve_path), "retrieve")
@@ -96,7 +96,7 @@ def encoding_options(func):
     return wrapper
 
 
-def retrieving_options(func):
+def retrive_options(func):
     @cloup.option("--encoding", required=True, type=str, help="Name of the encoding from 'encodings' directory")   
     @cloup.option("--result", required=True, type=str, help="Result from simulation")   
     @functools.wraps(func)
@@ -134,16 +134,12 @@ def simulate(ctx: cloup.Context, **params):
 
 
 @cli.command()
-@retrieving_options
+@retrive_options
 def retrieve(**params):
     print('Retrieve CLI')
-    # print(f'Params: {params}')
     print(f'Params.get("result"): {params.get("result")}')
-
-    retrieve_fun = _get_retrive_functions(params)
-    # print(f'e: {e}')
-    print(retrieve_fun(params.get("result")))
-    # return retrieve_fun, params
+    retrieve_function = _get_retrive_function(params)
+    print(retrieve_function(params.get("result")))
 
 
 if __name__ == '__main__':
