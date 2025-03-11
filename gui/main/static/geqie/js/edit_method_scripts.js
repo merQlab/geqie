@@ -109,7 +109,7 @@ document.getElementById("addNewMethod").addEventListener("click", async function
 
     const images = await fetchAllImageFiles();
 
-    await startTest(methodName, images, 'simulate', '1024', true);
+    await startTest(methodName, images, 'simulate', '1024', true, false);
     
     addNewMethodBtn.disabled = false;
     loadingGif.style.display = 'none';
@@ -151,7 +151,7 @@ document.getElementById("saveAsNew").addEventListener("click", async function ()
 
         const images = await fetchAllImageFiles();
 
-        await startTest(methodName, images, 'simulate', '1024', true);
+        await startTest(methodName, images, 'simulate', '1024', true, false);
         
         addNewMethodBtn.disabled = false;
         loadingGif.style.display = 'none';
@@ -294,14 +294,14 @@ document.getElementById("startTest").addEventListener("click", async function ()
     loadingGif.style.display = 'inline-block';
 
     try {
-        const responseData = await startTest(displayedName, [images], 'simulate', shotsElement.value, false);
+        const responseData = await startTest(displayedName, [images], 'simulate', shotsElement.value, false, true);
         
         if (responseData) {
             logToServer('info', `Response data=${responseData}`);
             const testResultInput = document.getElementById('testResult');
             testResultInput.innerHTML = "";
 
-            for (const result of Object.entries(responseData)) {
+            for (const result of Object.entries(responseData.processed)) {
                 const listItem = document.createElement("li");
                 listItem.className = "list-group-item";
 
@@ -312,6 +312,15 @@ document.getElementById("startTest").addEventListener("click", async function ()
                 listItem.appendChild(strongResultText);
                 listItem.appendChild(resultValueText);
                 testResultInput.appendChild(listItem);
+            }
+
+            if (responseData.retrieved_image) {
+                const retrievedImg = document.createElement("img");
+                retrievedImg.src = "data:image/png;base64," + responseData.retrieved_image;
+                retrievedImg.alt = "Retrieved image";
+                const boxRight = document.querySelector(".box-right");
+                boxRight.innerHTML = "<p>Retrieved image</p>";
+                boxRight.appendChild(retrievedImg);
             }
 
             const reader = new FileReader();
@@ -325,7 +334,6 @@ document.getElementById("startTest").addEventListener("click", async function ()
                 boxLeft.appendChild(img);
             };
             reader.readAsDataURL(images);
-            
         } else {
             logToServer('warning', "No data received or request failed");
         }
@@ -337,8 +345,8 @@ document.getElementById("startTest").addEventListener("click", async function ()
     loadingGif.style.display = 'none';
 });
 
-async function startTest(selected_method, images, computer, shots, is_test) {
-    logToServer('info', `Start test: method=${selected_method}, images=${images.length}, computer=${computer}, shots=${shots}, is_test=${is_test}`);
+async function startTest(selected_method, images, computer, shots, is_test, is_retrieve) {
+    logToServer('info', `Start test: method=${selected_method}, images=${images.length}, computer=${computer}, shots=${shots}, is_test=${is_test}, is_retrieve=${is_retrieve}`);
     
     const formData = new FormData();
     images.forEach(image => {
@@ -348,6 +356,7 @@ async function startTest(selected_method, images, computer, shots, is_test) {
     formData.append('computer', computer);
     formData.append('shots', shots);
     formData.append('is_test', is_test);
+    formData.append('is_retrieve', is_retrieve);
 
     try {
         const response = await fetch(startTestUrl, {

@@ -1,3 +1,4 @@
+import io
 from django.shortcuts import render
 from django.http import JsonResponse
 from .utils import all_methods, approved_methods
@@ -8,6 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import default_storage
 from django.conf import settings
 from .utils import refresh_quantum_methods
+import matplotlib.pyplot as plt
 import json
 import subprocess
 import os
@@ -15,6 +17,7 @@ import base64
 import uuid
 import logging
 from collections import OrderedDict
+from importlib import import_module
 
 logger = logging.getLogger(__name__)
 loggerFront = logging.getLogger('frontend_logs')
@@ -38,10 +41,12 @@ def start_experiment(request):
     if request.method == "POST" and request.FILES:
         logger.info("Processing POST request")
         results = {}
+        subprocess_results = {}
         try:
             selected_method = request.POST.get('selected_method')
             shots = request.POST.get('shots')
-            is_test = request.POST.get('is_test', '').strip().lower() in ['true', '1', 't', 'y', 'yes']
+            is_test = request.POST.get('is_test', '').strip().lower() in ['true']
+            is_retrieve = request.POST.get('is_retrieve', '').strip().lower() in ['true']
 
             file_list = request.FILES.getlist('images[]')
             if not file_list:
@@ -65,17 +70,19 @@ def start_experiment(request):
                         "simulate",
                         "--encoding", selected_method,
                         "--image", file_path,
+                        "--grayscale", "true",
                         "--n-shots", shots,
                         "--return-padded-counts", "true"
                     ]
                     logger.info("Executing command: %s", command)
                     result = subprocess.run(command, capture_output=True, text=True, check=True)
                     logger.info("Command output: %s", result.stdout)
-
                     output = json.loads(result.stdout)
                     logger.info("Command output: %s", output)
                     ordered_output = json.dumps(OrderedDict(output))
                     logger.info("OrderedDict: %s", ordered_output)
+                    
+                    subprocess_results['stdout'] = OrderedDict(output)
                     
                     return uploaded_file.name, ordered_output
                 except subprocess.CalledProcessError as e:
@@ -109,6 +116,26 @@ def start_experiment(request):
                 method_obj.total_tests = total
                 method_obj.passed_tests = passed
                 method_obj.save()
+
+            if is_retrieve:
+                encoding_module = import_module(f"geqie.encodings.{selected_method}")
+                retrieved_image = encoding_module.retrieve_function(subprocess_results.get('stdout'))
+                
+                buf = io.BytesIO()
+                logger.info("Retrieved_image.shape: %s", retrieved_image.shape)
+                if retrieved_image.ndim == 3 and retrieved_image.shape[2] == 3:
+                    plt.imsave(buf, retrieved_image, format="png")
+                else:
+                    plt.imsave(buf, retrieved_image, cmap="gray", format="png")
+
+                buf.seek(0)
+                image_base64 = base64.b64encode(buf.getvalue()).decode("utf-8")
+                buf.close()
+
+                results = {
+                    "processed": results,
+                    "retrieved_image": image_base64
+                }
 
             logger.info("Returned results: %s", results)
             return JsonResponse(results)
