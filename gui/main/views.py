@@ -70,7 +70,7 @@ def start_experiment(request):
                         "simulate",
                         "--encoding", selected_method,
                         "--image", file_path,
-                        "--grayscale", "true",
+                        "--grayscale", "false",
                         "--n-shots", shots,
                         "--return-padded-counts", "true"
                     ]
@@ -102,14 +102,15 @@ def start_experiment(request):
                     for uploaded_file in file_list
                 }
                 for future in as_completed(futures):
+                    file_obj = futures[future]
                     try:
                         file_name, output = future.result()
                         results[file_name] = output
                         if is_test:
                             passed += 1
                     except Exception as e:
-                        logger.exception("Error processing file: %s", e)
-                        return JsonResponse({"success": False, "error": str(e)}, status=500)
+                        logger.exception("Error processing file %s: %s", file_obj.name, e)
+                        results[file_obj.name] = f"Photo processing error with this method"
 
             if is_test:
                 method_obj = QuantumMethod.objects.get(name=selected_method)
