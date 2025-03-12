@@ -20,14 +20,15 @@ def refresh_quantum_methods():
                 "description": description,
                 "init": file_contents.get("init", ""),
                 "map": file_contents.get("map", ""),
-                "data": file_contents.get("data", "")
+                "data": file_contents.get("data", ""),
+                "retrieve": file_contents.get("retrieve", "")
             }
         )
 
 def read_method_files(method_name):
     method_path = os.path.join(ENCODINGS_DIR, method_name)
     files = {}
-    for filename in ["init.py", "map.py", "data.py"]:
+    for filename in ["init.py", "map.py", "data.py", "retrieve.py"]:
         key = filename.replace(".py", "")
         file_path = os.path.join(method_path, filename)
         if os.path.exists(file_path):

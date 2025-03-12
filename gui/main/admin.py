@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 @admin.register(QuantumMethod)
 class QuantumMethodAdmin(admin.ModelAdmin):
     list_display = ('name', 'description', 'test', 'approved')
-    fields = ('name', 'description', 'init', 'map', 'data', 'test', 'approved')
+    fields = ('name', 'description', 'init', 'map', 'data', 'retrieve', 'test', 'approved')
 
     def get_queryset(self, request):
         refresh_quantum_methods()

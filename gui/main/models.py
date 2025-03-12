@@ -6,6 +6,7 @@ class QuantumMethod(models.Model):
     init = models.TextField(default='', blank=True)
     map = models.TextField(default='', blank=True)
     data = models.TextField(default='', blank=True)
+    retrieve = models.TextField(default='', blank=True)
     total_tests = models.PositiveIntegerField(default=0)
     passed_tests = models.PositiveIntegerField(default=0)
     test = models.CharField(max_length=10, editable=True)

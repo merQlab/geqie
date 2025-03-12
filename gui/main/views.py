@@ -70,7 +70,7 @@ def start_experiment(request):
                         "simulate",
                         "--encoding", selected_method,
                         "--image", file_path,
-                        "--grayscale", "false",
+                        "--grayscale", "true",
                         "--n-shots", shots,
                         "--return-padded-counts", "true"
                     ]
@@ -153,7 +153,7 @@ def read_method_files(request, method_name):
         logger.error("Method not found")
         return JsonResponse({"error": "Method not found"}, status=404)
 
-    files = ["init.py", "map.py", "data.py"]
+    files = ["init.py", "map.py", "data.py", "retrieve.py"]
     file_contents = {}
 
     for file in files:
@@ -175,6 +175,7 @@ def save_method_files(request):
             init_content = data.get("init")
             map_content = data.get("map")
             data_content = data.get("data")
+            retrieve_content = data.get("retrieve")
             is_new = data.get("is_new", False)
             save_name = data.get("save_name")
             add_new = data.get("add_new")
@@ -197,19 +198,20 @@ from .map import map as map_function""",
                     "init.py": init_content,
                     "map.py": map_content,
                     "data.py": data_content,
+                    "retrieve.py": retrieve_content,
                 }
             else:
                 files = {
                     "init.py": init_content,
                     "map.py": map_content,
                     "data.py": data_content,
+                    "retrieve.py": retrieve_content,
                 }
 
             for filename, content in files.items():
                 file_path = os.path.join(method_path, filename)
                 with open(file_path, "w", encoding="utf-8") as f:
                     f.write(content)
-
                 os.chmod(file_path, 0o755)
 
             refresh_quantum_methods()
@@ -256,7 +258,6 @@ def get_all_images(request):
         return JsonResponse({"error": str(e)}, status=500)
 
     return JsonResponse({"images": images})
-
 
 @csrf_exempt
 def log_from_js(request):

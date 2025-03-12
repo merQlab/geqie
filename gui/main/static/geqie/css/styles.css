@@ -138,16 +138,7 @@ textarea:focus, select:focus {
     position: relative;
 }
 
-.box-left img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    position: absolute;
-    image-rendering: pixelated;
-    image-rendering: -moz-crisp-edges;
-    image-rendering: crisp-edges;
-}
-
+.box-left img,
 .box-right img {
     width: 100%;
     height: 100%;

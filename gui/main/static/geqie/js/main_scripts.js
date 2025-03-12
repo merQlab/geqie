@@ -173,6 +173,7 @@ document.getElementById('startExperiment').addEventListener('click', async funct
             formData.append('method', experiment.method);
             formData.append('computer', experiment.computer);
             formData.append('shots', experiment.shots);
+            formData.append('is_retrieve', "true");
 
             try {
                 const response = await fetch(startExperimentUrl, {
@@ -189,10 +190,12 @@ document.getElementById('startExperiment').addEventListener('click', async funct
                     headerItem.className = "list-group-item fw-bold";
                     headerItem.textContent = `Experiment ${index + 1}:`;
                     resultsList.appendChild(headerItem);
+    
                     const data = await response.json();
-                    logToServer('info', `Response ok: ${JSON.stringify(data, null, 2)}`);
-                    if (data && Object.keys(data).length > 0) {
-                        for (const [fileName, result] of Object.entries(data)) {
+                    const resultsToIterate = (data.processed) ? data.processed : data;
+                    logToServer('error', `Response ok: ${JSON.stringify(resultsToIterate, null, 2)}`);
+                    if (resultsToIterate && Object.keys(resultsToIterate).length > 0) {
+                        for (const [fileName, result] of Object.entries(resultsToIterate)) {
                             const listItem = document.createElement("li");
                             listItem.className = "list-group-item";
 
@@ -214,6 +217,7 @@ document.getElementById('startExperiment').addEventListener('click', async funct
                             allResults.push({
                                 file: fileName,
                                 result: result,
+                                retrieved_image: data.retrieved_image,
                                 method: experiment.method
                             });
                         }

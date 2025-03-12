@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const initContent = document.getElementById('initContent');
     const mapContent = document.getElementById('mapContent');
     const dataContent = document.getElementById('dataContent');
+    const retrieveContent = document.getElementById('retrieveContent');
 
     methodSelect.addEventListener("change", function () {
         const methodName = methodSelect.value;
@@ -13,6 +14,7 @@ document.addEventListener("DOMContentLoaded", function () {
             initContent.value = "";
             mapContent.value = "";
             dataContent.value = "";
+            retrieveContent.value = "";
             logToServer('debug', 'No method selected, clearing content fields.');
             return;
         }
@@ -27,6 +29,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 initContent.value = data.init || "No content found.";
                 mapContent.value = data.map || "No content found.";
                 dataContent.value = data.data || "No content found.";
+                retrieveContent.value = data.retrieve || "No content found.";
                 logToServer('info', `Fetched method data for ${methodName}`);
             })
             .catch(error => logToServer('critical', `Error fetching method data: ${error}`));
@@ -69,6 +72,9 @@ def data(u: int, v: int, R: int, image: np.ndarray) -> Statevector:
     data_vector[m] = 1    
     return Statevector(data_vector)`;
 
+    document.getElementById("addRetrieveContent").value = 
+    `???`;
+
     logToServer('debug', 'Default method content loaded for addNewMethod.');
 });
 
@@ -105,7 +111,7 @@ document.getElementById("addNewMethod").addEventListener("click", async function
     loadingGif.style.display = 'inline-block';
     addNewMethodBtn.disabled = true;
 
-    await saveMethod(true, true, methodName, "methodName", "addInitContent", "addMapContent", "addDataContent", canProceed);
+    await saveMethod(true, true, methodName, "methodName", "addInitContent", "addMapContent", "addDataContent", "addRetrieveContent", canProceed);
 
     const images = await fetchAllImageFiles();
 
@@ -147,7 +153,7 @@ document.getElementById("saveAsNew").addEventListener("click", async function ()
             return;
         }
         
-        await saveMethod(false, true, methodName, "methodSelect", "initContent", "mapContent", "dataContent", canProceed);
+        await saveMethod(false, true, methodName, "methodSelect", "initContent", "mapContent", "dataContent", "retrieveContent", canProceed);
 
         const images = await fetchAllImageFiles();
 
@@ -158,11 +164,12 @@ document.getElementById("saveAsNew").addEventListener("click", async function ()
     }
 });
 
-async function saveMethod(addNew, isNew, saveName, method, init, map, data, isFolderExist) {
+async function saveMethod(addNew, isNew, saveName, method, init, map, data, retrieve, isFolderExist) {
     let methodName = document.getElementById(method).value;
     let initContent = document.getElementById(init).value;
     let mapContent = document.getElementById(map).value;
     let dataContent = document.getElementById(data).value;
+    let retrieveContent = document.getElementById(retrieve).value;
 
     logToServer('error', `saveMethod called with methodName="${methodName}", isNew=${isNew}, addNew=${addNew}, saveName="${saveName}"`);
 
@@ -193,6 +200,7 @@ async function saveMethod(addNew, isNew, saveName, method, init, map, data, isFo
                 init: initContent,
                 map: mapContent,
                 data: dataContent,
+                retrieve: retrieveContent,
                 is_new: isNew,
                 save_name: saveName,
                 add_new: addNew,
