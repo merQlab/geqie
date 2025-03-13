@@ -195,23 +195,24 @@ def save_method_files(request):
                 method_path = os.path.join(ENCODINGS_DIR, save_name)
                 os.makedirs(method_path)
 
-            if add_new:
+            # if add_new:
                 files = {
                     "__init__.py": """from .init import init as init_function
 from .data import data as data_function
-from .map import map as map_function""",
+from .map import map as map_function
+from .retrieve import retrieve as retrieve_function""",
                     "init.py": init_content,
                     "map.py": map_content,
                     "data.py": data_content,
                     "retrieve.py": retrieve_content,
                 }
-            else:
-                files = {
-                    "init.py": init_content,
-                    "map.py": map_content,
-                    "data.py": data_content,
-                    "retrieve.py": retrieve_content,
-                }
+            # else:
+            #     files = {
+            #         "init.py": init_content,
+            #         "map.py": map_content,
+            #         "data.py": data_content,
+            #         "retrieve.py": retrieve_content,
+            #     }
 
             for filename, content in files.items():
                 file_path = os.path.join(method_path, filename)
