@@ -309,7 +309,7 @@ document.getElementById("startTest").addEventListener("click", async function ()
             const testResultInput = document.getElementById('testResult');
             testResultInput.innerHTML = "";
 
-            for (const result of Object.entries(responseData.processed)) {
+            for (const [fileName, result] of Object.entries(responseData.processed)) {
                 const listItem = document.createElement("li");
                 listItem.className = "list-group-item";
 
@@ -320,25 +320,20 @@ document.getElementById("startTest").addEventListener("click", async function ()
                 listItem.appendChild(strongResultText);
                 listItem.appendChild(resultValueText);
                 testResultInput.appendChild(listItem);
-            }
 
-            if (responseData.retrieved_image) {
-                const retrievedImg = document.createElement("img");
-                retrievedImg.src = "data:image/png;base64," + responseData.retrieved_image;
-                retrievedImg.alt = "Retrieved image";
-                const boxRight = document.querySelector(".box-right");
-                boxRight.innerHTML = "<p>Retrieved image</p>";
-                boxRight.appendChild(retrievedImg);
+                if (responseData.retrieved_image) {
+                    const retrievedImg = document.createElement("img");
+                    retrievedImg.src = "data:image/png;base64," + responseData.retrieved_image[fileName];
+                    const boxRight = document.querySelector(".box-right");
+                    boxRight.appendChild(retrievedImg);
+                }
             }
-
+            
             const reader = new FileReader();
             reader.onload = function (e) {
                 const img = document.createElement("img");
                 img.src = e.target.result;
-                img.alt = "Uploaded Image";
-
                 const boxLeft = document.querySelector(".box-left");
-                boxLeft.innerHTML = "<p>Source photo</p>";
                 boxLeft.appendChild(img);
             };
             reader.readAsDataURL(images);

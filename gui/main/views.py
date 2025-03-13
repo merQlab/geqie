@@ -40,8 +40,10 @@ def edit_method(request):
 def start_experiment(request):
     if request.method == "POST" and request.FILES:
         logger.info("Processing POST request")
-        results = {}
-        subprocess_results = {}
+        processed_results = {}
+        images_results = {}
+        retrieved_results = {}
+        
         try:
             selected_method = request.POST.get('selected_method')
             shots = request.POST.get('shots')
@@ -57,6 +59,11 @@ def start_experiment(request):
                 passed = 0
 
             def process_file(uploaded_file):
+                uploaded_file.seek(0)
+                original_bytes = uploaded_file.read()
+                image_base64 = base64.b64encode(original_bytes).decode("utf-8")
+                uploaded_file.seek(0)
+
                 unique_filename = f"{uuid.uuid4()}_{uploaded_file.name}"
                 file_path = os.path.join(settings.MEDIA_ROOT, unique_filename)
                 try:
@@ -70,7 +77,7 @@ def start_experiment(request):
                         "simulate",
                         "--encoding", selected_method,
                         "--image", file_path,
-                        "--grayscale", "true",
+                        "--grayscale", "false",
                         "--n-shots", shots,
                         "--return-padded-counts", "true"
                     ]
@@ -78,13 +85,24 @@ def start_experiment(request):
                     result = subprocess.run(command, capture_output=True, text=True, check=True)
                     logger.info("Command output: %s", result.stdout)
                     output = json.loads(result.stdout)
-                    logger.info("Command output: %s", output)
-                    ordered_output = json.dumps(OrderedDict(output))
-                    logger.info("OrderedDict: %s", ordered_output)
-                    
-                    subprocess_results['stdout'] = OrderedDict(output)
-                    
-                    return uploaded_file.name, ordered_output
+                    ordered_output = OrderedDict(output)
+
+                    retrieved_image_base64 = None
+                    if is_retrieve:
+                        encoding_module = import_module(f"geqie.encodings.{selected_method}")
+                        retrieved_image = encoding_module.retrieve_function(ordered_output)
+                        buf = io.BytesIO()
+                        logger.info("Retrieved_image.shape for %s: %s", uploaded_file.name, retrieved_image.shape)
+                        if retrieved_image.ndim == 3 and retrieved_image.shape[2] == 3:
+                            plt.imsave(buf, retrieved_image, format="png")
+                        else:
+                            plt.imsave(buf, retrieved_image, cmap="gray", format="png")
+                        buf.seek(0)
+                        retrieved_image_base64 = base64.b64encode(buf.getvalue()).decode("utf-8")
+                        buf.close()
+
+                    return uploaded_file.name, json.dumps(ordered_output), image_base64, retrieved_image_base64
+
                 except subprocess.CalledProcessError as e:
                     logger.exception("Command failed with return code %s. Stderr: %s", e.returncode, e.stderr)
                     raise Exception(f"Command failed: {e}")
@@ -104,13 +122,16 @@ def start_experiment(request):
                 for future in as_completed(futures):
                     file_obj = futures[future]
                     try:
-                        file_name, output = future.result()
-                        results[file_name] = output
+                        file_name, output, orig_b64, retrieved_b64 = future.result()
+                        processed_results[file_name] = output
+                        images_results[file_name] = orig_b64
+                        if retrieved_b64 is not None:
+                            retrieved_results[file_name] = retrieved_b64
                         if is_test:
                             passed += 1
                     except Exception as e:
                         logger.exception("Error processing file %s: %s", file_obj.name, e)
-                        results[file_obj.name] = f"Photo processing error with this method"
+                        processed_results[file_obj.name] = "Photo processing error with this method"
 
             if is_test:
                 method_obj = QuantumMethod.objects.get(name=selected_method)
@@ -118,28 +139,12 @@ def start_experiment(request):
                 method_obj.passed_tests = passed
                 method_obj.save()
 
+            final_results = {"processed": processed_results, "image": images_results}
             if is_retrieve:
-                encoding_module = import_module(f"geqie.encodings.{selected_method}")
-                retrieved_image = encoding_module.retrieve_function(subprocess_results.get('stdout'))
-                
-                buf = io.BytesIO()
-                logger.info("Retrieved_image.shape: %s", retrieved_image.shape)
-                if retrieved_image.ndim == 3 and retrieved_image.shape[2] == 3:
-                    plt.imsave(buf, retrieved_image, format="png")
-                else:
-                    plt.imsave(buf, retrieved_image, cmap="gray", format="png")
+                final_results["retrieved_image"] = retrieved_results
 
-                buf.seek(0)
-                image_base64 = base64.b64encode(buf.getvalue()).decode("utf-8")
-                buf.close()
-
-                results = {
-                    "processed": results,
-                    "retrieved_image": image_base64
-                }
-
-            logger.info("Returned results: %s", results)
-            return JsonResponse(results)
+            logger.info("Returned results: %s", final_results)
+            return JsonResponse(final_results)
 
         except Exception as e:
             logger.exception("Unexpected error: %s", e)

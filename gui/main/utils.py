@@ -53,10 +53,11 @@ def approved_methods():
         for method_name in os.listdir(ENCODINGS_DIR):
             method_path = os.path.join(ENCODINGS_DIR, method_name)
             if os.path.isdir(method_path):
-                methods.append({"name": method_name})
-
-        approved_method_names = list(
-        QuantumMethod.objects.filter(approved=True).values_list('name', flat=True)
-        )
-        approved_methods = [m for m in methods if m["name"] in approved_method_names]
-    return approved_methods
+                qm = QuantumMethod.objects.filter(name=method_name, approved=True).first()
+                if qm:
+                    methods.append({
+                        "id": qm.id,
+                        "name": qm.name,
+                        "description": qm.description
+                    })
+    return methods

@@ -143,12 +143,12 @@ document.getElementById('startExperiment').addEventListener('click', async funct
                 try {
                     methodDirHandles[method] = await mainDirHandle.getDirectoryHandle(method, { create: true });
                 } catch (error) {
-                    console.error(`Error creating subfolder for method ${method}:`, error);
+                    logToServer('error', `Error creating subfolder for method ${method}: ${error}`);
                     alert(`Failed to create a subfolder for the method ${method}.`);
                 }
             }
         } catch (error) {
-            console.error("Failed to select folder:", error);
+            logToServer('error', `Failed to select folder: ${error}`);
             alert("Failed to select folder.");
             startExperimentBtn.disabled = false;
             saveToCSVCheckbox.disabled = false;
@@ -192,8 +192,10 @@ document.getElementById('startExperiment').addEventListener('click', async funct
                     resultsList.appendChild(headerItem);
     
                     const data = await response.json();
-                    const resultsToIterate = (data.processed) ? data.processed : data;
-                    logToServer('error', `Response ok: ${JSON.stringify(resultsToIterate, null, 2)}`);
+                    const resultsToIterate = data.processed ? data.processed : data;
+
+                    logToServer('info', `Response ok: ${JSON.stringify(resultsToIterate, null, 2)}`);
+
                     if (resultsToIterate && Object.keys(resultsToIterate).length > 0) {
                         for (const [fileName, result] of Object.entries(resultsToIterate)) {
                             const listItem = document.createElement("li");
@@ -201,23 +203,55 @@ document.getElementById('startExperiment').addEventListener('click', async funct
 
                             const strongFileText = document.createElement("strong");
                             strongFileText.textContent = "File: ";
-                            const fileNameText = document.createTextNode(fileName);
+                            listItem.appendChild(strongFileText);
+                            listItem.appendChild(document.createTextNode(fileName));
+                            listItem.appendChild(document.createElement("br"));
 
                             const strongResultText = document.createElement("strong");
                             strongResultText.textContent = "Result: ";
-                            const resultValueText = document.createTextNode(result);
-
-                            listItem.appendChild(strongFileText);
-                            listItem.appendChild(fileNameText);
-                            listItem.appendChild(document.createElement("br"));
                             listItem.appendChild(strongResultText);
-                            listItem.appendChild(resultValueText);
+                            listItem.appendChild(document.createTextNode(result));
+                            listItem.appendChild(document.createElement("br"));
+
+                            const originalImageBase64 = data.image?.[fileName] || null;
+                            const retrievedImageBase64 = data.retrieved_image?.[fileName] || null;
+
+                            if (originalImageBase64) {
+                                const originalImg = document.createElement("img");
+                                originalImg.src = "data:image/png;base64," + originalImageBase64;
+                                originalImg.alt = "Original image";
+                                originalImg.style.width = "100%";
+                                originalImg.style.imageRendering = "pixelated";
+                                listItem.appendChild(originalImg);
+                                listItem.appendChild(document.createElement("br"));
+                            }
+
+                            if (originalImageBase64 && retrievedImageBase64) {
+                                const arrowDown = document.createElement("div");
+                                arrowDown.innerHTML = "&#8595;";
+                                arrowDown.style.fontSize = "24px";
+                                arrowDown.style.textAlign = "center";
+                                arrowDown.style.margin = "10px 0";
+                                listItem.appendChild(arrowDown);
+                            }
+                            
+                            if (retrievedImageBase64) {
+                                const retrievedImg = document.createElement("img");
+                                retrievedImg.src = "data:image/png;base64," + retrievedImageBase64;
+                                retrievedImg.alt = "Retrieved image";
+                                retrievedImg.style.width = "100%";
+                                retrievedImg.style.imageRendering = "pixelated";
+                                listItem.appendChild(retrievedImg);
+                                listItem.appendChild(document.createElement("br"));
+                            }
+
                             resultsList.appendChild(listItem);
 
                             allResults.push({
                                 file: fileName,
                                 result: result,
-                                retrieved_image: data.retrieved_image,
+                                image: originalImageBase64,
+                                retrieved_image: retrievedImageBase64,
                                 method: experiment.method
                             });
                         }
@@ -280,26 +314,90 @@ async function getUniqueFileHandle(dirHandle, baseName, extension) {
     }
 }
 
+async function getUpscaledImageBlob(base64Image, scale) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = function() {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width * scale;
+            canvas.height = img.height * scale;
+            const ctx = canvas.getContext('2d');
+            ctx.imageSmoothingEnabled = false;
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            canvas.toBlob(blob => {
+                if (blob) {
+                    resolve(blob);
+                } else {
+                    reject(new Error("Failed to generate Blob from canvas."));
+                }
+            }, 'image/png');
+        };
+        img.onerror = reject;
+        img.src = 'data:image/png;base64,' + base64Image;
+    });
+}
+
 async function saveResultsToFolder(results, mainDirHandle, methodDirHandles) {
     for (const result of results) {
         const baseName = result.file.replace(/\.[^/.]+$/, "");
-        const csvContent = `file,result\n${result.file},${result.result}`;
-
         try {
             const methodHandle = methodDirHandles[result.method];
             if (!methodHandle) {
-                throw new Error(`No handle for methods ${result.method}`);
+                throw new Error(`No handle for the method ${result.method}`);
             }
-            const fileHandle = await getUniqueFileHandle(methodHandle, baseName, ".csv");
+
+            const workbook = new ExcelJS.Workbook();
+            const worksheet = workbook.addWorksheet("Result");
+
+            worksheet.getCell("A1").value = "File name:";
+            worksheet.getCell("B1").value = result.file;
+            worksheet.getCell("A2").value = "Result:";
+            worksheet.getCell("B2").value = result.result;
+
+            const scaleFactor = 64;
+
+            const originalBlob = await getUpscaledImageBlob(result.image, scaleFactor);
+            const originalBuffer = new Uint8Array(await originalBlob.arrayBuffer());
+
+            const retrievedBlob = await getUpscaledImageBlob(result.retrieved_image, scaleFactor);
+            const retrievedBuffer = new Uint8Array(await retrievedBlob.arrayBuffer());
+
+            const originalImageId = workbook.addImage({
+                buffer: originalBuffer,
+                extension: 'png'
+            });
+
+            const retrievedImageId = workbook.addImage({
+                buffer: retrievedBuffer,
+                extension: 'png'
+            });
+
+            worksheet.addImage(originalImageId, {
+                tl: { col: 0, row: 4 },
+                ext: { width: 4 * scaleFactor, height: 4 * scaleFactor }
+            });
+
+            worksheet.getCell("E11").value = "→";
+            worksheet.getCell("E11").alignment = { horizontal: "center", vertical: "middle" };
+
+            worksheet.addImage(retrievedImageId, {
+                tl: { col: 5, row: 4 },
+                ext: { width: 4 * scaleFactor, height: 4 * scaleFactor }
+            });
+
+            const xlsxData = await workbook.xlsx.writeBuffer();
+            const fileHandle = await getUniqueFileHandle(methodHandle, baseName, ".xlsx");
             const writable = await fileHandle.createWritable();
-            await writable.write(csvContent);
+            const blob = new Blob([xlsxData], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+            await writable.write(blob);
             await writable.close();
+
         } catch (error) {
-            console.error(`Error saving file ${baseName}.csv:`, error);
-            alert("An error occurred while saving the CSV files: " + error.message);
+            console.error(`Error saving the file ${baseName}.xlsx:`, error);
+            alert("An error occurred while saving XLSX files: " + error.message);
         }
     }
-    alert("CSV files saved successfully!");
+    alert("XLSX files have been successfully saved!");
 }
 
 function updateProgress(value) {
@@ -310,7 +408,7 @@ function updateProgress(value) {
 }
 
 function animateProgress(from, to, duration) {
-    logToServer('debug', `Progress animation started: ${from}% -> ${to}% przez ${duration} ms`);
+    logToServer('info', `Progress animation started: ${from}% -> ${to}% przez ${duration} ms`);
     const startTime = performance.now();
     function animate(currentTime) {
         const elapsed = currentTime - startTime;
@@ -320,7 +418,7 @@ function animateProgress(from, to, duration) {
         if (elapsed < duration) {
             animationFrameId = requestAnimationFrame(animate);
         } else {
-            logToServer('debug', `Progress animation finished on ${to}%`);
+            logToServer('info', `Progress animation finished on ${to}%`);
         }
     }
     animationFrameId = requestAnimationFrame(animate);
