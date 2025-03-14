@@ -73,7 +73,35 @@ def data(u: int, v: int, R: int, image: np.ndarray) -> Statevector:
     return Statevector(data_vector)`;
 
     document.getElementById("addRetrieveContent").value = 
-    `???`;
+    `import numpy as np
+import json
+ 
+def retrieve(results: str) -> np.ndarray:
+    """
+    Decodes an image from quantum state measurement results.
+ 
+    Parameters:
+    results (dict): A dictionary where keys are binary strings representing quantum states,
+                         and values are their respective occurrence counts.
+ 
+    Returns:
+    np.ndarray: A NumPy array representing the decoded image.
+    """
+    state_length = len(next(iter(results)))
+    # color_qubits = set qubits used for color encoding
+    number_of_position_qubits = state_length - color_qubits
+    x_qubits = number_of_position_qubits // 2
+    y_qubits = number_of_position_qubits // 2
+    image_shape = (2**x_qubits, 2**y_qubits)
+ 
+    # For grayscale images:
+    # reconstructed_image = np.zeros((image_shape[0], image_shape[1]))
+    # For RGB images:
+    # reconstructed_image = np.zeros((image_shape[0], image_shape[1], 3))
+ 
+    # Provide your own code here...
+        
+    return reconstructed_image`;
 
     logToServer('debug', 'Default method content loaded for addNewMethod.');
 });
@@ -158,7 +186,7 @@ document.getElementById("saveAsNew").addEventListener("click", async function ()
         const images = await fetchAllImageFiles();
 
         await startTest(methodName, images, 'simulate', '1024', true, false);
-        
+
         addNewMethodBtn.disabled = false;
         loadingGif.style.display = 'none';
     }
