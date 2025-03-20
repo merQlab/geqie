@@ -401,8 +401,20 @@ async function startTest(selected_method, images, computer, shots, is_test, is_r
 
         if (response.ok) {
             const data = await response.json();
-            logToServer('info', `Response ok: ${JSON.stringify(data, null, 2)}`);
+            logToServer('error', `Response ok: ${JSON.stringify(data, null, 2)}`);
             isResponseOk = true;
+
+            if (Object.keys(data.processed).length === 0) {
+                alert("Photo processing error with this method.");
+                return null;
+            }
+            if (is_test === false && Object.keys(data.image).length === 0) {
+                alert("Image is empty.");
+            }
+            if (is_test === false && Object.keys(data.retrieved_image).length === 0) {
+                alert("Retrieved image is empty.");
+            }
+
             alert("Executed successfully!");
             return data;
         } else {

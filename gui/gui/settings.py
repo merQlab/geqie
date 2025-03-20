@@ -172,6 +172,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CRISPY_TEMPLATE_PACK = 'bootstrap5'
 
+DEFAULT_INIT = {
+    "__init__.py": (
+        "from .init import init as init_function\n"
+        "from .data import data as data_function\n"
+        "from .map import map as map_function\n"
+        "from .retrieve import retrieve as retrieve_function"
+    ),
+}
+
 MEDIA_URL = 'grayscale/'
 
 #Docker path

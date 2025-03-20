@@ -131,7 +131,6 @@ def start_experiment(request):
                             passed += 1
                     except Exception as e:
                         logger.exception("Error processing file %s: %s", file_obj.name, e)
-                        processed_results[file_obj.name] = "Photo processing error with this method"
 
             if is_test:
                 method_obj = QuantumMethod.objects.get(name=selected_method)
@@ -196,16 +195,13 @@ def save_method_files(request):
                 os.makedirs(method_path)
 
             # if add_new:
-                files = {
-                    "__init__.py": """from .init import init as init_function
-from .data import data as data_function
-from .map import map as map_function
-from .retrieve import retrieve as retrieve_function""",
+                files = settings.DEFAULT_INIT.copy()
+                files.update({
                     "init.py": init_content,
                     "map.py": map_content,
                     "data.py": data_content,
                     "retrieve.py": retrieve_content,
-                }
+                })
             # else:
             #     files = {
             #         "init.py": init_content,
@@ -216,7 +212,7 @@ from .retrieve import retrieve as retrieve_function""",
 
             for filename, content in files.items():
                 file_path = os.path.join(method_path, filename)
-                with open(file_path, "w", encoding="utf-8") as f:
+                with open(file_path, "w", encoding="utf-8", newline='') as f:
                     f.write(content)
                 os.chmod(file_path, 0o755)
 

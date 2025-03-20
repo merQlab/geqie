@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .utils import refresh_quantum_methods
+from .utils import refresh_quantum_methods, update_method_files
 from .models import QuantumMethod, QuantumComputer, QuantumSubComputer
 import os, logging, shutil
 from gui.settings import ENCODINGS_DIR
@@ -45,6 +45,14 @@ class QuantumMethodAdmin(admin.ModelAdmin):
                 obj.test = computed
                 obj.save(update_fields=['test'])
         return super().changelist_view(request, extra_context=extra_context)
+    
+    def save_model(self, request, obj, form, change):
+        old_name = None
+        if change:
+            old_instance = QuantumMethod.objects.get(pk=obj.pk)
+            old_name = old_instance.name
+        super().save_model(request, obj, form, change)
+        update_method_files(obj, old_name)
 
 class QuantumSubComputerInline(admin.TabularInline):
     model = QuantumSubComputer

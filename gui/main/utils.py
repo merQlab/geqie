@@ -1,4 +1,5 @@
 import os
+from django.conf import settings
 from gui.settings import ENCODINGS_DIR
 from .models import QuantumMethod
 
@@ -7,23 +8,21 @@ def refresh_quantum_methods():
     for method in methods:
         method_name = method["name"]
         file_contents = read_method_files(method_name)
-        description = f"The implementation of the {method_name} method has been loaded from files."
+        default_description = f"The implementation of the {method_name} method has been loaded from files."
 
         qs = QuantumMethod.objects.filter(name=method_name)
         if qs.count() > 1:
             first = qs.first()
             qs.exclude(pk=first.pk).delete()
 
-        QuantumMethod.objects.update_or_create(
-            name=method_name,
-            defaults={
-                "description": description,
-                "init": file_contents.get("init", ""),
-                "map": file_contents.get("map", ""),
-                "data": file_contents.get("data", ""),
-                "retrieve": file_contents.get("retrieve", "")
-            }
-        )
+        obj, created = QuantumMethod.objects.get_or_create(name=method_name)
+        if created:
+            obj.description = default_description
+        obj.init = file_contents.get("init", "")
+        obj.map = file_contents.get("map", "")
+        obj.data = file_contents.get("data", "")
+        obj.retrieve = file_contents.get("retrieve", "")
+        obj.save(update_fields=["init", "map", "data", "retrieve"] if not created else ["description", "init", "map", "data", "retrieve"])
 
 def read_method_files(method_name):
     method_path = os.path.join(ENCODINGS_DIR, method_name)
@@ -61,3 +60,32 @@ def approved_methods():
                         "description": qm.description
                     })
     return methods
+
+def update_method_files(instance, old_name=None):
+    new_path = os.path.join(ENCODINGS_DIR, instance.name)
+
+    if old_name and old_name != instance.name:
+        old_path = os.path.join(ENCODINGS_DIR, old_name)
+        if os.path.exists(old_path):
+            os.rename(old_path, new_path)
+        else:
+            os.makedirs(new_path, exist_ok=True)
+    else:
+        if not os.path.exists(new_path):
+            os.makedirs(new_path, exist_ok=True)
+
+    files = settings.DEFAULT_INIT.copy()
+    files.update({
+        "init.py": instance.init or "",
+        "map.py": instance.map or "",
+        "data.py": instance.data or "",
+        "retrieve.py": instance.retrieve or "",
+    })
+
+    for filename, content in files.items():
+        file_path = os.path.join(new_path, filename)
+        with open(file_path, "w", encoding="utf-8", newline='') as f:
+            f.write(content)
+        os.chmod(file_path, 0o755)
+
+    refresh_quantum_methods()
