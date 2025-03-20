@@ -10,6 +10,7 @@
     <script src="{% static 'geqie/js/edit_method_scripts.js' %}" defer></script>
     <link href="{% static 'geqie/css/styles.css' %}" rel="stylesheet">
     <link rel="icon" href="{% static 'geqie/icon/favicon.png' %}" type="image/png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
 <body>
     <div class="container mt-5">
@@ -17,7 +18,12 @@
             <div class="col-md-8">
                 <div class="card shadow">
                     <div class="card-body">
-                        <h4 class="card-title text-center mb-4">Manage Methods</h4>
+                        <div class="card-body position-relative">
+                            <a href="javascript:history.back()" class="position-absolute start-0 top-50 translate-middle-y ms-3">
+                                <i class="fas fa-arrow-left fa-lg"></i>
+                            </a>
+                            <h4 class="card-title text-center mb-0">Manage Methods</h4>
+                        </div>
                         <!-- Main -->
                         <ul class="nav nav-tabs" role="tablist">
                             <li class="nav-item" role="presentation">
