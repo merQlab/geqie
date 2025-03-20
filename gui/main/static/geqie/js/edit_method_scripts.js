@@ -199,7 +199,7 @@ async function saveMethod(addNew, isNew, saveName, method, init, map, data, retr
     let dataContent = document.getElementById(data).value;
     let retrieveContent = document.getElementById(retrieve).value;
 
-    logToServer('error', `saveMethod called with methodName="${methodName}", isNew=${isNew}, addNew=${addNew}, saveName="${saveName}"`);
+    logToServer('info', `saveMethod called with methodName="${methodName}", isNew=${isNew}, addNew=${addNew}, saveName="${saveName}"`);
 
     if(!addNew && isNew) {
         methodName = saveName;
@@ -234,7 +234,7 @@ async function saveMethod(addNew, isNew, saveName, method, init, map, data, retr
                 add_new: addNew,
             }),
         });
-        logToServer('debug', `saveMethod response received for method: ${methodName}`);
+        logToServer('info', `saveMethod response received for method: ${methodName}`);
 
         const result = await response.json();
         if (result.error) {
@@ -369,7 +369,7 @@ document.getElementById("startTest").addEventListener("click", async function ()
             logToServer('warning', "No data received or request failed");
         }
     } catch (error) {
-        logToServer('error', `Response data=${error}`);
+        logToServer('critical', `Response data=${error}`);
     }
     
     startTestBtn.disabled = false;
@@ -401,7 +401,7 @@ async function startTest(selected_method, images, computer, shots, is_test, is_r
 
         if (response.ok) {
             const data = await response.json();
-            logToServer('error', `Response ok: ${JSON.stringify(data, null, 2)}`);
+            logToServer('info', `Response ok: ${JSON.stringify(data, null, 2)}`);
             isResponseOk = true;
 
             if (Object.keys(data.processed).length === 0) {
@@ -432,7 +432,7 @@ async function startTest(selected_method, images, computer, shots, is_test, is_r
             return null;
         }
     } catch (error) {
-        logToServer('error', `Error starting experiment: ${error.message || error}`);
+        logToServer('critical', `Error starting experiment: ${error.message || error}`);
         return null;
     }
 }

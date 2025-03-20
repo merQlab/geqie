@@ -143,12 +143,12 @@ document.getElementById('startExperiment').addEventListener('click', async funct
                 try {
                     methodDirHandles[method] = await mainDirHandle.getDirectoryHandle(method, { create: true });
                 } catch (error) {
-                    logToServer('error', `Error creating subfolder for method ${method}: ${error}`);
+                    logToServer('critical', `Error creating subfolder for method ${method}: ${error}`);
                     alert(`Failed to create a subfolder for the method ${method}.`);
                 }
             }
         } catch (error) {
-            logToServer('error', `Failed to select folder: ${error}`);
+            logToServer('critical', `Failed to select folder: ${error}`);
             alert("Failed to select folder.");
             startExperimentBtn.disabled = false;
             saveToCSVCheckbox.disabled = false;
@@ -277,7 +277,7 @@ document.getElementById('startExperiment').addEventListener('click', async funct
                     }
                 }
             } catch (error) {
-                logToServer('error', `Error starting experiment ${index + 1}: ${error.message || error}`);
+                logToServer('critical', `Error starting experiment ${index + 1}: ${error.message || error}`);
             }
         }
 
@@ -309,6 +309,7 @@ async function getUniqueFileHandle(dirHandle, baseName, extension) {
             counter++;
             fileName = `${baseName} (${counter})${extension}`;
         } catch (error) {
+            logToServer('critical', `Error get unique file handle ${fileName}: ${error.message || error}`);
             return await dirHandle.getFileHandle(fileName, { create: true });
         }
     }
@@ -393,7 +394,7 @@ async function saveResultsToFolder(results, mainDirHandle, methodDirHandles) {
             await writable.close();
 
         } catch (error) {
-            console.error(`Error saving the file ${baseName}.xlsx:`, error);
+            logToServer('critical', `Error saving the file ${baseName}.xlsx: ${error.message || error}`);
             alert("An error occurred while saving XLSX files: " + error.message);
         }
     }

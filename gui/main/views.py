@@ -257,6 +257,7 @@ def get_all_images(request):
                 "type": mime_type,
             })
     except Exception as e:
+        logger.exception("Get all images: %s", str(e))
         return JsonResponse({"error": str(e)}, status=500)
 
     return JsonResponse({"images": images})

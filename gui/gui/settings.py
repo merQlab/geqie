@@ -140,10 +140,13 @@ LOGGING = {
             'level': 'DEBUG',
         },
         'file': {
-            'class': 'logging.FileHandler',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
             'formatter': 'verbose',
             'level': 'ERROR',
             'filename': os.path.join(BASE_DIR, 'logs', 'error.log'),
+            'when': 'midnight',     # Rotation every day at midnight
+            'interval': 30,         # Keep 30 days
+            'backupCount': 2,       # Keep 1 backup
         },
     },
     'loggers': {
