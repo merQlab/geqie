@@ -3,18 +3,30 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const methodSelect = document.getElementById('methodSelect');
     const testMethodSelect = document.getElementById('testMethodSelect');
-    const initContent = document.getElementById('initContent');
-    const mapContent = document.getElementById('mapContent');
-    const dataContent = document.getElementById('dataContent');
-    const retrieveContent = document.getElementById('retrieveContent');
+
+    editorsList = [
+        { field: "init", editorId: "initEditor", contentId: "initContent" },
+        { field: "map", editorId: "mapEditor", contentId: "mapContent" },
+        { field: "data", editorId: "dataEditor", contentId: "dataContent" },
+        { field: "retrieve", editorId: "retrieveEditor", contentId: "retrieveContent" }
+    ];
+
+    editorsList.forEach(item => {
+        item.textarea = document.getElementById(item.contentId);
+        item.editor = ace.edit(item.editorId);
+        item.editor.session.setMode("ace/mode/python");
+        item.editor.setTheme("ace/theme/github");
+        item.editor.setFontSize("13px");
+        item.editor.setValue(item.textarea.value, -1);
+    });
 
     methodSelect.addEventListener("change", function () {
         const methodName = methodSelect.value;
         if (!methodName) {
-            initContent.value = "";
-            mapContent.value = "";
-            dataContent.value = "";
-            retrieveContent.value = "";
+            editorsList.forEach(item => {
+                item.textarea.value = "";
+                item.editor.setValue("", -1);
+            });
             logToServer('debug', 'No method selected, clearing content fields.');
             return;
         }
@@ -26,10 +38,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 return response.json();
             })
             .then(data => {
-                initContent.value = data.init || "No content found.";
-                mapContent.value = data.map || "No content found.";
-                dataContent.value = data.data || "No content found.";
-                retrieveContent.value = data.retrieve || "No content found.";
+                editorsList.forEach(item => {
+                    const value = data[item.field] || "No content found.";
+                    item.textarea.value = value;
+                    item.editor.setValue(value, -1);
+                });
                 logToServer('info', `Fetched method data for ${methodName}`);
             })
             .catch(error => logToServer('critical', `Error fetching method data: ${error}`));
@@ -41,51 +54,56 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
+let editorsData = [];
+let editorsList = [];
+
 document.addEventListener("DOMContentLoaded", function() {
-    document.getElementById("addInitContent").value = 
-    `import numpy as np
+    editorsData = [
+        {
+            contentId: "addInitContent",
+            editorId: "addInitEditor",
+            value: `import numpy as np
 from qiskit.quantum_info import Statevector
 
 def init(n_qubits: int) -> Statevector:    
     qubits_in_superposition = # place number of qubits in superposition
-    base_state = np.zeros(2**qubits_in_superposition , dtype=int)    
+    base_state = np.zeros(2**qubits_in_superposition, dtype=int)    
     base_state[0] = 1    
-    state = np.tile(base_state, 2**(n_qubits - qubits_in_superposition ))    
-    return Statevector(state)`;
-
-    document.getElementById("addMapContent").value = 
-    `import numpy as np
+    state = np.tile(base_state, 2**(n_qubits - qubits_in_superposition))
+    return Statevector(state)`
+        },
+        {
+            contentId: "addMapContent",
+            editorId: "addMapEditor",
+            value: `import numpy as np
 from qiskit.quantum_info import Operator
 
 def map(u: int, v: int, R: int, image: np.ndarray) -> Operator:    
     p = image[u, v]  
     # Provide your own unitary matrix for map operator
-    return Operator(map_operator)`;
-
-    document.getElementById("addDataContent").value = 
-    `import numpy as np
+    return Operator(map_operator)`
+        },
+        {
+            contentId: "addDataContent",
+            editorId: "addDataEditor",
+            value: `import numpy as np
 from qiskit.quantum_info import Statevector
 
 def data(u: int, v: int, R: int, image: np.ndarray) -> Statevector:    
     m = u * image.shape[0] + v    
     data_vector = np.zeros(2**(2 * R))    
     data_vector[m] = 1    
-    return Statevector(data_vector)`;
-
-    document.getElementById("addRetrieveContent").value = 
-    `import numpy as np
+    return Statevector(data_vector)`
+        },
+        {
+            contentId: "addRetrieveContent",
+            editorId: "addRetrieveEditor",
+            value: `import numpy as np
 import json
  
 def retrieve(results: str) -> np.ndarray:
     """
     Decodes an image from quantum state measurement results.
- 
-    Parameters:
-    results (dict): A dictionary where keys are binary strings representing quantum states,
-                         and values are their respective occurrence counts.
- 
-    Returns:
-    np.ndarray: A NumPy array representing the decoded image.
     """
     state_length = len(next(iter(results)))
     # color_qubits = set qubits used for color encoding
@@ -93,15 +111,22 @@ def retrieve(results: str) -> np.ndarray:
     x_qubits = number_of_position_qubits // 2
     y_qubits = number_of_position_qubits // 2
     image_shape = (2**x_qubits, 2**y_qubits)
- 
-    # For grayscale images:
-    # reconstructed_image = np.zeros((image_shape[0], image_shape[1]))
-    # For RGB images:
-    # reconstructed_image = np.zeros((image_shape[0], image_shape[1], 3))
- 
+    
     # Provide your own code here...
-        
-    return reconstructed_image`;
+    return reconstructed_image`
+        }
+    ];
+
+    editorsData.forEach(item => {
+        const textarea = document.getElementById(item.contentId);
+        textarea.value = item.value;
+
+        const editor = ace.edit(item.editorId);
+        editor.session.setMode("ace/mode/python");
+        editor.setTheme("ace/theme/github");
+        editor.setValue(item.value, -1);
+        editor.setFontSize("13px");
+    });
 
     logToServer('debug', 'Default method content loaded for addNewMethod.');
 });
@@ -138,16 +163,25 @@ document.getElementById("addNewMethod").addEventListener("click", async function
     
     loadingGif.style.display = 'inline-block';
     addNewMethodBtn.disabled = true;
+    
+    updateTextareas(editorsData);
 
     await saveMethod(true, true, methodName, "methodName", "addInitContent", "addMapContent", "addDataContent", "addRetrieveContent", canProceed);
 
     const images = await fetchAllImageFiles();
 
     await startTest(methodName, images, 'simulate', '1024', true, false);
-    
+
     addNewMethodBtn.disabled = false;
     loadingGif.style.display = 'none';
 });
+
+function updateTextareas(editorsList) {
+    editorsList.forEach(item => {
+      const editor = ace.edit(item.editorId);
+      document.getElementById(item.contentId).value = editor.getValue();
+    });
+}
 
 // document.getElementById("save").addEventListener("click", function () {
 //     logToServer('info', 'Method saved.');
@@ -180,6 +214,8 @@ document.getElementById("saveAsNew").addEventListener("click", async function ()
             loadingGif.style.display = 'none';
             return;
         }
+
+        updateTextareas(editorsList);
         
         await saveMethod(false, true, methodName, "methodSelect", "initContent", "mapContent", "dataContent", "retrieveContent", canProceed);
 
