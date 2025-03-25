@@ -13,10 +13,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
     editorsList.forEach(item => {
         item.textarea = document.getElementById(item.contentId);
+        ace.require("ace/ext/language_tools");
         item.editor = ace.edit(item.editorId);
         item.editor.session.setMode("ace/mode/python");
-        item.editor.setTheme("ace/theme/github");
+        // item.editor.setTheme("ace/theme/merbivore_soft");
+        item.editor.setTheme("ace/theme/xcode");
         item.editor.setFontSize("13px");
+        item.editor.setShowPrintMargin(false);
+        item.editor.setOptions({
+            enableBasicAutocompletion: true,
+            enableSnippets: true,
+            enableLiveAutocompletion: true
+        });
         item.editor.setValue(item.textarea.value, -1);
     });
 
@@ -120,12 +128,21 @@ def retrieve(results: str) -> np.ndarray:
     editorsData.forEach(item => {
         const textarea = document.getElementById(item.contentId);
         textarea.value = item.value;
-
+        
+        ace.require("ace/ext/language_tools");
         const editor = ace.edit(item.editorId);
         editor.session.setMode("ace/mode/python");
-        editor.setTheme("ace/theme/github");
+        // editor.setTheme("ace/theme/merbivore_soft");
+        editor.setTheme("ace/theme/xcode");
         editor.setValue(item.value, -1);
         editor.setFontSize("13px");
+        editor.setShowPrintMargin(false);
+        editor.setAnimatedScroll(true);
+        editor.setOptions({
+            enableBasicAutocompletion: true,
+            enableSnippets: true,
+            enableLiveAutocompletion: true
+        });
     });
 
     logToServer('debug', 'Default method content loaded for addNewMethod.');
