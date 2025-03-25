@@ -65,6 +65,17 @@ document.addEventListener("DOMContentLoaded", function () {
 let editorsData = [];
 let editorsList = [];
 
+document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(tab => {
+    tab.addEventListener('shown.bs.tab', function (event) {
+        const targetId = event.target.getAttribute('data-bs-target').substring(1);
+        
+        const editorItem = editorsList.find(item => item.field === targetId);
+        if (editorItem && editorItem.editor) {
+            editorItem.editor.resize();
+        }
+    });
+});
+
 document.addEventListener("DOMContentLoaded", function() {
     editorsData = [
         {
