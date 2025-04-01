@@ -184,6 +184,52 @@ DEFAULT_INIT = {
     ),
 }
 
+DEFAULT_METHODS_CONTENT = {
+    "init": """import numpy as np
+from qiskit.quantum_info import Statevector
+
+def init(n_qubits: int) -> Statevector:    
+    qubits_in_superposition = # place number of qubits in superposition
+    base_state = np.zeros(2**qubits_in_superposition, dtype=int)    
+    base_state[0] = 1    
+    state = np.tile(base_state, 2**(n_qubits - qubits_in_superposition))
+    return Statevector(state)""",
+    
+    "map": """import numpy as np
+from qiskit.quantum_info import Operator
+
+def map(u: int, v: int, R: int, image: np.ndarray) -> Operator:    
+    p = image[u, v]  
+    # Provide your own unitary matrix for map operator
+    return Operator(map_operator)""",
+    
+    "data": """import numpy as np
+from qiskit.quantum_info import Statevector
+
+def data(u: int, v: int, R: int, image: np.ndarray) -> Statevector:    
+    m = u * image.shape[0] + v    
+    data_vector = np.zeros(2**(2 * R))    
+    data_vector[m] = 1    
+    return Statevector(data_vector)""",
+    
+    "retrieve": """import numpy as np
+import json
+ 
+def retrieve(results: str) -> np.ndarray:
+    \"""
+    Decodes an image from quantum state measurement results.
+    \"""
+    state_length = len(next(iter(results)))
+    # color_qubits = set qubits used for color encoding
+    number_of_position_qubits = state_length - color_qubits
+    x_qubits = number_of_position_qubits // 2
+    y_qubits = number_of_position_qubits // 2
+    image_shape = (2**x_qubits, 2**y_qubits)
+    
+    # Provide your own code here...
+    return reconstructed_image"""
+}
+
 MEDIA_URL = 'grayscale/'
 
 #Docker path

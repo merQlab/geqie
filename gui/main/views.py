@@ -35,8 +35,12 @@ def experiment_config(request):
 
 def edit_method(request):
     methods = all_methods()
+    default_methods_content = settings.DEFAULT_METHODS_CONTENT
     logger.info("Edit_method card")
-    return render(request, 'edit_method.html', {'methods': methods})
+    return render(request, 'edit_method.html', {
+        'methods': methods,
+        'default_methods_content': default_methods_content,
+    })
 
 @csrf_exempt
 def start_experiment(request):
