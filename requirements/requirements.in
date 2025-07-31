@@ -1,8 +1,12 @@
+django
+gunicorn
+django-crispy-forms
+dj-database-url
+psycopg2-binary
+whitenoise
 cloup
 matplotlib
 pillow
 qiskit>1.0.0
 qiskit-aer
 tabulate
-django
-django-crispy-forms

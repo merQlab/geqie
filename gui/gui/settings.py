@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,13 +22,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-5d^frof^@!qferbrxi$218ke0!&4p4j*=dex(d+xeoufnf-k8o'
+SECRET_KEY = os.environ.get("SECRET_KEY", "INSECURE-SECRET-CHANGE-ME")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = ["*"]
-
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", ".onrender.com,localhost,127.0.0.1").split(',')
 
 # Application definition
 
@@ -44,6 +44,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # <-- Dla statyków!
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -72,20 +73,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'gui.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
+# Baza danych: domyślnie z env DATABASE_URL, fallback na SQLite
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}"
+    )
 }
-
-
-# Password validation
-# https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -102,25 +95,29 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
-# Internationalization
-# https://docs.djangoproject.com/en/5.1/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
-
-STATIC_URL = 'main/static/geqie/'
+# STATIC files
+STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'main/static/geqie/']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+# MEDIA files
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# Custom paths (dopasuj jeśli musisz!)
+# Jeśli assets/geqie/encodings i assets/test_images są w repo
+ENCODINGS_DIR = BASE_DIR / 'assets' / 'geqie' / 'encodings'
+# Możesz też użyć os.environ do nadpisania w razie potrzeby!
+MEDIA_ROOT = BASE_DIR / 'assets' / 'test_images'
+
+# Logging
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -144,9 +141,9 @@ LOGGING = {
             'formatter': 'verbose',
             'level': 'ERROR',
             'filename': os.path.join(BASE_DIR, 'logs', 'error.log'),
-            'when': 'midnight',     # Rotation every day at midnight
-            'interval': 30,         # Keep 30 days
-            'backupCount': 2,       # Keep 1 backup
+            'when': 'midnight',
+            'interval': 30,
+            'backupCount': 2,
         },
     },
     'loggers': {
@@ -167,9 +164,6 @@ LOGGING = {
         },
     },
 }
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -216,9 +210,9 @@ def data(u: int, v: int, R: int, image: np.ndarray) -> Statevector:
 import json
  
 def retrieve(results: str) -> np.ndarray:
-    \"""
+    \"\"\"
     Decodes an image from quantum state measurement results.
-    \"""
+    \"\"\"
     state_length = len(next(iter(results)))
     # color_qubits = set qubits used for color encoding
     number_of_position_qubits = state_length - color_qubits
@@ -229,13 +223,3 @@ def retrieve(results: str) -> np.ndarray:
     # Provide your own code here...
     return reconstructed_image"""
 }
-
-MEDIA_URL = 'grayscale/'
-
-#Docker path
-MEDIA_ROOT = os.path.join(BASE_DIR, 'assets', 'test_images')
-#MEDIA_ROOT = os.path.join(BASE_DIR, '..', 'assets', 'test_images')
-
-#Docker path
-ENCODINGS_DIR = os.path.abspath(os.path.join(BASE_DIR, "geqie", "encodings"))
-#ENCODINGS_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "geqie", "encodings"))
