@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 
 class QuantumMethod(models.Model):
@@ -29,3 +30,21 @@ class QuantumSubComputer(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.quantum_computer.name})"
+    
+class Job(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    filename = models.CharField(max_length=255)
+    method = models.CharField(max_length=100)
+    shots = models.CharField(max_length=32)
+    is_retrieve = models.BooleanField(default=False)
+
+    input_key = models.CharField(max_length=512)
+    output_json_key = models.CharField(max_length=512, blank=True, null=True)
+    retrieved_png_key = models.CharField(max_length=512, blank=True, null=True)
+    original_png_key = models.CharField(max_length=512, blank=True, null=True)
+
+    status = models.CharField(max_length=20, default="queued")
+    error = models.TextField(blank=True, null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)

@@ -97,3 +97,30 @@ geqie simulate --encoding frqi --image assets/test_image.png --n-shots 1024 --re
 ## Related research
 
 - [ICCS 2024 Poster](https://www.researchgate.net/publication/383184874_General_Quantum_Image_Representation_Model_and_Framework)
+
+
+## Docker
+
+Execute docker commands in the gui directory `cd gui`
+The page will be displayed at `http://localhost:8000`
+The admin panel is available at `http://localhost:8000/admin`
+
+**Build**
+```bash
+docker compose -f compose.server.yml -f compose.worker.yml build
+```
+
+**Start**
+```bash
+docker compose -f compose.server.yml -f compose.worker.yml up -d
+```
+
+**Migrate**
+```bash
+docker compose -f compose.server.yml -f compose.worker.yml exec web python gui/manage.py migrate --noinput
+```
+
+**Create superuser**
+```bash
+docker compose -f compose.server.yml -f compose.worker.yml exec web python gui/manage.py createsuperuser
+```

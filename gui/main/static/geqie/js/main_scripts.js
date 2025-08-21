@@ -192,75 +192,18 @@ document.getElementById('startExperiment').addEventListener('click', async funct
                     resultsList.appendChild(headerItem);
     
                     const data = await response.json();
-                    const resultsToIterate = data.processed ? data.processed : data;
 
-                    logToServer('info', `Response ok: ${JSON.stringify(resultsToIterate, null, 2)}`);
-
-                    if (resultsToIterate && Object.keys(resultsToIterate).length > 0) {
-                        for (const [fileName, result] of Object.entries(resultsToIterate)) {
-                            const listItem = document.createElement("li");
-                            listItem.className = "list-group-item";
-
-                            const strongFileText = document.createElement("strong");
-                            strongFileText.textContent = "File: ";
-                            listItem.appendChild(strongFileText);
-                            listItem.appendChild(document.createTextNode(fileName));
-                            listItem.appendChild(document.createElement("br"));
-
-                            const strongResultText = document.createElement("strong");
-                            strongResultText.textContent = "Result: ";
-                            listItem.appendChild(strongResultText);
-                            listItem.appendChild(document.createTextNode(result));
-                            listItem.appendChild(document.createElement("br"));
-
-                            const originalImageBase64 = data.image?.[fileName] || null;
-                            const retrievedImageBase64 = data.retrieved_image?.[fileName] || null;
-
-                            if (originalImageBase64) {
-                                const originalImg = document.createElement("img");
-                                originalImg.src = "data:image/png;base64," + originalImageBase64;
-                                originalImg.alt = "Original image";
-                                originalImg.style.width = "100%";
-                                originalImg.style.imageRendering = "pixelated";
-                                listItem.appendChild(originalImg);
-                                listItem.appendChild(document.createElement("br"));
-                            }
-
-                            if (originalImageBase64 && retrievedImageBase64) {
-                                const arrowDown = document.createElement("div");
-                                arrowDown.innerHTML = "&#8595;";
-                                arrowDown.style.fontSize = "24px";
-                                arrowDown.style.textAlign = "center";
-                                arrowDown.style.margin = "10px 0";
-                                listItem.appendChild(arrowDown);
-                            }
-                            
-                            if (retrievedImageBase64) {
-                                const retrievedImg = document.createElement("img");
-                                retrievedImg.src = "data:image/png;base64," + retrievedImageBase64;
-                                retrievedImg.alt = "Retrieved image";
-                                retrievedImg.style.width = "100%";
-                                retrievedImg.style.imageRendering = "pixelated";
-                                listItem.appendChild(retrievedImg);
-                                listItem.appendChild(document.createElement("br"));
-                            }
-
-                            resultsList.appendChild(listItem);
-
-                            allResults.push({
-                                file: fileName,
-                                result: result,
-                                image: originalImageBase64,
-                                retrieved_image: retrievedImageBase64,
-                                method: experiment.method
-                            });
-                        }
-                    } else {
+                    if (!data.jobs || !Array.isArray(data.jobs) || data.jobs.length === 0) {
                         const noResultsItem = document.createElement("li");
                         noResultsItem.className = "list-group-item text-muted";
-                        noResultsItem.textContent = "No results";
+                        noResultsItem.textContent = "No jobs returned";
                         resultsList.appendChild(noResultsItem);
+                    } else {
+                        for (const job of data.jobs) {
+                            await pollJobAndRender(job, resultsList, experiment.method, allResults, saveToCSVCheckbox.checked);
+                        }
                     }
+
                     isResponseOk = true;
                 } else {
                     isResponseOk = false;
@@ -299,6 +242,184 @@ document.getElementById('startExperiment').addEventListener('click', async funct
         saveToCSVCheckbox.disabled = false;
     }
 });
+
+function jobStatusUrl(jobId) {
+    return `/job-status/${jobId}/`;
+}
+
+async function pollJobAndRender(job, resultsList, methodName, allResults, needBase64ForSave) {
+    const listItem = document.createElement("li");
+    listItem.className = "list-group-item";
+
+    const strongFileText = document.createElement("strong");
+    strongFileText.textContent = "File: ";
+    listItem.appendChild(strongFileText);
+    listItem.appendChild(document.createTextNode(job.file));
+    listItem.appendChild(document.createElement("br"));
+
+    const statusStrong = document.createElement("strong");
+    statusStrong.textContent = "Status: ";
+    listItem.appendChild(statusStrong);
+    const statusText = document.createElement("span");
+    statusText.textContent = "queued";
+    listItem.appendChild(statusText);
+
+    resultsList.appendChild(listItem);
+
+    let attempts = 0;
+    while (true) {
+        await new Promise(r => setTimeout(r, Math.min(2500, 1000 + attempts * 300)));
+        attempts++;
+
+        let resp;
+        try {
+            resp = await fetch(jobStatusUrl(job.job_id), { credentials: "same-origin" });
+        } catch (e) {
+            statusText.textContent = `network error: ${e.message || e}`;
+            continue;
+        }
+
+        if (!resp.ok) {
+            statusText.textContent = `http ${resp.status}`;
+            continue;
+        }
+
+        const s = await resp.json();
+        statusText.textContent = s.status || "unknown";
+
+        if (s.status === "error" || s.status === "failed") {
+            if (s.error) {
+                const em = document.createElement("div");
+                em.className = "text-danger mt-1";
+                em.textContent = s.error;
+                listItem.appendChild(document.createElement("br"));
+                listItem.appendChild(em);
+            }
+            break;
+        }
+
+        if (s.status === "done") {
+            let resultObj = null;
+            let resultText = "";
+            if (s.output_json_url) {
+                try {
+                    const r = await fetch(s.output_json_url);
+                    if (r.ok) {
+                        const ct = r.headers.get("Content-Type") || "";
+                        if (ct.includes("application/json")) {
+                            let obj = await r.json();
+
+                            if (Array.isArray(obj) &&
+                                obj.length === 1 &&
+                                Array.isArray(obj[0]) &&
+                                obj[0].length === 2 &&
+                                obj[0][0] === "counts" &&
+                                typeof obj[0][1] === "object") {
+                                obj = obj[0][1];
+                            }
+                            else if (obj && typeof obj === "object" && obj.counts && typeof obj.counts === "object") {
+                                obj = obj.counts;
+                            }
+
+                            resultObj = obj;
+                            resultText = JSON.stringify(obj);
+                        } else {
+                            resultText = await r.text();
+                        }
+
+                    } else {
+                        resultText = `Result available: ${s.output_json_url}`;
+                    }
+                } catch (e) {
+                    resultText = "";
+                }
+            }
+
+            if (resultText) {
+                const strongResultText = document.createElement("strong");
+                strongResultText.textContent = "Result: ";
+                listItem.appendChild(document.createElement("br"));
+                listItem.appendChild(strongResultText);
+
+                const pre = document.createElement("pre");
+                pre.style.whiteSpace = "pre";
+                pre.style.overflowX = "auto";
+                pre.style.maxWidth = "100%";
+                pre.textContent = resultText;
+                listItem.appendChild(pre);
+            }
+
+            if (s.original_url) {
+                const originalImg = document.createElement("img");
+                originalImg.src = s.original_url;
+                originalImg.alt = "Original image";
+                originalImg.style.width = "100%";
+                originalImg.style.imageRendering = "pixelated";
+                listItem.appendChild(document.createElement("br"));
+                listItem.appendChild(originalImg);
+            }
+
+            if (s.original_url && s.retrieved_url) {
+                const arrowDown = document.createElement("div");
+                arrowDown.innerHTML = "&#8595;";
+                arrowDown.style.fontSize = "24px";
+                arrowDown.style.textAlign = "center";
+                arrowDown.style.margin = "10px 0";
+                listItem.appendChild(arrowDown);
+            }
+
+            if (s.retrieved_url) {
+                const retrievedImg = document.createElement("img");
+                retrievedImg.src = s.retrieved_url;
+                retrievedImg.alt = "Retrieved image";
+                retrievedImg.style.width = "100%";
+                retrievedImg.style.imageRendering = "pixelated";
+                listItem.appendChild(retrievedImg);
+            }
+
+            let originalB64 = null;
+            let retrievedB64 = null;
+            if (needBase64ForSave) {
+                try {
+                    if (s.original_url) originalB64 = await fetchToBase64(s.original_url);
+                    if (s.retrieved_url) retrievedB64 = await fetchToBase64(s.retrieved_url);
+                } catch (e) {
+                    logToServer('error', `Failed to fetch images as base64: ${e.message || e}`);
+                }
+            }
+
+            allResults.push({
+                file: job.file,
+                result: resultText || (resultObj ? JSON.stringify(resultObj) : ""),
+                image: originalB64,
+                retrieved_image: retrievedB64,
+                method: methodName
+            });
+
+            break;
+        }
+    }
+}
+
+async function fetchToBase64(url) {
+    const r = await fetch(url);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const blob = await r.blob();
+    return await blobToBase64(blob);
+}
+
+function blobToBase64(blob) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error("Failed to read blob"));
+        reader.onload = () => {
+            const dataUrl = reader.result;
+            const base64 = String(dataUrl).split(",")[1] || "";
+            resolve(base64);
+        };
+        reader.readAsDataURL(blob);
+    });
+}
 
 async function getUniqueFileHandle(dirHandle, baseName, extension) {
     let fileName = baseName + extension;
@@ -353,38 +474,32 @@ async function saveResultsToFolder(results, mainDirHandle, methodDirHandles) {
             worksheet.getCell("A1").value = "File name:";
             worksheet.getCell("B1").value = result.file;
             worksheet.getCell("A2").value = "Result:";
-            worksheet.getCell("B2").value = result.result;
+            worksheet.getCell("B2").value = typeof result.result === 'string' ? result.result : JSON.stringify(result.result);
 
             const scaleFactor = 64;
 
-            const originalBlob = await getUpscaledImageBlob(result.image, scaleFactor);
-            const originalBuffer = new Uint8Array(await originalBlob.arrayBuffer());
+            if (result.image) {
+                const originalBlob = await getUpscaledImageBlob(result.image, scaleFactor);
+                const originalBuffer = new Uint8Array(await originalBlob.arrayBuffer());
+                const originalImageId = workbook.addImage({ buffer: originalBuffer, extension: 'png' });
+                worksheet.addImage(originalImageId, {
+                    tl: { col: 0, row: 4 },
+                    ext: { width: 4 * scaleFactor, height: 4 * scaleFactor }
+                });
+            }
 
-            const retrievedBlob = await getUpscaledImageBlob(result.retrieved_image, scaleFactor);
-            const retrievedBuffer = new Uint8Array(await retrievedBlob.arrayBuffer());
+            if (result.retrieved_image) {
+                worksheet.getCell("E11").value = "→";
+                worksheet.getCell("E11").alignment = { horizontal: "center", vertical: "middle" };
 
-            const originalImageId = workbook.addImage({
-                buffer: originalBuffer,
-                extension: 'png'
-            });
-
-            const retrievedImageId = workbook.addImage({
-                buffer: retrievedBuffer,
-                extension: 'png'
-            });
-
-            worksheet.addImage(originalImageId, {
-                tl: { col: 0, row: 4 },
-                ext: { width: 4 * scaleFactor, height: 4 * scaleFactor }
-            });
-
-            worksheet.getCell("E11").value = "→";
-            worksheet.getCell("E11").alignment = { horizontal: "center", vertical: "middle" };
-
-            worksheet.addImage(retrievedImageId, {
-                tl: { col: 5, row: 4 },
-                ext: { width: 4 * scaleFactor, height: 4 * scaleFactor }
-            });
+                const retrievedBlob = await getUpscaledImageBlob(result.retrieved_image, scaleFactor);
+                const retrievedBuffer = new Uint8Array(await retrievedBlob.arrayBuffer());
+                const retrievedImageId = workbook.addImage({ buffer: retrievedBuffer, extension: 'png' });
+                worksheet.addImage(retrievedImageId, {
+                    tl: { col: 5, row: 4 },
+                    ext: { width: 4 * scaleFactor, height: 4 * scaleFactor }
+                });
+            }
 
             const xlsxData = await workbook.xlsx.writeBuffer();
             const fileHandle = await getUniqueFileHandle(methodHandle, baseName, ".xlsx");

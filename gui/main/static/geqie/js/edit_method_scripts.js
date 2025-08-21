@@ -22,7 +22,6 @@ document.addEventListener("DOMContentLoaded", function () {
         ace.require("ace/ext/language_tools");
         item.editor = ace.edit(item.editorId);
         item.editor.session.setMode("ace/mode/python");
-        // item.editor.setTheme("ace/theme/merbivore_soft");
         item.editor.setTheme("ace/theme/xcode");
         item.editor.setFontSize("13px");
         item.editor.setShowPrintMargin(false);
@@ -110,7 +109,6 @@ document.addEventListener("DOMContentLoaded", function() {
         ace.require("ace/ext/language_tools");
         const editor = ace.edit(item.editorId);
         editor.session.setMode("ace/mode/python");
-        // editor.setTheme("ace/theme/merbivore_soft");
         editor.setTheme("ace/theme/xcode");
         editor.setValue(item.value, -1);
         editor.setFontSize("13px");
@@ -174,11 +172,6 @@ function updateTextareas(editorsList) {
       document.getElementById(item.contentId).value = editor.getValue();
     });
 }
-
-// document.getElementById("save").addEventListener("click", function () {
-//     logToServer('info', 'Method saved.');
-//     saveMethod(false, false, document.getElementById("methodSelect").value, "methodSelect", "initContent", "mapContent", "dataContent");
-// });
 
 document.getElementById("saveAsNew").addEventListener("click", async function () {
     let userInput = prompt("Method name:");
