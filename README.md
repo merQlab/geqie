@@ -101,9 +101,9 @@ geqie simulate --encoding frqi --image assets/test_image.png --n-shots 1024 --re
 
 ## Docker
 
-Execute docker commands in the gui directory `cd gui`
-The page will be displayed at `http://localhost:8000`
-The admin panel is available at `http://localhost:8000/admin`
+Execute docker commands in the gui directory `cd gui`  
+The page will be displayed at `http://localhost:8000`  
+The admin panel is available at `http://localhost:8000/admin`  
 
 **Build**
 ```bash
