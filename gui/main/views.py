@@ -4,19 +4,20 @@ import json
 import uuid
 import base64
 import logging
+import mimetypes
 from importlib import import_module
-
+from pathlib import Path
 from django.conf import settings
 from django.http import JsonResponse, Http404
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
 from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
 
 from .models import QuantumMethod, QuantumComputer, Job
 from .utils import all_methods, approved_methods, refresh_quantum_methods
 from .tasks import run_experiment
-from gui.settings import ENCODINGS_DIR
 
 logger = logging.getLogger(__name__)
 loggerFront = logging.getLogger("frontend_logs")
@@ -73,38 +74,66 @@ def _presigned_url(key: str, ttl: int = 3600) -> str | None:
 @csrf_exempt
 @require_POST
 def start_experiment(request):
-    """
-    It accepts files, saves to S3/MinIO, creates a Job and starts the Celery worker.
-    Returns a list of job_ids for uploaded files.
-    """
     logger.info("Processing POST /start-Experiment/")
+
     selected_method = request.POST.get("selected_method")
     shots = request.POST.get("shots", "1024")
     is_retrieve = request.POST.get("is_retrieve", "").strip().lower() in ["true"]
 
-    file_list = request.FILES.getlist("images[]") or list(request.FILES.values())
-    if not file_list:
-        return JsonResponse({"success": False, "error": "No files provided."}, status=400)
-
     if not selected_method:
         return JsonResponse({"success": False, "error": "No method selected."}, status=400)
 
+    file_list = request.FILES.getlist("images[]") or list(request.FILES.values())
+
+    if not file_list:
+        exts = {".png", ".jpg", ".jpeg", ".gif", ".bmp", ".tif", ".tiff"}
+
+        assets_root = Path("/app/assets")
+        roots = [
+            assets_root / "test_images" / "grayscale",
+            assets_root / "test_images" / "rgb",
+        ]
+
+        gathered = []
+        for root in roots:
+            if root.exists():
+                for p in root.rglob("*"):
+                    if p.is_file() and p.suffix.lower() in exts:
+                        gathered.append(p)
+
+        if not gathered:
+            searched = ", ".join(str(p) for p in roots)
+            return JsonResponse(
+                {"success": False, "error": f"No files provided and no images found under: {searched}"},
+                status=400
+            )
+
+        for p in gathered:
+            data = p.read_bytes()
+            key = f"uploads/{uuid.uuid4()}_{p.name}"
+            default_storage.save(key, ContentFile(data))
+            file_list.append({"_stored_key": key, "_orig_name": p.name})
+
     jobs = []
     for uploaded in file_list:
-        key = f"uploads/{uuid.uuid4()}_{uploaded.name}"
-        default_storage.save(key, uploaded)
+        if hasattr(uploaded, "name"):
+            key = f"uploads/{uuid.uuid4()}_{uploaded.name}"
+            default_storage.save(key, uploaded)
+            filename = uploaded.name
+        else:
+            key = uploaded["_stored_key"]
+            filename = uploaded["_orig_name"]
 
         job = Job.objects.create(
-            filename=uploaded.name,
+            filename=filename,
             method=selected_method,
             shots=str(shots),
             is_retrieve=is_retrieve,
             input_key=key,
             status="queued",
         )
-
         run_experiment.delay(str(job.id))
-        jobs.append({"file": uploaded.name, "job_id": str(job.id)})
+        jobs.append({"file": filename, "job_id": str(job.id)})
 
     logger.info("Queued %d job(s) for method=%s shots=%s", len(jobs), selected_method, shots)
     return JsonResponse({"jobs": jobs})
@@ -135,7 +164,7 @@ def job_status(request, job_id):
 
 
 def read_method_files(request, method_name):
-    method_path = os.path.join(ENCODINGS_DIR, method_name)
+    method_path = os.path.join(settings.ENCODINGS_DIR, method_name)
     if not os.path.exists(method_path):
         logger.error("Method not found: %s", method_name)
         return JsonResponse({"error": "Method not found"}, status=404)
@@ -173,10 +202,10 @@ def save_method_files(request):
             logger.error("No method name provided")
             return JsonResponse({"error": "No method name provided"}, status=400)
 
-        method_path = os.path.join(ENCODINGS_DIR, method_name)
+        method_path = os.path.join(settings.ENCODINGS_DIR, method_name)
 
-        if is_new and not os.path.exists(os.path.join(ENCODINGS_DIR, save_name)):
-            method_path = os.path.join(ENCODINGS_DIR, save_name)
+        if is_new and not os.path.exists(os.path.join(settings.ENCODINGS_DIR, save_name)):
+            method_path = os.path.join(settings.ENCODINGS_DIR, save_name)
             os.makedirs(method_path)
 
         files = settings.DEFAULT_INIT.copy()
@@ -212,41 +241,42 @@ def check_folder_exists(request):
     return JsonResponse({"exists": exists})
 
 
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
+
+@require_GET
 def get_all_images(request):
-    prefix = "grayscale/"
+    exts = {".png", ".jpg", ".jpeg", ".gif", ".bmp", ".tif", ".tiff"}
     images = []
+
     try:
-        s3 = _s3_client()
-        bucket = settings.AWS_STORAGE_BUCKET_NAME
-        paginator = s3.get_paginator("list_objects_v2")
+        assets_root = Path("/app/assets")
+        roots = [
+            assets_root / "test_images" / "grayscale",
+            assets_root / "test_images" / "rgb",
+        ]
 
-        keys = []
-        for page in paginator.paginate(Bucket=bucket, Prefix=prefix):
-            for obj in page.get("Contents", []):
-                key = obj["Key"]
-                if key.lower().endswith((".png", ".jpg", ".jpeg", ".gif")):
-                    keys.append(key)
+        any_found = False
+        for root in roots:
+            if not root.exists():
+                logger.debug("get_all_images: skipping the missing directory: %s", root)
+                continue
+            for p in root.rglob("*"):
+                if p.is_file() and p.suffix.lower() in exts:
+                    body = p.read_bytes()
+                    mime_type, _ = mimetypes.guess_type(p.name)
+                    images.append({
+                        "name": p.name,
+                        "data": base64.b64encode(body).decode("utf-8"),
+                        "type": mime_type or "application/octet-stream",
+                    })
+                    any_found = True
 
-        for key in keys:
-            with default_storage.open(key, "rb") as f:
-                data = f.read()
-            name = os.path.basename(key)
-            if name.lower().endswith((".jpg", ".jpeg")):
-                mime_type = "image/jpeg"
-            elif name.lower().endswith(".gif"):
-                mime_type = "image/gif"
-            else:
-                mime_type = "image/png"
-
-            images.append({
-                "name": name,
-                "data": base64.b64encode(data).decode("utf-8"),
-                "type": mime_type
-            })
-
+        if not any_found:
+            logger.warning("get_all_images: no images found. Searched in: %s", ", ".join(map(str, roots)))
         return JsonResponse({"images": images})
     except Exception as e:
-        logger.exception("S3 read error: %s", e)
+        logger.exception("get_all_images error: %s", e)
         return JsonResponse({"error": str(e)}, status=500)
 
 

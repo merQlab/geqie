@@ -1,4 +1,5 @@
 from __future__ import annotations
+import logging
 import io, os, sys, json, tempfile, subprocess, shutil
 from pathlib import Path
 from collections import OrderedDict
@@ -15,6 +16,8 @@ from django.core.files.storage import default_storage
 from importlib.util import spec_from_file_location, module_from_spec
 from .models import Job
 
+class UserVisibleError(Exception):
+    pass
 
 def _save_pil_to_s3(img: Image.Image, key: str):
     buf = io.BytesIO()
@@ -26,10 +29,10 @@ def _save_pil_to_s3(img: Image.Image, key: str):
 
 def _load_method_module(method_name: str):
     enc_dir = Path(settings.ENCODINGS_DIR)
-    init_py = enc_dir / method_name / "__init__.py"
+    init_py = enc_dir / method_name
     if not init_py.exists():
         return None
-    spec = spec_from_file_location(f"enc_{method_name}", init_py)
+    spec = spec_from_file_location(f"{method_name}", init_py)
     if not spec or not spec.loader:
         return None
     mod = module_from_spec(spec)
@@ -119,7 +122,11 @@ def run_experiment(self, job_id: str) -> dict:
 
         ok, ordered_output, err = _try_geqie_cli_simulate(str(job.method), tmp_path, shots)
         if not ok:
-            ordered_output = _fake_simulation(tmp_path, shots)
+            logging.getLogger(__name__).error(
+            "geqie simulate failed for method=%s file=%s: %s",
+            job.method, job.filename, err
+        )
+            raise UserVisibleError("Experiment failed: method error.")
 
         out_json_key = f"results/{job.id}_output.json"
         payload = ordered_output.get("counts", ordered_output)
@@ -158,13 +165,14 @@ def run_experiment(self, job_id: str) -> dict:
         ])
         return {"ok": True}
 
-    except Exception as e:
+    except UserVisibleError as e:
         job.status = "error"
-        job.error = f"{type(e).__name__}: {e}"
+        job.error = str(e)
         job.save(update_fields=["status", "error", "updated_at"])
-        raise
-    finally:
-        try:
-            os.remove(tmp_path)
-        except Exception:
-            pass
+        return {"ok": False}
+    except Exception as e:
+        logging.getLogger(__name__).exception("Unexpected error in run_experiment job_id=%s", job.id)
+        job.status = "error"
+        job.error = "Experiment failed: internal error."
+        job.save(update_fields=["status", "error", "updated_at"])
+        return {"ok": False}

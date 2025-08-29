@@ -1,6 +1,7 @@
 from pathlib import Path
 from botocore.config import Config
 import os
+import geqie
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -239,4 +240,4 @@ def retrieve(results: str) -> np.ndarray:
     return reconstructed_image""",
 }
 
-ENCODINGS_DIR = BASE_DIR / 'geqie' / 'encodings'
+ENCODINGS_DIR = (Path(geqie.__file__).resolve().parent / "encodings").resolve()

@@ -3,6 +3,11 @@ let editorsData = [];
 let editorsList = [];
 let formData = new FormData();
 let displayedName;
+let isResponseOk; 
+
+function jobStatusUrl(jobId) {
+    return `/job-status/${jobId}/`;
+}
 
 document.addEventListener("DOMContentLoaded", function () {
     logToServer('debug', 'DOM fully loaded. Setting up event listeners for methodSelect.');
@@ -70,7 +75,6 @@ document.addEventListener("DOMContentLoaded", function () {
 document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(tab => {
     tab.addEventListener('shown.bs.tab', function (event) {
         const targetId = event.target.getAttribute('data-bs-target').substring(1);
-        
         const editorItem = editorsList.find(item => item.field === targetId);
         if (editorItem && editorItem.editor) {
             editorItem.editor.resize();
@@ -105,7 +109,7 @@ document.addEventListener("DOMContentLoaded", function() {
     editorsData.forEach(item => {
         const textarea = document.getElementById(item.contentId);
         textarea.value = item.value;
-        
+
         ace.require("ace/ext/language_tools");
         const editor = ace.edit(item.editorId);
         editor.session.setMode("ace/mode/python");
@@ -124,6 +128,7 @@ document.addEventListener("DOMContentLoaded", function() {
     logToServer('debug', 'Default method content loaded for addNewMethod.');
 });
 
+
 document.getElementById("imagePath").addEventListener("click", function() {
     document.getElementById("fileInput").click();
     logToServer('debug', 'Image path clicked, triggering file input click.');
@@ -139,6 +144,7 @@ document.getElementById("fileInput").addEventListener("change", function() {
     }
 });
 
+
 document.getElementById("addNewMethod").addEventListener("click", async function () {
     logToServer('info', 'User triggered addNewMethod.');
     const methodName = document.getElementById("methodName").value;
@@ -150,28 +156,22 @@ document.getElementById("addNewMethod").addEventListener("click", async function
         logToServer('info', `Folder check failed for method: ${methodName}`);
         return;
     }
-    
+
     loadingGif.style.display = 'inline-block';
     addNewMethodBtn.disabled = true;
-    
+
     updateTextareas(editorsData);
 
     await saveMethod(true, true, methodName, "methodName", "addInitContent", "addMapContent", "addDataContent", "addRetrieveContent", canProceed);
 
     const images = await fetchAllImageFiles();
 
-    await startTest(methodName, images, 'simulate', '1024', true, false);
+    await startTest(methodName, [], 'simulate', '1024', true, true);
 
     addNewMethodBtn.disabled = false;
     loadingGif.style.display = 'none';
 });
 
-function updateTextareas(editorsList) {
-    editorsList.forEach(item => {
-      const editor = ace.edit(item.editorId);
-      document.getElementById(item.contentId).value = editor.getValue();
-    });
-}
 
 document.getElementById("saveAsNew").addEventListener("click", async function () {
     let userInput = prompt("Method name:");
@@ -201,17 +201,24 @@ document.getElementById("saveAsNew").addEventListener("click", async function ()
         }
 
         updateTextareas(editorsList);
-        
+
         await saveMethod(false, true, methodName, "methodSelect", "initContent", "mapContent", "dataContent", "retrieveContent", canProceed);
 
         const images = await fetchAllImageFiles();
 
-        await startTest(methodName, images, 'simulate', '1024', true, false);
+        await startTest(methodName, [], 'simulate', '1024', true, true);
 
         addNewMethodBtn.disabled = false;
         loadingGif.style.display = 'none';
     }
 });
+
+function updateTextareas(editorsList) {
+    editorsList.forEach(item => {
+      const editor = ace.edit(item.editorId);
+      document.getElementById(item.contentId).value = editor.getValue();
+    });
+}
 
 async function saveMethod(addNew, isNew, saveName, method, init, map, data, retrieve, isFolderExist) {
     let methodName = document.getElementById(method).value;
@@ -309,7 +316,7 @@ async function fetchAllImageFiles() {
     const response = await fetch('/get-all-images/');
     if (!response.ok) {
         logToServer('error', 'Error downloading images');
-        return;
+        return [];
     }
     const data = await response.json();
     const imageFiles = [];
@@ -329,13 +336,14 @@ async function fetchAllImageFiles() {
     return imageFiles;
 }
 
+
 document.getElementById("startTest").addEventListener("click", async function () {
     const startTestBtn = document.getElementById('startTest');
     const loadingGif = document.getElementById('testLoadingGif');
     const shotsElement = document.getElementById('shots');
     const images = fileInput.files[0];
 
-    logToServer('info', `Start test: method=${displayedName}, images=${fileInput.files.length}, shots=${shotsElement.value}`);
+    logToServer('info', `Start test click: method=${displayedName || '(none)'}, images=${fileInput.files.length}, shots=${shotsElement.value}`);
 
     if (!displayedName) {
         alert("Please select an method first.");
@@ -347,59 +355,38 @@ document.getElementById("startTest").addEventListener("click", async function ()
         return;
     }
 
+    const testResultList = document.getElementById('testResult');
+    if (testResultList) testResultList.innerHTML = "";
+    const boxLeft = document.querySelector(".box-left");
+    const boxRight = document.querySelector(".box-right");
+    if (boxLeft) boxLeft.innerHTML = "";
+    if (boxRight) boxRight.innerHTML = "";
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        const img = document.createElement("img");
+        img.src = e.target.result;
+        if (boxLeft) boxLeft.appendChild(img);
+    };
+    reader.readAsDataURL(images);
+
     startTestBtn.disabled = true;
     loadingGif.style.display = 'inline-block';
 
     try {
-        const responseData = await startTest(displayedName, [images], 'simulate', shotsElement.value, false, true);
-        
-        if (responseData) {
-            logToServer('info', `Response data=${responseData}`);
-            const testResultInput = document.getElementById('testResult');
-            testResultInput.innerHTML = "";
-
-            for (const [fileName, result] of Object.entries(responseData.processed)) {
-                const listItem = document.createElement("li");
-                listItem.className = "list-group-item";
-
-                const strongResultText = document.createElement("strong");
-                strongResultText.textContent = "Result: ";
-                const resultValueText = document.createTextNode(result);
-
-                listItem.appendChild(strongResultText);
-                listItem.appendChild(resultValueText);
-                testResultInput.appendChild(listItem);
-
-                if (responseData.retrieved_image) {
-                    const retrievedImg = document.createElement("img");
-                    retrievedImg.src = "data:image/png;base64," + responseData.retrieved_image[fileName];
-                    const boxRight = document.querySelector(".box-right");
-                    boxRight.appendChild(retrievedImg);
-                }
-            }
-            
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                const img = document.createElement("img");
-                img.src = e.target.result;
-                const boxLeft = document.querySelector(".box-left");
-                boxLeft.appendChild(img);
-            };
-            reader.readAsDataURL(images);
-        } else {
-            logToServer('warning', "No data received or request failed");
-        }
+        const data = await startTest(displayedName, [images], 'simulate', shotsElement.value, true, true);
     } catch (error) {
-        logToServer('critical', `Response data=${error}`);
+        logToServer('critical', `Start test click error: ${error?.message || error}`);
     }
-    
+
     startTestBtn.disabled = false;
     loadingGif.style.display = 'none';
 });
 
+
 async function startTest(selected_method, images, computer, shots, is_test, is_retrieve) {
-    logToServer('info', `Start test: method=${selected_method}, images=${images.length}, computer=${computer}, shots=${shots}, is_test=${is_test}, is_retrieve=${is_retrieve}`);
-    
+    logToServer('info', `Start test (jobs): method=${selected_method}, images=${images.length}, computer=${computer}, shots=${shots}, is_test=${is_test}, is_retrieve=${is_retrieve}`);
+
     const formData = new FormData();
     images.forEach(image => {
         formData.append('images[]', image);
@@ -409,6 +396,8 @@ async function startTest(selected_method, images, computer, shots, is_test, is_r
     formData.append('shots', shots);
     formData.append('is_test', is_test);
     formData.append('is_retrieve', is_retrieve);
+
+    const testResultList = document.getElementById('testResult');
 
     try {
         const response = await fetch(startTestUrl, {
@@ -425,15 +414,21 @@ async function startTest(selected_method, images, computer, shots, is_test, is_r
             logToServer('info', `Response ok: ${JSON.stringify(data, null, 2)}`);
             isResponseOk = true;
 
-            if (Object.keys(data.processed).length === 0) {
-                alert("Photo processing error with this method.");
-                return null;
+            if (!data.jobs || !Array.isArray(data.jobs) || data.jobs.length === 0) {
+                const noResultsItem = document.createElement("li");
+                noResultsItem.className = "list-group-item text-muted";
+                noResultsItem.textContent = "No jobs returned";
+                if (testResultList) testResultList.appendChild(noResultsItem);
+                return data;
             }
-            if (is_test === false && Object.keys(data.image).length === 0) {
-                alert("Image is empty.");
-            }
-            if (is_test === false && Object.keys(data.retrieved_image).length === 0) {
-                alert("Retrieved image is empty.");
+
+            const headerItem = document.createElement("li");
+            headerItem.className = "list-group-item fw-bold";
+            headerItem.textContent = `Test: ${selected_method}`;
+            if (testResultList) testResultList.appendChild(headerItem);
+
+            for (const job of data.jobs) {
+                await pollJobAndRender(job, testResultList, selected_method);
             }
 
             alert("Executed successfully!");
@@ -455,5 +450,143 @@ async function startTest(selected_method, images, computer, shots, is_test, is_r
     } catch (error) {
         logToServer('critical', `Error starting experiment: ${error.message || error}`);
         return null;
+    }
+}
+
+async function pollJobAndRender(job, resultsList, methodName) {
+    const listItem = document.createElement("li");
+    listItem.className = "list-group-item";
+
+    const strongFileText = document.createElement("strong");
+    strongFileText.textContent = "File: ";
+    listItem.appendChild(strongFileText);
+    listItem.appendChild(document.createTextNode(job.file));
+    listItem.appendChild(document.createElement("br"));
+
+    const statusStrong = document.createElement("strong");
+    statusStrong.textContent = "Status: ";
+    listItem.appendChild(statusStrong);
+    const statusText = document.createElement("span");
+    statusText.textContent = "queued";
+    listItem.appendChild(statusText);
+
+    resultsList.appendChild(listItem);
+
+    let attempts = 0;
+    while (true) {
+        await new Promise(r => setTimeout(r, Math.min(2500, 1000 + attempts * 300)));
+        attempts++;
+
+        let resp;
+        try {
+            resp = await fetch(jobStatusUrl(job.job_id), { credentials: "same-origin" });
+        } catch (e) {
+            statusText.textContent = `network error: ${e.message || e}`;
+            continue;
+        }
+
+        if (!resp.ok) {
+            statusText.textContent = `http ${resp.status}`;
+            continue;
+        }
+
+        const s = await resp.json();
+        statusText.textContent = s.status || "unknown";
+
+        if (s.status === "error" || s.status === "failed") {
+            if (s.error) {
+                const em = document.createElement("div");
+                em.className = "text-danger mt-1";
+                em.textContent = s.error;
+                listItem.appendChild(document.createElement("br"));
+                listItem.appendChild(em);
+            }
+            break;
+        }
+
+        if (s.status === "done") {
+            let resultText = "";
+            if (s.output_json_url) {
+                try {
+                    const r = await fetch(s.output_json_url);
+                    if (r.ok) {
+                        const ct = r.headers.get("Content-Type") || "";
+                        if (ct.includes("application/json")) {
+                            let obj = await r.json();
+
+                            if (Array.isArray(obj) &&
+                                obj.length === 1 &&
+                                Array.isArray(obj[0]) &&
+                                obj[0].length === 2 &&
+                                obj[0][0] === "counts" &&
+                                typeof obj[0][1] === "object") {
+                                obj = obj[0][1];
+                            }
+                            else if (obj && typeof obj === "object" && obj.counts && typeof obj.counts === "object") {
+                                obj = obj.counts;
+                            }
+
+                            resultText = JSON.stringify(obj);
+                        } else {
+                            resultText = await r.text();
+                        }
+                    } else {
+                        resultText = `Result available: ${s.output_json_url}`;
+                    }
+                } catch (e) {
+                    resultText = "";
+                }
+            }
+
+            if (resultText) {
+                const strongResultText = document.createElement("strong");
+                strongResultText.textContent = "Result: ";
+                listItem.appendChild(document.createElement("br"));
+                listItem.appendChild(strongResultText);
+
+                const pre = document.createElement("pre");
+                pre.style.whiteSpace = "pre";
+                pre.style.overflowX = "auto";
+                pre.style.maxWidth = "100%";
+                pre.textContent = resultText;
+                listItem.appendChild(pre);
+            }
+
+            if (s.original_url) {
+                const originalImg = document.createElement("img");
+                originalImg.src = s.original_url;
+                originalImg.alt = "Original image";
+                originalImg.style.width = "100%";
+                originalImg.style.imageRendering = "pixelated";
+                listItem.appendChild(document.createElement("br"));
+                listItem.appendChild(originalImg);
+            }
+
+            if (s.original_url && s.retrieved_url) {
+                const arrowDown = document.createElement("div");
+                arrowDown.innerHTML = "&#8595;";
+                arrowDown.style.fontSize = "24px";
+                arrowDown.style.textAlign = "center";
+                arrowDown.style.margin = "10px 0";
+                listItem.appendChild(arrowDown);
+            }
+
+            if (s.retrieved_url) {
+                const retrievedImg = document.createElement("img");
+                retrievedImg.src = s.retrieved_url;
+                retrievedImg.alt = "Retrieved image";
+                retrievedImg.style.width = "100%";
+                retrievedImg.style.imageRendering = "pixelated";
+                listItem.appendChild(retrievedImg);
+
+                const boxRight = document.querySelector(".box-right");
+                if (boxRight) {
+                    const thumb = document.createElement("img");
+                    thumb.src = s.retrieved_url;
+                    boxRight.appendChild(thumb);
+                }
+            }
+            break;
+        }
     }
 }
