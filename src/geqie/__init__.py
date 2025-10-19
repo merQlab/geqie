@@ -1,5 +1,5 @@
 import itertools
-from typing import Callable, Dict
+from typing import Callable
 
 import numpy as np
 from qiskit.circuit import QuantumCircuit
@@ -18,7 +18,7 @@ def encode(
     data_function: Callable[[int, int, int, np.ndarray], Statevector],
     map_function: Callable[[int, int, int, np.ndarray], Operator],
     image: np.ndarray,
-    ctx: Dict = {},
+    ctx: dict = {},
 ) -> QuantumCircuit:
     verbosity_level = ctx.get("verbose", 0)
 
@@ -68,7 +68,7 @@ def simulate(
     n_shots: int,
     return_qiskit_result: bool = False,
     return_padded_counts: bool = False,
-) -> Dict[str, int] | Result:
+) -> dict[str, int] | Result:
     simulator = Aer.get_backend("aer_simulator")
 
     result = simulator.run(circuit, shots=n_shots, memory=True).result()

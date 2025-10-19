@@ -4,7 +4,7 @@ import importlib.util
 import json
 import sys
 from pathlib import Path
-from typing import Callable, Dict, NamedTuple
+from typing import Callable, NamedTuple
 
 import cloup
 import numpy as np
@@ -32,7 +32,7 @@ def _import_module(name: str, file_path: str):
     return module
 
 
-def _get_encoding_functions(params: Dict):
+def _get_encoding_functions(params: dict):
     if params.get("init") and params.get("data") and params.get("map"):
         init_path = params.get("init")
         data_path = params.get("data")
@@ -51,7 +51,7 @@ def _get_encoding_functions(params: Dict):
     return EncodingFunctions(init_function, data_function, map_function)
 
 
-def _get_retrive_functions(params: Dict):
+def _get_retrive_functions(params: dict):
     encoding_path = params.get("encoding")
     retrieve_path = f"{encoding_path}/retrieve.py"
     retrieve_function = getattr(_import_module("retrieve", retrieve_path), "retrieve")
