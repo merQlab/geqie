@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Build and check the project
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          cache-dependency-glob: |
+            **/pyproject.toml
+            **/uv.lock
+
+      - name: Install the project
+        run: uv sync --all-extras --dev
+
+      - name: Check format
+        run: uvx --from=ruff ruff format --check
+
+      - name: Check lints
+        run: uvx --from=ruff ruff check
+
+      - name: Test with pytest
+        run: uv run pytest
