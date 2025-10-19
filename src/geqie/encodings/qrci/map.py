@@ -1,14 +1,10 @@
 import numpy as np
 from qiskit.quantum_info import Operator
 
-
 KET_BRA_0 = np.array([[1, 0], [0, 0]])
 KET_BRA_1 = np.array([[0, 0], [0, 1]])
 I_GATE = np.eye(2)
-X_GATE = np.array([
-    [0, 1], 
-    [1, 0]
-])
+X_GATE = np.array([[0, 1], [1, 0]])
 
 # Precompute label operators to avoid recalculating them in the loop
 LABEL_OPERATORS = [
@@ -18,9 +14,11 @@ LABEL_OPERATORS = [
     for k3 in (KET_BRA_0, KET_BRA_1)
 ]
 
+
 def get_channel_gate(bit_value: str) -> np.ndarray:
     """Returns the appropriate gate for the given bit value."""
-    return X_GATE if bit_value == '1' else I_GATE
+    return X_GATE if bit_value == "1" else I_GATE
+
 
 def map(u: int, v: int, R: int, image: np.ndarray) -> Operator:
     u_v_pixel_operator = np.zeros((2**6, 2**6))

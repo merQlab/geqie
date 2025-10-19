@@ -1,12 +1,8 @@
 import numpy as np
 from qiskit.quantum_info import Operator
 
-
 I_GATE = np.eye(2)
-X_GATE = np.array([
-    [0, 1], 
-    [1, 0]
-])
+X_GATE = np.array([[0, 1], [1, 0]])
 
 CHANNEL_POSITIONING = {
     0: np.kron(I_GATE, I_GATE),  # red
@@ -16,10 +12,7 @@ CHANNEL_POSITIONING = {
 
 
 def ry_gate(theta: float) -> np.ndarray:
-    return [
-        [np.cos(theta), -np.sin(theta)],
-        [np.sin(theta),  np.cos(theta)]
-    ]
+    return [[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]]
 
 
 def map(u: int, v: int, R: int, image: np.ndarray) -> Operator:

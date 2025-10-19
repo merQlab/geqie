@@ -1,5 +1,7 @@
-import numpy as np
 import json
+
+import numpy as np
+
 
 def retrieve(results: str) -> np.ndarray:
     """
@@ -16,7 +18,7 @@ def retrieve(results: str) -> np.ndarray:
     results = json.loads(results)
 
     state_length = len(next(iter(results)))
-    row_col_shape = int((state_length - 1)/2)**2
+    row_col_shape = int((state_length - 1) / 2) ** 2
     image_shape = (row_col_shape, row_col_shape)
 
     image_reconstructed = np.zeros(image_shape, dtype=np.uint8)
