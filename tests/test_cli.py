@@ -30,6 +30,8 @@ METHOD_CLI_MAPPING = {
 def test_cli(method: str, params: CLIParameters):
     subprocess.run(
         [
+            "uv",
+            "run",
             "geqie",
             "simulate",
             "--encoding",
