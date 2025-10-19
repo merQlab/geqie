@@ -3,25 +3,24 @@ import importlib
 import importlib.util
 import json
 import sys
-
 from pathlib import Path
 from typing import Callable, Dict, NamedTuple
 
 import cloup
+import numpy as np
 from cloup import constraints
 from PIL import Image, ImageOps
+from qiskit.quantum_info import Operator, Statevector
 
-import numpy as np
-
-import geqie.main as main
+import geqie
 
 ENCODINGS_PATH = Path(__file__).parent / "encodings"
 
 
 class EncodingFunctions(NamedTuple):
-    init_function: Callable
-    data_function: Callable
-    map_function: Callable
+    init_function: Callable[[int], Statevector]
+    data_function: Callable[[int, int, int, np.ndarray], Statevector]
+    map_function: Callable[[int, int, int, np.ndarray], Operator]
 
 
 def _import_module(name: str, file_path: str):
@@ -40,7 +39,7 @@ def _get_encoding_functions(params: Dict):
         map_path = params.get("map")
     else:
         encoding_path = params.get("encoding")
-        
+
         init_path = f"{encoding_path}/init.py"
         data_path = f"{encoding_path}/data.py"
         map_path = f"{encoding_path}/map.py"
@@ -79,29 +78,53 @@ def list_encodings():
 
 def encoding_options(func):
     @constraints.require_one(
-        cloup.option("--encoding", help="Name of the encoding from 'encodings' directory"),
-        cloup.option_group("Custom encoding plugins",
+        cloup.option(
+            "--encoding", help="Name of the encoding from 'encodings' directory"
+        ),
+        cloup.option_group(
+            "Custom encoding plugins",
             cloup.option("--init"),
             cloup.option("--data"),
             cloup.option("--map"),
-            constraint=constraints.If("encoding", then=constraints.accept_none, else_=constraints.require_all),
-        )
+            constraint=constraints.If(
+                "encoding", then=constraints.accept_none, else_=constraints.require_all
+            ),
+        ),
     )
     @cloup.option("--image", required=True, help="Path to the image file")
-    @cloup.option("--grayscale", type=cloup.BOOL, default=True, show_default=True, help="Indication wether the image is grayscale")
-    @cloup.option("-v", "--verbose", count=True, default=0, help="Increase verbosity (can be used multiple times, up to '-vvv')")
+    @cloup.option(
+        "--grayscale",
+        type=cloup.BOOL,
+        default=True,
+        show_default=True,
+        help="Indication wether the image is grayscale",
+    )
+    @cloup.option(
+        "-v",
+        "--verbose",
+        count=True,
+        default=0,
+        help="Increase verbosity (can be used multiple times, up to '-vvv')",
+    )
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         return func(*args, **kwargs)
+
     return wrapper
 
 
 def retrieving_options(func):
-    @cloup.option("--encoding", required=True, type=str, help="Name of the encoding from 'encodings' directory")   
-    @cloup.option("--result", required=True, type=str, help="Result from simulation")   
+    @cloup.option(
+        "--encoding",
+        required=True,
+        type=str,
+        help="Name of the encoding from 'encodings' directory",
+    )
+    @cloup.option("--result", required=True, type=str, help="Result from simulation")
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         return func(*args, **kwargs)
+
     return wrapper
 
 
@@ -110,16 +133,29 @@ def retrieving_options(func):
 def encode(**params):
     image = _parse_image(params)
     e = _get_encoding_functions(params)
-    return main.encode(e.init_function, e.data_function, e.map_function, image, params)
+    return geqie.encode(e.init_function, e.data_function, e.map_function, image, params)
 
 
 def simulate_options(func):
     @cloup.option("--n-shots", type=int, help="Number of simulation shots")
-    @cloup.option("--return-qiskit-result", type=cloup.BOOL, default=False, show_default=True, help="Return results directly from qiskit")
-    @cloup.option("--return-padded-counts", type=cloup.BOOL, default=False, show_default=True, help="Return state counts including zero-count states")
+    @cloup.option(
+        "--return-qiskit-result",
+        type=cloup.BOOL,
+        default=False,
+        show_default=True,
+        help="Return results directly from qiskit",
+    )
+    @cloup.option(
+        "--return-padded-counts",
+        type=cloup.BOOL,
+        default=False,
+        show_default=True,
+        help="Return state counts including zero-count states",
+    )
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         return func(*args, **kwargs)
+
     return wrapper
 
 
@@ -129,14 +165,18 @@ def simulate_options(func):
 @cloup.pass_context
 def simulate(ctx: cloup.Context, **params):
     circuit = ctx.invoke(encode, **params)
-    cli_params = {name: value for name, value in params.items() if name in ["n_shots", "return_qiskit_result", "return_padded_counts"]}
-    print(json.dumps(main.simulate(circuit, **cli_params)))
+    cli_params = {
+        name: value
+        for name, value in params.items()
+        if name in ["n_shots", "return_qiskit_result", "return_padded_counts"]
+    }
+    print(json.dumps(geqie.simulate(circuit, **cli_params)))
 
 
 @cli.command()
 @retrieving_options
 def retrieve(**params):
-    print('Retrieve CLI')
+    print("Retrieve CLI")
     # print(f'Params: {params}')
     print(f'Params.get("result"): {params.get("result")}')
 
@@ -146,6 +186,5 @@ def retrieve(**params):
     # return retrieve_fun, params
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli()
-

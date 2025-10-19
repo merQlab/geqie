@@ -1,5 +1,0 @@
--r ../../requirements/requirements.in
-
-ipykernel
-ipyforms
-pylatexenc

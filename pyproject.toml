@@ -1,0 +1,33 @@
+[project]
+name = "geqie"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Jan Smółka", email = "jp.smolka@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "cloup>=3.0.8",
+    "matplotlib>=3.10.7",
+    "numpy>=2.3.4",
+    "pillow>=12.0.0",
+    "qiskit>=2.2.1",
+    "qiskit-aer>=0.17.2",
+    "tabulate>=0.9.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project.scripts]
+geqie = "geqie:cli"
+
+[dependency-groups]
+dev = [
+    "ipykernel>=7.0.1",
+    "jupyter>=1.1.1",
+    "pylatexenc>=2.10",
+    "pytest>=8.4.2",
+]

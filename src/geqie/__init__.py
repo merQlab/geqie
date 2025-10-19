@@ -1,23 +1,22 @@
 import itertools
-from tabulate import tabulate
 from typing import Callable, Dict
 
-import matplotlib.pyplot as plt
-
 import numpy as np
-
 from qiskit.circuit import QuantumCircuit
 from qiskit.quantum_info import Operator, Statevector
 from qiskit.result import Result
 from qiskit_aer import Aer
 
+from geqie.cli import cli
 from geqie.utils.print import tabulate_complex
+
+__all__ = ["cli", "encode", "simulate"]
 
 
 def encode(
-    init_function: Callable[[int], Statevector], 
-    data_function: Callable[[int, int, int, np.ndarray], Statevector], 
-    map_function: Callable[[int, int, int, np.ndarray], Operator], 
+    init_function: Callable[[int], Statevector],
+    data_function: Callable[[int, int, int, np.ndarray], Statevector],
+    map_function: Callable[[int, int, int, np.ndarray], Operator],
     image: np.ndarray,
     ctx: Dict = {},
 ) -> QuantumCircuit:
@@ -46,7 +45,7 @@ def encode(
     if verbosity_level > 1:
         print(f"G=\n{tabulate_complex(G)}")
         print(f"U=\n{tabulate_complex(U)}")
-    
+
     U_op = Operator(U)
     n_qubits = U_op.num_qubits
     init_state = init_function(n_qubits)
@@ -65,12 +64,12 @@ def encode(
 
 
 def simulate(
-    circuit: QuantumCircuit, 
-    n_shots: int, 
-    return_qiskit_result: bool = False, 
+    circuit: QuantumCircuit,
+    n_shots: int,
+    return_qiskit_result: bool = False,
     return_padded_counts: bool = False,
 ) -> Dict[str, int] | Result:
-    simulator = Aer.get_backend('aer_simulator')
+    simulator = Aer.get_backend("aer_simulator")
 
     result = simulator.run(circuit, shots=n_shots, memory=True).result()
     if return_qiskit_result:
@@ -79,7 +78,9 @@ def simulate(
     counts = result.get_counts(circuit)
 
     if return_padded_counts:
-        counts_padded = {f"{n:0{circuit.num_qubits}b}": 0 for n in range(2**circuit.num_qubits)}
+        counts_padded = {
+            f"{n:0{circuit.num_qubits}b}": 0 for n in range(2**circuit.num_qubits)
+        }
         return {**counts_padded, **counts}
     else:
         return counts
