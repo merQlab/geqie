@@ -1,0 +1,162 @@
+body {
+    background-color: #f8f9fa;
+}
+
+.card {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: none;
+    border-radius: 8px;
+}
+
+.sub-item {
+    cursor: pointer;
+    display: block;
+    padding: 10px;
+    background-color: white;
+}
+
+.btn-primary {
+    background-color: #007bff;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+.progress {
+    background-color: #e9ecef;
+    border-radius: 0.25rem;
+    overflow: hidden;
+}
+  
+.progress-bar {
+    background-color: #007bff;
+    color: white;
+    text-align: center;
+    line-height: 1.5rem;
+    transition: width 0.6s ease;
+}
+
+.card-title {
+    font-weight: 600;
+    color: #343a40;
+}
+
+.form-label {
+    font-weight: 500;
+    font-size: 1rem;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+textarea, select {
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+    padding: 10px;
+    font-size: 0.95rem;
+    color: #495057;
+}
+
+textarea:focus, select:focus {
+    border-color: #80bdff;
+    outline: none;
+    box-shadow: 0 0 5px rgba(128, 189, 255, 0.5);
+}
+
+.btn-custom {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.edit-button {
+    margin-top: -10px;
+}
+
+.btn-custom:hover {
+    background-color: #5a6268;
+}
+
+.container {
+    margin-top: 50px;
+}
+
+.number-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.number-label {
+    margin: 0;
+    white-space: nowrap;
+    line-height: 1;
+}
+
+.number-input {
+    width: 150px;
+    padding: 4px;
+    font-size: 14px;
+    height: 28px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    text-align: center;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease-in-out;
+}
+
+.number-input:focus {
+    border-color: #007BFF;
+    outline: none;
+}
+
+#results-list {
+    max-height: 772px;
+    overflow-y: auto;
+}
+
+#methods-list {
+    max-height: 340px;
+    overflow-y: auto;
+}
+
+.box-left, .box-right {
+    flex: 1;
+    width: 200px;
+    aspect-ratio: 1 / 1;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+    position: relative;
+}
+
+.box-left img,
+.box-right img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    position: absolute;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+}
+
+.arrow-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.arrow {
+    font-size: 40px;
+    font-weight: bold;
+    color: #007bff;
+}

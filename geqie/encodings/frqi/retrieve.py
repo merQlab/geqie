@@ -12,17 +12,18 @@ def retrieve(results: str) -> np.ndarray:
     Returns:
     np.ndarray: A NumPy array representing the decoded image.
     """
-
-    results = json.loads(results)
-
     state_length = len(next(iter(results)))
-    row_col_shape = int((state_length - 1)/2)**2
-    image_shape = (row_col_shape, row_col_shape)
+    color_qubits = 1
+    number_of_position_qubits = state_length - color_qubits
+    x_qubits = number_of_position_qubits // 2
+    y_qubits = number_of_position_qubits // 2
+    
+    image_shape = (2**x_qubits, 2**y_qubits)
 
-    image_reconstructed = np.zeros(image_shape, dtype=np.uint8)
+    reconstructed_image = np.zeros((image_shape[0], image_shape[1]))
 
-    ones = np.zeros_like(image_reconstructed)
-    total = np.zeros_like(image_reconstructed)
+    ones = np.zeros_like(reconstructed_image)
+    total = np.zeros_like(reconstructed_image)
 
     for state, n in results.items():
         b = state[:-1]
@@ -33,11 +34,10 @@ def retrieve(results: str) -> np.ndarray:
         if c == "1":
             ones.flat[m] += n
 
-    image_reconstructed = ones / total
+    reconstructed_image = ones / total
     try:
-        image_reconstructed = np.where(total > 0, ones / total, 0)
+        reconstructed_image = np.where(total > 0, ones / total, 0)
     except ZeroDivisionError:
         print("Error during FRQI image retrieval. Division by zero!")
-
-    print(image_reconstructed)
-    return image_reconstructed
+        
+    return reconstructed_image
