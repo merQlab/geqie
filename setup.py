@@ -3,7 +3,7 @@ from setuptools import find_namespace_packages, setup
 
 
 readme_file = Path(__file__).parent / "README.md"
-requirements_file = Path(__file__).parent / "requirements" / "requirements.in"
+requirements_file = Path(__file__).parent / "requirements" / "requirements.txt"
 
 setup(
     name='geqie',
