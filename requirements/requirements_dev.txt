@@ -2,14 +2,12 @@
 #    uv pip compile -o requirements/requirements_dev.txt requirements/requirements_dev.in
 -e .
     # via -r requirements/requirements_dev.in
-click==8.2.1
+click==8.3.1
     # via
     #   cloup
     #   geqie
-cloup==3.0.7
-    # via
-    #   -r requirements/requirements.in
-    #   geqie
+cloup==3.0.8
+    # via geqie
 colorama==0.4.6
     # via
     #   click
@@ -27,25 +25,23 @@ dill==0.4.0
     # via
     #   geqie
     #   qiskit
-fonttools==4.59.0
+fonttools==4.60.1
     # via
     #   geqie
     #   matplotlib
 iniconfig==2.3.0
     # via pytest
-kiwisolver==1.4.8
+kiwisolver==1.4.9
     # via
     #   geqie
     #   matplotlib
-matplotlib==3.10.3
-    # via
-    #   -r requirements/requirements.in
-    #   geqie
+matplotlib==3.10.7
+    # via geqie
 mpmath==1.3.0
     # via
     #   geqie
     #   sympy
-numpy==2.3.2
+numpy==2.3.5
     # via
     #   contourpy
     #   geqie
@@ -59,24 +55,19 @@ packaging==25.0
     #   geqie
     #   matplotlib
     #   pytest
-pbr==6.1.1
+pillow==12.0.0
     # via
-    #   geqie
-    #   stevedore
-pillow==11.3.0
-    # via
-    #   -r requirements/requirements.in
     #   geqie
     #   matplotlib
 pluggy==1.6.0
     # via pytest
-psutil==7.0.0
+psutil==7.1.3
     # via
     #   geqie
     #   qiskit-aer
 pygments==2.19.2
     # via pytest
-pyparsing==3.2.3
+pyparsing==3.2.5
     # via
     #   geqie
     #   matplotlib
@@ -90,31 +81,24 @@ python-dateutil==2.9.0.post0
     #   qiskit-aer
 qiskit==1.4.5
     # via
-    #   -r requirements/requirements.in
     #   geqie
     #   qiskit-aer
-qiskit-aer==0.17.1
-    # via
-    #   -r requirements/requirements.in
-    #   geqie
-rustworkx==0.16.0
+qiskit-aer==0.17.2
+    # via geqie
+rustworkx==0.17.1
     # via
     #   geqie
     #   qiskit
-scipy==1.16.1
+scipy==1.16.3
     # via
     #   geqie
     #   qiskit
     #   qiskit-aer
-setuptools==80.9.0
-    # via
-    #   geqie
-    #   pbr
 six==1.17.0
     # via
     #   geqie
     #   python-dateutil
-stevedore==5.4.1
+stevedore==5.6.0
     # via
     #   geqie
     #   qiskit
@@ -127,10 +111,8 @@ sympy==1.14.0
     #   geqie
     #   qiskit
 tabulate==0.9.0
-    # via
-    #   -r requirements/requirements.in
-    #   geqie
-typing-extensions==4.14.1
+    # via geqie
+typing-extensions==4.15.0
     # via
     #   geqie
     #   qiskit
