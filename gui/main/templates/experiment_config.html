@@ -1,0 +1,155 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Experiment</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="{% static 'geqie/js/global_scripts.js' %}" defer></script>
+    <script src="{% static 'geqie/js/main_scripts.js' %}" defer></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
+    <link href="{% static 'geqie/css/styles.css' %}" rel="stylesheet">
+    <link rel="icon" href="{% static 'geqie/icon/favicon.png' %}" type="image/png">
+</head>
+<body>
+    <div class="container my-4">
+        <div class="row">
+            
+            <!-- Left column -->
+            <div class="col-md-3">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center position-relative">
+                            <h4 class="card-title text-center flex-grow-1">Methods</h4>
+                            <a class="btn btn-primary edit-button btn-sm position-absolute end-0" href="{% url 'edit_method' %}">Edit</a>
+                        </div>
+                        
+                        <ul class="list-group" id="methods-list">
+                            {% for method in methods %}
+                                <li class="list-group-item list-group-item-action sub-item" id="method-{{ method.id }}" methodname="{{ method.name }}" title="{{ method.description }}">
+                                    {{ method.name }}
+                                </li>
+                            {% empty %}
+                                <li class="list-group-item">No methods available</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h4 class="card-title text-center">Computers</h4>
+                        <ul class="list-group" id="methods-list">
+                            {% for computer in computers %}
+                                <li class="list-group-item list-group-item-action" id="computer-{{ computer.id }}" title="{{ computer.description }}">
+                                    <details>
+                                        <summary>
+                                            {{ computer.name }}
+                                        </summary>
+                                        <ul class="list-group mt-2">
+                                            {% for subcomputer in computer.sub_computers.all%}
+                                            <li class="list-group-item list-group-item-action sub-item" id="subcomputer-{{ subcomputer.id }}" computername="{{ computer.name }}" title="{{ subcomputer.description }}">
+                                                {{ subcomputer.name }}
+                                            </li>
+                                            {% empty %}
+                                            <li class="list-group-item text-muted">No wrapper available</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </details>
+                                </li>
+                            {% empty %}
+                                <li class="list-group-item text-muted">No computers available</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mid column -->
+            <div class="col-md-6 text-center">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h4 class="card-title mb-3">Prepare Experiment</h4>
+                        <div class="d-flex justify-content-center gap-3 mb-3">
+                            <form id="uploadForm" enctype="multipart/form-data" style="display: none;">
+                                <input type="file" id="imageFile" name="images[]" accept="image/*" multiple required />
+                            </form>
+                            <button class="btn btn-primary" id="selectImage">Select images</button>
+                        </div>
+                        <div class="my-3">
+                            <p class="d-inline">Selected method:</p>
+                            <span id="selected-submethod" class="fw-bold text-primary">No method</span>
+                        </div>
+                        <div class="my-3">
+                            <p class="d-inline">Selected computer:</p>
+                            <span id="selected-computer" class="fw-bold text-primary">Simulator</span>
+                        </div>
+                        <div class="my-3 number-container">
+                            <label class="number-label" for="shots">Number of shots:</label>
+                            <input class="number-input" type="number" id="shots" min="1" value="1024">
+                        </div>
+                        <button class="btn btn-primary" type="button" id="addExperiment">Add experiment</button>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h4 class="card-title mb-3">Experiments List</h4>
+                        <form id="experimentsForm" enctype="multipart/form-data">
+                            <div class="table-responsive mb-3" style="max-height: 346px; overflow-y: auto;">
+                                <table class="table table-bordered" id="experimentsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Image</th>
+                                            <th>Method</th>
+                                            <th>Computer</th>
+                                            <th>Shots</th>
+                                            <th>
+                                                <script>
+                                                    const trashIconPath = "{% static 'geqie/icon/trash.png' %}";
+                                                </script>
+                                                <img src="{% static 'geqie/icon/trash.png' %}" alt="Trash Icon" style="width:20px;height:20px;">
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="experimentsTableBody"></tbody>
+                                </table>
+                            </div>
+                            <div style="display: flex; justify-content: center; align-items: center; position: relative;">
+                                <button class="btn btn-success" type="submit" id="startExperiment" style="position: relative; z-index: 1;">Start experiments</button>
+                                <label style="display: flex; align-items: center; gap: 5px; margin-left: 15px;">
+                                  <input type="checkbox" id="saveToCSV" />
+                                  Save to XLSX
+                                </label>
+                            </div>
+                        </form>
+                        <script>
+                            const startExperimentUrl = "{% url 'start_experiment' %}";
+                        </script>
+                        <div class="my-3 d-flex align-items-center justify-content-between">
+                            <div class="flex-grow-1">
+                                <div class="progress">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%;" id="progress-bar">0%</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right column -->
+            <div class="col-md-3">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h4 class="card-title text-center">Results</h4>
+                        <ul class="list-group" id="results-list"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
