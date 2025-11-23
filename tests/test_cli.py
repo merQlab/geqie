@@ -25,6 +25,6 @@ def test_cli(method: str, params: CLIParameters):
     subprocess.run([
         "geqie", "simulate", 
         "--encoding", method, 
-        "--image", params.image_path, 
+        "--image-path", params.image_path, 
         "--grayscale", str(params.grayscale)
     ], check=True)
