@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements/requirements.txt /app/requirements.txt
+COPY gui/requirements/requirements.txt /app/requirements.txt
 RUN uv pip install -r /app/requirements.txt --system
 
 COPY . .
@@ -22,8 +22,8 @@ COPY . .
 RUN uv pip install -e /app --system
 
 RUN cp gui/entrypoint.sh /app/entrypoint.sh \
- && sed -i 's/\r$//' /app/entrypoint.sh \
- && chmod +x /app/entrypoint.sh
+    && sed -i 's/\r$//' /app/entrypoint.sh \
+    && chmod +x /app/entrypoint.sh
 
 RUN python gui/manage.py collectstatic --noinput || true
 

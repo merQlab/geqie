@@ -53,7 +53,7 @@ Custom encoding plugins:
 
 Other options:
   --encoding TEXT      Name of the encoding from 'encodings' directory
-  --image TEXT         Path to the image file  [required]
+  --image-path TEXT    Path to the image file  [required]
   --grayscale BOOLEAN  Indication wether the image is grayscale  [default: True]
   -v, --verbose        Increase verbosity (can be used multiple times, up to
                        '-vvv')
@@ -63,7 +63,7 @@ Other options:
 **Example**
 
 ```bash
-geqie encode --encoding frqi --image assets/test_image.png
+geqie encode --encoding frqi --image-path assets/test_image.png
 ```
 
 #### Command `geqie simulate`
@@ -80,7 +80,7 @@ Custom encoding plugins:
 Other options:
   --encoding TEXT                 Name of the encoding from 'encodings'
                                   directory
-  --image TEXT                    Path to the image file  [required]
+  --image-path TEXT               Path to the image file  [required]
   --grayscale BOOLEAN             Indication wether the image is grayscale
                                   [default: True]
   -v, --verbose                   Increase verbosity (can be used multiple
@@ -96,7 +96,7 @@ Other options:
 **Example**
 
 ```bash
-geqie simulate --encoding frqi --image assets/test_image.png --n-shots 1024 --return-padded-counts true
+geqie simulate --encoding frqi --image-path assets/test_image.png --n-shots 1024 --return-padded-counts true
 ```
 
 ## GUI

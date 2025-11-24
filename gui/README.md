@@ -8,20 +8,20 @@ The admin panel is available at `http://localhost:8000/admin`
 
 **Build**
 ```bash
-docker compose build
+docker-compose build
 ```
 
 **Start**
 ```bash
-docker compose up
+docker-compose up
 ```
 
 **Migrate**
 ```bash
-docker compose exec web python gui/manage.py migrate --noinput
+docker-compose exec web python gui/manage.py migrate --noinput
 ```
 
 **Create superuser**
 ```bash
-docker compose exec web python gui/manage.py createsuperuser
+docker-compose exec web python gui/manage.py createsuperuser
 ```

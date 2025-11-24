@@ -30,14 +30,14 @@ def home(request):
 def experiment_config(request):
     methods = approved_methods()
     computers = QuantumComputer.objects.all()
-    logger.info("Experiment_config card")
+    logger.debug("Experiment_config card")
     return render(request, "experiment_config.html", {"methods": methods, "computers": computers})
 
 
 def edit_method(request):
     methods = all_methods()
     default_methods_content = settings.DEFAULT_METHODS_CONTENT
-    logger.info("Edit_method card")
+    logger.debug("Edit_method card")
     return render(
         request,
         "edit_method.html",

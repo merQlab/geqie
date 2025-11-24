@@ -46,14 +46,14 @@ def _try_geqie_cli_simulate(method: str, image_path: str, shots: int) -> tuple[b
         cmd = [
                 geqie_bin, "simulate",
                 "--encoding", str(method),
-                "--image", image_path,
+                "--image-path", image_path,
                 "--n-shots", str(shots),
                 "--return-padded-counts", "true"
             ]
     else:
         cmd = [sys.executable, "-m", "geqie.cli", "simulate",
                "--encoding", str(method),
-               "--image", image_path,
+               "--image-path", image_path,
                "--n-shots", str(shots),
                "--return-padded-counts", "true"
             ]

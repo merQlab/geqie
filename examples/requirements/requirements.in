@@ -1,5 +1,6 @@
 -r ../../requirements/requirements.in
 
 ipykernel
-ipyforms
+ipyform
+pandas
 pylatexenc
