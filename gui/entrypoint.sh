@@ -4,6 +4,7 @@ set -euo pipefail
 APP_DIR="/app"
 DB_HOST="${POSTGRES_HOST:-db}"
 DB_PORT="${POSTGRES_PORT:-5432}"
+DEV_MODE="${DEV_MODE:-0}"
 
 echo "===> Waiting for database ${DB_HOST}:${DB_PORT} ..."
 for i in $(seq 1 60); do

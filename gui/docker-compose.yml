@@ -8,6 +8,7 @@ volumes:
 
 services:
   web:
+    container_name: web
     build:
       context: ..
       dockerfile: gui/Dockerfile
@@ -26,7 +27,76 @@ services:
       - redis
       - minio
 
+
+  web-dev:
+    container_name: web-dev
+    build:
+      context: ..
+      dockerfile: gui/Dockerfile
+    image: geqie-app:web
+    env_file: .env
+    environment:
+      PYTHONPATH: /app/gui
+      DEV_MODE: "1"
+    command: ["gunicorn", "gui.wsgi:application", "--bind", "0.0.0.0:8000", "--reload"]
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    # volumes:
+    #   - ./gui:/app
+    depends_on:
+      - db
+      - redis
+      - minio
+
+
+  worker:
+    container_name: worker
+    image: geqie-app:web
+    env_file:
+      - .env
+    environment:
+      PYTHONPATH: /app/gui
+    working_dir: /app
+    command: >
+      sh -lc '
+        set -e
+        exec celery -A gui worker -l info -Q processing_queue
+      '
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+
+
+  worker-dev:
+    container_name: worker-dev
+    image: geqie-app:web
+    env_file:
+      - .env
+    environment:
+      PYTHONPATH: /app/gui
+      DEV_MODE: "1"
+    working_dir: /app
+    command: >
+      sh -lc '
+        set -e
+        exec celery -A gui worker -l info -Q processing_queue
+      '
+    restart: unless-stopped
+    # volumes:
+    #   - ../gui:/app
+    depends_on:
+      redis:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+
+
   db:
+    container_name: db
     image: postgres:16
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
@@ -36,10 +106,17 @@ services:
       - dbdata:/var/lib/postgresql/data
     ports:
       - "5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-postgres} || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     restart: unless-stopped
 
 
   pgadmin:
+    container_name: pgadmin
     image: dpage/pgadmin4
     environment:
       PGADMIN_DEFAULT_EMAIL: pgadmin4@pgadmin.org
@@ -52,6 +129,7 @@ services:
 
 
   minio:
+    container_name: minio
     image: quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z
     command: server /data --console-address ":9001"
     environment:
@@ -66,6 +144,7 @@ services:
 
 
   minio-setup:
+    container_name: minio-setup
     image: minio/mc:latest
     # One shell script as entrypoint; 'command:' doesn't work`
     entrypoint:
@@ -92,38 +171,17 @@ services:
 
 
   redis:
+    container_name: redis
     image: redis:7
     command: ["redis-server", "--appendonly", "yes"]
     volumes:
       - redisdata:/data
     ports:
       - "6379"
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     restart: unless-stopped
-
-
-  worker:
-    environment:
-      PYTHONPATH: /app/gui
-    image: geqie-app:web
-    env_file:
-      - .env
-    working_dir: /app
-    command: >
-      sh -lc '
-        set -e
-        echo "===> Waiting for redis ${REDIS_HOST:-redis}:6379 ..."
-        for i in $(seq 1 60); do
-          (echo > /dev/tcp/${REDIS_HOST:-redis}/6379) >/dev/null 2>&1 && break
-          sleep 1
-        done
-        echo "===> Waiting for db ${POSTGRES_HOST:-db}:${POSTGRES_PORT:-5432} ..."
-        for i in $(seq 1 60); do
-          (echo > /dev/tcp/${POSTGRES_HOST:-db}/${POSTGRES_PORT:-5432}) >/dev/null 2>&1 && break
-          sleep 1
-        done
-        exec celery -A gui worker -l info -Q processing_queue
-      '
-    restart: unless-stopped
-    depends_on:
-      - redis
-      - db

@@ -1,8 +1,5 @@
 import itertools
-from tabulate import tabulate
-from typing import Callable, Dict
-
-import matplotlib.pyplot as plt
+from typing import Any, Callable, Dict
 
 import numpy as np
 
@@ -19,10 +16,9 @@ def encode(
     data_function: Callable[[int, int, int, np.ndarray], Statevector], 
     map_function: Callable[[int, int, int, np.ndarray], Operator], 
     image: np.ndarray,
-    ctx: Dict = {},
+    verbosity_level: int = 0,
+    **_: Dict[Any, Any],
 ) -> QuantumCircuit:
-    verbosity_level = ctx.get("verbose", 0)
-
     R = np.ceil(np.log2(np.max((image.shape[0], image.shape[1])))).astype(int)
 
     products, data_vectors, map_operators = [], [], []
@@ -67,8 +63,9 @@ def encode(
 def simulate(
     circuit: QuantumCircuit, 
     n_shots: int, 
-    return_qiskit_result: bool = False, 
+    return_qiskit_result: bool = False,
     return_padded_counts: bool = False,
+    **_: Dict[Any, Any],
 ) -> Dict[str, int] | Result:
     simulator = Aer.get_backend('aer_simulator')
 

@@ -133,6 +133,8 @@ document.getElementById('startExperiment').addEventListener('click', async funct
     let allResults = [];
     let mainDirHandle = null;
     let methodDirHandles = {};
+    const totalImages = experiments.reduce((sum, experiment) => sum + experiment.images.length, 0);
+    let finishedImages = 0;
 
     if (saveToCSVCheckbox.checked) {
         try {
@@ -157,8 +159,7 @@ document.getElementById('startExperiment').addEventListener('click', async funct
     }
 
     try {
-        const totalImages = experiments.reduce((sum, experiment) => sum + experiment.images.length, 0);
-        animateProgress(10, 90, totalImages / 2 * experiments.length * 3000);
+        initProgress();
 
         const resultsList = document.getElementById("results-list");
         resultsList.innerHTML = '';
@@ -201,9 +202,15 @@ document.getElementById('startExperiment').addEventListener('click', async funct
                     } else {
                         for (const job of data.jobs) {
                             await pollJobAndRender(job, resultsList, experiment.method, allResults, saveToCSVCheckbox.checked);
+                            // Count each finished job (image) rather than counting experiments.
+                            finishedImages += 1;
+                            const progress = Math.min(100, +(finishedImages / totalImages * 100).toFixed(1));
+                            updateProgress(progress);
+                            if (progress == 100) {
+                                stopProgress();
+                            }
                         }
                     }
-
                     isResponseOk = true;
                 } else {
                     isResponseOk = false;
@@ -226,14 +233,6 @@ document.getElementById('startExperiment').addEventListener('click', async funct
 
         if (saveToCSVCheckbox.checked && allResults.length > 0 && mainDirHandle) {
             await saveResultsToFolder(allResults, mainDirHandle, methodDirHandles);
-        }
-
-        if (isResponseOk) {
-            cancelAnimationFrame(animationFrameId);
-            updateProgress(100);
-        } else {
-            cancelAnimationFrame(animationFrameId);
-            updateProgress(0);
         }
 
     } finally {
@@ -294,6 +293,7 @@ async function pollJobAndRender(job, resultsList, methodName, allResults, needBa
                 em.textContent = s.error;
                 listItem.appendChild(document.createElement("br"));
                 listItem.appendChild(em);
+                stopProgress();
             }
             break;
         }
@@ -349,34 +349,42 @@ async function pollJobAndRender(job, resultsList, methodName, allResults, needBa
                 listItem.appendChild(pre);
             }
 
-            if (s.original_url) {
-                const originalImg = document.createElement("img");
-                originalImg.src = s.original_url;
-                originalImg.alt = "Original image";
-                originalImg.style.width = "100%";
-                originalImg.style.imageRendering = "pixelated";
-                listItem.appendChild(document.createElement("br"));
-                listItem.appendChild(originalImg);
-            }
+            if (s.original_url || s.retrieved_url) {
+                const row = document.createElement("div");
+                row.style.display = "flex";
+                row.style.flexDirection = "row";
+                row.style.alignItems = "center";
+                row.style.gap = "10px"; // spacing
+                row.style.margin = "10px 0";
 
-            if (s.original_url && s.retrieved_url) {
-                const arrowDown = document.createElement("div");
-                arrowDown.innerHTML = "&#8595;";
-                arrowDown.style.fontSize = "24px";
-                arrowDown.style.textAlign = "center";
-                arrowDown.style.margin = "10px 0";
-                listItem.appendChild(arrowDown);
-            }
+                if (s.original_url) {
+                    const originalImg = document.createElement("img");
+                    originalImg.src = s.original_url;
+                    originalImg.alt = "Original image";
+                    originalImg.style.width = "50%";
+                    originalImg.style.imageRendering = "pixelated";
+                    row.appendChild(originalImg);
+                }
 
-            if (s.retrieved_url) {
-                const retrievedImg = document.createElement("img");
-                retrievedImg.src = s.retrieved_url;
-                retrievedImg.alt = "Retrieved image";
-                retrievedImg.style.width = "100%";
-                retrievedImg.style.imageRendering = "pixelated";
-                listItem.appendChild(retrievedImg);
-            }
+                if (s.original_url && s.retrieved_url) {
+                    const arrow = document.createElement("div");
+                    arrow.innerHTML = "&#8594;";
+                    arrow.style.fontSize = "24px";
+                    arrow.style.textAlign = "center";
+                    row.appendChild(arrow);
+                }
 
+                if (s.retrieved_url) {
+                    const retrievedImg = document.createElement("img");
+                    retrievedImg.src = s.retrieved_url;
+                    retrievedImg.alt = "Retrieved image";
+                    retrievedImg.style.width = "50%";
+                    retrievedImg.style.imageRendering = "pixelated";
+                    row.appendChild(retrievedImg);
+                }
+
+                listItem.appendChild(row);
+            }
             let originalB64 = null;
             let retrievedB64 = null;
             if (needBase64ForSave) {
@@ -395,7 +403,6 @@ async function pollJobAndRender(job, resultsList, methodName, allResults, needBa
                 retrieved_image: retrievedB64,
                 method: methodName
             });
-
             break;
         }
     }
@@ -518,9 +525,22 @@ async function saveResultsToFolder(results, mainDirHandle, methodDirHandles) {
 
 function updateProgress(value) {
     const progressBar = document.getElementById('progress-bar');
+    progressBar.innerText = value + '%';
     progressBar.style.width = value + '%';
     progressBar.setAttribute('aria-valuenow', value);
-    progressBar.innerText = value + '%';
+}
+
+function initProgress() {
+    const progressBar = document.getElementById('progress-bar');
+    progressBar.classList.add('progress-bar-animated', 'progress-bar-striped');
+    progressBar.innerText = 'Initializing...';
+    progressBar.style.width = '100%';
+}
+
+function stopProgress() {
+    const progressBar = document.getElementById('progress-bar');
+    progressBar.classList.remove('progress-bar-animated', 'progress-bar-striped');
+    progressBar.style.width = '100%';
 }
 
 function animateProgress(from, to, duration) {

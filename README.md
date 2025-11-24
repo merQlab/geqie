@@ -11,11 +11,16 @@
     - [Command `geqie list-encodings`](#command-geqie-list-encodings)
     - [Command `geqie encode`](#command-geqie-encode)
     - [Command `geqie simulate`](#command-geqie-simulate)
+- [GUI](#gui)
 - [Related research](#related-research)
+- [Acknowledgements](#acknowledgements)
+
+Related documentation:
+- [GEQIE GUI](gui/README.md)
 
 ## Installation
 
-While in `optiq-geqie` directory invoke:
+While in `geqie` directory invoke:
 
 ```bash
 pip install .
@@ -48,7 +53,7 @@ Custom encoding plugins:
 
 Other options:
   --encoding TEXT      Name of the encoding from 'encodings' directory
-  --image TEXT         Path to the image file  [required]
+  --image-path TEXT    Path to the image file  [required]
   --grayscale BOOLEAN  Indication wether the image is grayscale  [default: True]
   -v, --verbose        Increase verbosity (can be used multiple times, up to
                        '-vvv')
@@ -58,7 +63,7 @@ Other options:
 **Example**
 
 ```bash
-geqie encode --encoding frqi --image assets/test_image.png
+geqie encode --encoding frqi --image-path assets/test_image.png
 ```
 
 #### Command `geqie simulate`
@@ -75,7 +80,7 @@ Custom encoding plugins:
 Other options:
   --encoding TEXT                 Name of the encoding from 'encodings'
                                   directory
-  --image TEXT                    Path to the image file  [required]
+  --image-path TEXT               Path to the image file  [required]
   --grayscale BOOLEAN             Indication wether the image is grayscale
                                   [default: True]
   -v, --verbose                   Increase verbosity (can be used multiple
@@ -91,40 +96,18 @@ Other options:
 **Example**
 
 ```bash
-geqie simulate --encoding frqi --image assets/test_image.png --n-shots 1024 --return-padded-counts true
+geqie simulate --encoding frqi --image-path assets/test_image.png --n-shots 1024 --return-padded-counts true
 ```
+
+## GUI
+
+See the [gui/README.md](gui/README.md) for instructions on running the GEQIE GUI.
 
 ## Related research
 
 - [ICCS 2024 Poster](https://www.researchgate.net/publication/383184874_General_Quantum_Image_Representation_Model_and_Framework)
 
 
-## Docker
+## Acknowledgements
 
-Execute docker commands in the gui directory `cd gui`  
-The page will be displayed at `http://localhost:8000`  
-The admin panel is available at `http://localhost:8000/admin`  
-
-**Build**
-```bash
-docker compose -f compose.server.yml -f compose.worker.yml build
-```
-
-**Start**
-```bash
-docker compose -f compose.server.yml -f compose.worker.yml up -d
-```
-
-**Migrate**
-```bash
-docker compose -f compose.server.yml -f compose.worker.yml exec web python gui/manage.py migrate --noinput
-```
-
-**Create superuser**
-```bash
-docker compose -f compose.server.yml -f compose.worker.yml exec web python gui/manage.py createsuperuser
-```
-
-## ACKNOWLEDGEMENTS
 The authors would like to acknowledge that this repository is maintained for the OptiQ project. This Project has received funding from the European Union’s Horizon Europe programme under the grant agreement No 101080374-OptiQ. Supplementarily, the Project is co-financed from the resources of the Polish Ministry of Science and Higher Education in a frame of programme International Co-financed Projects. Disclaimer Funded by the European Union. Views and opinions expressed are however those of the author(s) only and do not necessarily reflect those of the European Union or the European Research Executive Agency (REA–granting authority). Neither the European Union nor the granting authority can beheld responsible for them.
-
