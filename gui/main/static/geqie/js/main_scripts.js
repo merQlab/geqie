@@ -206,6 +206,9 @@ document.getElementById('startExperiment').addEventListener('click', async funct
                             finishedImages += 1;
                             const progress = Math.min(100, +(finishedImages / totalImages * 100).toFixed(1));
                             updateProgress(progress);
+                            if (progress == 100) {
+                                stopProgress();
+                            }
                         }
                     }
                     isResponseOk = true;
@@ -290,6 +293,7 @@ async function pollJobAndRender(job, resultsList, methodName, allResults, needBa
                 em.textContent = s.error;
                 listItem.appendChild(document.createElement("br"));
                 listItem.appendChild(em);
+                stopProgress();
             }
             break;
         }
@@ -399,7 +403,6 @@ async function pollJobAndRender(job, resultsList, methodName, allResults, needBa
                 retrieved_image: retrievedB64,
                 method: methodName
             });
-
             break;
         }
     }
@@ -522,15 +525,22 @@ async function saveResultsToFolder(results, mainDirHandle, methodDirHandles) {
 
 function updateProgress(value) {
     const progressBar = document.getElementById('progress-bar');
+    progressBar.innerText = value + '%';
     progressBar.style.width = value + '%';
     progressBar.setAttribute('aria-valuenow', value);
-    progressBar.innerText = value + '%';
 }
 
 function initProgress() {
     const progressBar = document.getElementById('progress-bar');
-    progressBar.style.width = '100%';
+    progressBar.classList.add('progress-bar-animated', 'progress-bar-striped');
     progressBar.innerText = 'Initializing...';
+    progressBar.style.width = '100%';
+}
+
+function stopProgress() {
+    const progressBar = document.getElementById('progress-bar');
+    progressBar.classList.remove('progress-bar-animated', 'progress-bar-striped');
+    progressBar.style.width = '100%';
 }
 
 function animateProgress(from, to, duration) {
