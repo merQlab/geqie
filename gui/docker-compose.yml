@@ -12,7 +12,7 @@ services:
     build:
       context: ..
       dockerfile: gui/Dockerfile
-    image: geqie-app:web
+    image: geqie-app:latest
     env_file: .env
     environment:
       DJANGO_ASGI: "1"
