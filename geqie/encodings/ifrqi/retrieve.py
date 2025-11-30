@@ -44,7 +44,7 @@ def retrieve(results: str) -> np.ndarray:
         for y in range(reconstructed_image_counts_ones.shape[1]):
             color_bit_string = ""
             for c in range(color_qubits):
-                coeff = reconstructed_image_counts_ones[x, y, c]/reconstructed_image_counts_total[x, y]
+                coeff =reconstructed_image_counts_ones[x, y, c]/reconstructed_image_counts_total[x, y]
                 if coeff > .75:
                     color_bit_string += "11"
                 elif .5 < coeff < .75:
