@@ -1,0 +1,7 @@
+-r ../../requirements/requirements.in
+
+ipykernel
+ipyform
+pandas
+pylatexenc
+tqdm
