@@ -48,8 +48,7 @@ def retrieve(results: str) -> np.ndarray:
                     ones[x_dec, y_dec, 2] = n
                 total[x_dec, y_dec, 2] += n
             
-    reconstructed_image = np.arccos(np.sqrt(1 - ones / total))
+    reconstructed_image = np.where(total > 0, np.arccos(np.sqrt(1 - ones / total)), 0)
     reconstructed_image = 255 * 2 * reconstructed_image / np.pi
-    reconstructed_image = reconstructed_image.astype(np.uint8)
-    
+    reconstructed_image = reconstructed_image.astype(np.uint8)    
     return reconstructed_image
