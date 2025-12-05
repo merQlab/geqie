@@ -33,11 +33,8 @@ def retrieve(results: str) -> np.ndarray:
         total.flat[m] += n
         if c == "1":
             ones.flat[m] += n
-    try:
-        reconstructed_image = np.where(total > 0, np.arccos(np.sqrt(1 - ones / total)), 0)
-        reconstructed_image = 255 * 2 * reconstructed_image / np.pi
-        reconstructed_image = reconstructed_image.astype(np.uint8)
-    except ZeroDivisionError:
-        print("Error during FRQI image retrieval. Division by zero!")
-        
+    
+    reconstructed_image = np.where(total > 0, np.arccos(np.sqrt(1 - ones / total)), 0)
+    reconstructed_image = 255 * 2 * reconstructed_image / np.pi
+    reconstructed_image = reconstructed_image.astype(np.uint8)        
     return reconstructed_image
