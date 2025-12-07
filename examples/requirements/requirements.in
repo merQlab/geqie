@@ -2,5 +2,7 @@
 
 ipykernel
 ipyform
+nbformat
 pandas
+plotly
 pylatexenc

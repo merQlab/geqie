@@ -12,26 +12,37 @@ from geqie.utils.print import tabulate_complex
 
 
 def encode(
-    init_function: Callable[[int], Statevector], 
-    data_function: Callable[[int, int, int, np.ndarray], Statevector], 
-    map_function: Callable[[int, int, int, np.ndarray], Operator], 
+    init_function: Callable[[int], Statevector],
+    # arbitrary coordinate indices + R + image
+    data_function: Callable[..., Statevector],
+    map_function: Callable[..., Operator],
     image: np.ndarray,
     verbosity_level: int = 0,
     **_: Dict[Any, Any],
 ) -> QuantumCircuit:
-    R = np.ceil(np.log2(np.max((image.shape[0], image.shape[1])))).astype(int)
+    shape = image.shape
+
+    # treat the last axis as channels if it's small (1, 3, 4)
+    if image.ndim >= 3 and shape[-1] in (1, 3, 4):
+        spatial_shape = shape[:-1]   # e.g. RGB - extracting only (u, v) from (u, v, 3)
+    else:
+        spatial_shape = shape        # pure spatial: (u, v), (u, v, w) etc.
+
+    R = int(np.ceil(np.log2(max(spatial_shape))))
 
     products, data_vectors, map_operators = [], [], []
-    for u, v in itertools.product(range(image.shape[0]), range(image.shape[1])):
-        data_vector = data_function(u, v, R, image)
-        map_operator = map_function(u, v, R, image)
+    for coords in np.ndindex(*spatial_shape):
+        # coords = (u, v) for 2D, (d, u, v) for 3D, etc.
+        data_vector = data_function(*coords, R=R, image=image)
+        map_operator = map_function(*coords, R=R, image=image)
         product = data_vector.to_operator() ^ map_operator
+
         products.append(product)
         data_vectors.append(data_vector)
         map_operators.append(map_operator)
 
         if verbosity_level > 2:
-            print(f"{u=}, {v=}")
+            print(f"{coords=}")
             print(f"{data_vector=}")
             print(f"{map_operator=}")
             print(f"{product=}")
