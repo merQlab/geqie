@@ -67,11 +67,13 @@ def simulate(
     n_shots: int, 
     return_qiskit_result: bool = False,
     return_padded_counts: bool = False,
+    device: str = "cpu",
+    method: str = "automatic",
     noise_model: NoiseModel | None = None,
     **_: Dict[Any, Any],
 ) -> Dict[str, int] | Result:	
-
-    simulator = AerSimulator()
+    
+    simulator = AerSimulator(device=device, method=method)
 
     result = simulator.run(circuit, shots=n_shots, memory=True, noise_model=noise_model).result()
     if return_qiskit_result:
