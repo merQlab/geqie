@@ -67,7 +67,7 @@ def simulate(
     n_shots: int, 
     return_qiskit_result: bool = False,
     return_padded_counts: bool = False,
-    device: str = "cpu",
+    device: str = "CPU",
     method: str = "automatic",
     noise_model: NoiseModel | None = None,
     **_: Dict[Any, Any],
