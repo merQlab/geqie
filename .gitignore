@@ -10,3 +10,22 @@ build
 
 !.env.worker
 !.env.server
+
+# Ignore virtual environment
+wenv/
+../wenv/
+
+# Ignore backup files
+*_OLD*
+*.bak
+
+# Local Image Files (Should not be committed)
+2x2.png
+Grass_Block.webp
+Grass_Block_32.png
+
+# Local Utility Scripts (Should not be committed)
+ResultVisualizer.py
+generate_image.py
+MinecraftTextureResizer.py
+personalaccesstoken_JOZEFCYRAN.txt

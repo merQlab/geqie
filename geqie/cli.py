@@ -19,6 +19,64 @@ import geqie.main as main
 
 ENCODINGS_PATH = Path(__file__).parent / "encodings"
 
+# ======================================================================
+# WHITELIST SYSTEM
+# ======================================================================
+
+# Default whitelist (fallback if DB is unreachable)
+DEFAULT_ALLOWED_ENCODINGS = {
+    "frqi", "ifrqi", "neqr", "mcqi", "ncqi", "qualpi"
+}
+
+def load_db_whitelist():
+    """Try to load QuantumMethod.approved=True from Django. Return set or None."""
+    try:
+        # Lazy import to avoid strict dependency if running standalone
+        from django.conf import settings
+        import django
+        
+        # Configure Django if not already configured
+        if not settings.configured:
+            try:
+                # Assuming DJANGO_SETTINGS_MODULE is set in env, or rely on default
+                django.setup()
+            except Exception:
+                pass
+        else:
+            try:
+                django.setup()
+            except Exception:
+                pass
+        
+        from main.models import QuantumMethod
+        approved = {m.name for m in QuantumMethod.objects.filter(approved=True)}
+        return approved if approved else None
+    except Exception:
+        # Fails silently if Django is not present/configured
+        return None
+
+def allowed_methods():
+    """Return final whitelist: DB first, fallback second."""
+    db = load_db_whitelist()
+    return db if db else DEFAULT_ALLOWED_ENCODINGS
+
+def whitelist_check(encoding_name):
+    """
+    Check if encoding is allowed.
+    Prints to sys.stderr to avoid corrupting JSON output on stdout.
+    """
+    w = allowed_methods()
+    if encoding_name in w:
+        # Print to stderr so we don't break JSON piping
+        print(f"[WHITELIST] Method '{encoding_name}' IS APPROVED.", file=sys.stderr)
+        return True
+    else:
+        print(f"[WHITELIST] Method '{encoding_name}' is NOT approved.", file=sys.stderr)
+        return False
+
+# ======================================================================
+# CORE FUNCTIONALITY
+# ======================================================================
 
 class EncodingFunctions(NamedTuple):
     init_function: Callable
@@ -36,6 +94,15 @@ def _import_module(name: str, file_path: str) -> types.ModuleType:
 
 
 def _get_encoding_functions(params: Dict) -> EncodingFunctions:
+    # ------------------------------------------------------------------
+    # WHITELIST CHECK
+    # ------------------------------------------------------------------
+    if params.get("encoding"):
+        encoding_name = params.get("encoding")
+        if not whitelist_check(encoding_name):
+            raise ValueError(f"Encoding '{encoding_name}' is not approved.")
+    # ------------------------------------------------------------------
+
     if params.get("init") and params.get("data") and params.get("map"):
         init_path = params.get("init")
         data_path = params.get("data")
@@ -55,6 +122,15 @@ def _get_encoding_functions(params: Dict) -> EncodingFunctions:
 
 
 def _get_retrive_functions(params: Dict):
+    # ------------------------------------------------------------------
+    # WHITELIST CHECK
+    # ------------------------------------------------------------------
+    if params.get("encoding"):
+        encoding_name = params.get("encoding")
+        if not whitelist_check(encoding_name):
+            raise ValueError(f"Encoding '{encoding_name}' is not approved.")
+    # ------------------------------------------------------------------
+
     encoding_path = params.get("encoding")
     retrieve_path = f"{encoding_path}/retrieve.py"
     retrieve_function = getattr(_import_module("retrieve", retrieve_path), "retrieve")
@@ -162,6 +238,7 @@ def execute(ctx: cloup.Context, **params):
 @cli.command()
 @retrieve_options
 def retrieve(**params):
+    # Keeping original cli_OLD logic for retrieve
     print('Retrieve CLI')
     # print(f'Params: {params}')
     print(f'Params.get("result"): {params.get("result")}')
@@ -174,4 +251,3 @@ def retrieve(**params):
 
 if __name__ == '__main__':
     cli()
-
