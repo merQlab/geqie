@@ -19,11 +19,11 @@ def encode(
     data_function: Callable[..., Statevector],
     map_function: Callable[..., Operator],
     image: np.ndarray,
-    image_dimensions: int = 2,
+    image_dimensionality: int = 2,
     verbosity_level: int = 0,
     **_: Dict[Any, Any],
 ) -> QuantumCircuit:
-    shape = image.shape[:image_dimensions]
+    shape = image.shape[:image_dimensionality]
 
     R = int(np.ceil(np.log2(max(shape))))
 

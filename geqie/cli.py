@@ -61,12 +61,15 @@ def _get_retrive_functions(params: Dict):
     return retrieve_function
 
 
-def _parse_image(image_path, grayscale, **_) -> np.ndarray:
-    image = Image.open(image_path)
-    if grayscale:
-        return np.asarray(ImageOps.grayscale(image))
+def _parse_image(image_path, grayscale, image_dimensionality, **_) -> np.ndarray:
+    if image_dimensionality == 2:
+        image = Image.open(image_path)
+        if grayscale:
+            return np.asarray(ImageOps.grayscale(image))
+        else:
+            return np.asarray(image)
     else:
-        return np.asarray(image)
+        return np.load(image_path)
 
 
 @cloup.group()
@@ -91,6 +94,7 @@ def encoding_options(func) -> Callable:
     )
     @cloup.option("--image-path", required=True, help="Path to the image file")
     @cloup.option("--grayscale", type=cloup.BOOL, default=True, show_default=True, help="Indication wether the image is grayscale")
+    @cloup.option("--image-dimensionality", type=int, default=2, show_default=True, help="Number of image dimensions to consider")
     @cloup.option("--verbosity-level", default=0, help="Set verbosity level, 0-3")
     @functools.wraps(func)
     def wrapper(*args, **kwargs):

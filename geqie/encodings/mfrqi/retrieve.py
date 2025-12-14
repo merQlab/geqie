@@ -1,16 +1,16 @@
 import numpy as np
 import json
 
-def retrieve(results: str) -> np.ndarray:
+def retrieve(results: str, image_dimensionality: int = 2) -> np.ndarray:
     state_length = len(next(iter(results)))
     color_qubits = 1
     number_of_position_qubits = state_length - color_qubits
-    x_qubits = number_of_position_qubits // 2
-    y_qubits = number_of_position_qubits // 2
-    
-    image_shape = (2**x_qubits, 2**y_qubits)
 
-    reconstructed_image = np.zeros((image_shape[0], image_shape[1]))
+    dimension_qubits = number_of_position_qubits // image_dimensionality
+    
+    image_shape = [2**dimension_qubits] * image_dimensionality
+
+    reconstructed_image = np.zeros(image_shape)
 
     ones = np.zeros_like(reconstructed_image)
     total = np.zeros_like(reconstructed_image)
@@ -26,5 +26,5 @@ def retrieve(results: str) -> np.ndarray:
     
     reconstructed_image = np.where(total > 0, np.arccos(np.sqrt(1 - ones / total)), 0)
     reconstructed_image = 255 * 2 * reconstructed_image / np.pi
-    reconstructed_image = reconstructed_image.astype(np.uint8)        
+    reconstructed_image = reconstructed_image.astype(np.uint8)
     return reconstructed_image
