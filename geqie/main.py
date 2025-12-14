@@ -14,26 +14,32 @@ from geqie.utils.print import tabulate_complex
 
 
 def encode(
-    init_function: Callable[[int], Statevector], 
-    data_function: Callable[[int, int, int, np.ndarray], Statevector], 
-    map_function: Callable[[int, int, int, np.ndarray], Operator], 
+    init_function: Callable[[int], Statevector],
+    # arbitrary coordinate indices + R + image
+    data_function: Callable[..., Statevector],
+    map_function: Callable[..., Operator],
     image: np.ndarray,
+    image_dimensions: int = 2,
     verbosity_level: int = 0,
     **_: Dict[Any, Any],
 ) -> QuantumCircuit:
-    R = np.ceil(np.log2(np.max((image.shape[0], image.shape[1])))).astype(int)
+    shape = image.shape[:image_dimensions]
+
+    R = int(np.ceil(np.log2(max(shape))))
 
     products, data_vectors, map_operators = [], [], []
-    for u, v in itertools.product(range(image.shape[0]), range(image.shape[1])):
-        data_vector = data_function(u, v, R, image)
-        map_operator = map_function(u, v, R, image)
+
+    for coords in np.ndindex(*shape):
+        data_vector = data_function(*coords, R=R, image=image)
+        map_operator = map_function(*coords, R=R, image=image)
         product = data_vector.to_operator() ^ map_operator
+
         products.append(product)
         data_vectors.append(data_vector)
         map_operators.append(map_operator)
 
         if verbosity_level > 2:
-            print(f"{u=}, {v=}")
+            print(f"{coords=}")
             print(f"{data_vector=}")
             print(f"{map_operator=}")
             print(f"{product=}")
@@ -44,7 +50,7 @@ def encode(
     if verbosity_level > 1:
         print(f"G=\n{tabulate_complex(G)}")
         print(f"U=\n{tabulate_complex(U)}")
-    
+
     U_op = Operator(U)
     n_qubits = U_op.num_qubits
     init_state = init_function(n_qubits)
