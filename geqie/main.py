@@ -6,7 +6,9 @@ import numpy as np
 from qiskit.circuit import QuantumCircuit
 from qiskit.quantum_info import Operator, Statevector
 from qiskit.result import Result
-from qiskit_aer import Aer
+from qiskit_aer import AerSimulator
+from qiskit_aer.noise import NoiseModel, thermal_relaxation_error
+from qiskit.quantum_info import SuperOp, Kraus
 
 from geqie.utils.print import tabulate_complex
 
@@ -76,11 +78,15 @@ def simulate(
     n_shots: int, 
     return_qiskit_result: bool = False,
     return_padded_counts: bool = False,
+    device: str = "CPU",
+    method: str = "automatic",
+    noise_model: NoiseModel | None = None,
     **_: Dict[Any, Any],
-) -> Dict[str, int] | Result:
-    simulator = Aer.get_backend('aer_simulator')
+) -> Dict[str, int] | Result:	
+    
+    simulator = AerSimulator(device=device, method=method)
 
-    result = simulator.run(circuit, shots=n_shots, memory=True).result()
+    result = simulator.run(circuit, shots=n_shots, memory=True, noise_model=noise_model).result()
     if return_qiskit_result:
         return result
 
