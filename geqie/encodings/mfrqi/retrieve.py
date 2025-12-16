@@ -25,6 +25,5 @@ def retrieve(results: str, image_dimensionality: int = 2) -> np.ndarray:
             ones.flat[m] += n
     
     reconstructed_image = np.where(total > 0, np.arccos(np.sqrt(1 - ones / total)), 0)
-    reconstructed_image = 255 * 2 * reconstructed_image / np.pi
-    reconstructed_image = reconstructed_image.astype(np.uint8)
+    reconstructed_image = 2 * reconstructed_image / np.pi
     return reconstructed_image
