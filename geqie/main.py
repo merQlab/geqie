@@ -19,22 +19,17 @@ def encode(
     data_function: Callable[..., Statevector],
     map_function: Callable[..., Operator],
     image: np.ndarray,
+    image_dimensionality: int = 2,
     verbosity_level: int = 0,
     **_: Dict[Any, Any],
 ) -> QuantumCircuit:
-    shape = image.shape
+    shape = image.shape[:image_dimensionality]
 
-    # treat the last axis as channels if it's small (1, 3, 4)
-    if image.ndim >= 3 and shape[-1] in (1, 3, 4):
-        spatial_shape = shape[:-1]   # e.g. RGB - extracting only (u, v) from (u, v, 3)
-    else:
-        spatial_shape = shape        # pure spatial: (u, v), (u, v, w) etc.
-
-    R = int(np.ceil(np.log2(max(spatial_shape))))
+    R = int(np.ceil(np.log2(max(shape))))
 
     products, data_vectors, map_operators = [], [], []
-    for coords in np.ndindex(*spatial_shape):
-        # coords = (u, v) for 2D, (d, u, v) for 3D, etc.
+
+    for coords in np.ndindex(*shape):
         data_vector = data_function(*coords, R=R, image=image)
         map_operator = map_function(*coords, R=R, image=image)
         product = data_vector.to_operator() ^ map_operator
@@ -55,7 +50,7 @@ def encode(
     if verbosity_level > 1:
         print(f"G=\n{tabulate_complex(G)}")
         print(f"U=\n{tabulate_complex(U)}")
-    
+
     U_op = Operator(U)
     n_qubits = U_op.num_qubits
     init_state = init_function(n_qubits)
