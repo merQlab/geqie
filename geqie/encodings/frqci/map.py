@@ -2,30 +2,27 @@ import numpy as np
 
 from qiskit.quantum_info import Operator
 
+RED_SHIFT   = 16
+GREEN_SHIFT = 8
+BLUE_SHIFT  = 0
+NORMALIZATION_FACTOR = 2**24 - 1
+
 def map(u: int, v: int, R: int, image: np.ndarray) -> Operator:
-    ''' FRQCI mapping function '''
-    image = image.astype(int)
-    red   = image[u, v, 0]
-    green = image[u, v, 1]
-    blue  = image[u, v, 2]
-    #print (f"{red=}");
-    #print (f"{green=}");
-    #print (f"{blue=}");
+    """FRQCI mapping function"""
+    red   = image[u, v, 0].astype(np.uint32)
+    green = image[u, v, 1].astype(np.uint32)
+    blue  = image[u, v, 2].astype(np.uint32)
 
+    color_blend = (red << RED_SHIFT) + (green << GREEN_SHIFT) + (blue << BLUE_SHIFT)
 
-    pi = np.pi;
-    red_coeff = 2**16;
-    green_coeff = 2**8;
-    blue_coeff = 1;
-    numerator = red * red_coeff + green * green_coeff + blue * blue_coeff;
-    denominator = 2**24 - 1;
-    theta = pi * numerator / denominator;
-    sin_theta_2 = np.sin(theta / 2);
-    cos_theta_2 = np.cos(theta / 2);
+    theta = color_blend / NORMALIZATION_FACTOR * (np.pi / 2)
+
+    sin_theta = np.sin(theta)
+    cos_theta = np.cos(theta)
 
     map_operator = [
-        [cos_theta_2, -1 * sin_theta_2],
-        [sin_theta_2,      cos_theta_2],
+        [cos_theta, -sin_theta],
+        [sin_theta,  cos_theta],
     ]
 
     return Operator(map_operator)
