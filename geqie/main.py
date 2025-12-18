@@ -1,41 +1,45 @@
 import itertools
-from tabulate import tabulate
-from typing import Callable, Dict
-
-import matplotlib.pyplot as plt
+from typing import Any, Callable, Dict
 
 import numpy as np
 
 from qiskit.circuit import QuantumCircuit
 from qiskit.quantum_info import Operator, Statevector
 from qiskit.result import Result
-from qiskit_aer import Aer
+from qiskit_aer import AerSimulator
+from qiskit_aer.noise import NoiseModel, thermal_relaxation_error
+from qiskit.quantum_info import SuperOp, Kraus
 
 from geqie.utils.print import tabulate_complex
 
 
 def encode(
-    init_function: Callable[[int], Statevector], 
-    data_function: Callable[[int, int, int, np.ndarray], Statevector], 
-    map_function: Callable[[int, int, int, np.ndarray], Operator], 
+    init_function: Callable[[int], Statevector],
+    # arbitrary coordinate indices + R + image
+    data_function: Callable[..., Statevector],
+    map_function: Callable[..., Operator],
     image: np.ndarray,
-    ctx: Dict = {},
+    image_dimensionality: int = 2,
+    verbosity_level: int = 0,
+    **_: Dict[Any, Any],
 ) -> QuantumCircuit:
-    verbosity_level = ctx.get("verbose", 0)
+    shape = image.shape[:image_dimensionality]
 
-    R = np.ceil(np.log2(np.max((image.shape[0], image.shape[1])))).astype(int)
+    R = int(np.ceil(np.log2(max(shape))))
 
     products, data_vectors, map_operators = [], [], []
-    for u, v in itertools.product(range(image.shape[0]), range(image.shape[1])):
-        data_vector = data_function(u, v, R, image)
-        map_operator = map_function(u, v, R, image)
+
+    for coords in np.ndindex(*shape):
+        data_vector = data_function(*coords, R=R, image=image)
+        map_operator = map_function(*coords, R=R, image=image)
         product = data_vector.to_operator() ^ map_operator
+
         products.append(product)
         data_vectors.append(data_vector)
         map_operators.append(map_operator)
 
         if verbosity_level > 2:
-            print(f"{u=}, {v=}")
+            print(f"{coords=}")
             print(f"{data_vector=}")
             print(f"{map_operator=}")
             print(f"{product=}")
@@ -46,7 +50,7 @@ def encode(
     if verbosity_level > 1:
         print(f"G=\n{tabulate_complex(G)}")
         print(f"U=\n{tabulate_complex(U)}")
-    
+
     U_op = Operator(U)
     n_qubits = U_op.num_qubits
     init_state = init_function(n_qubits)
@@ -67,12 +71,17 @@ def encode(
 def simulate(
     circuit: QuantumCircuit, 
     n_shots: int, 
-    return_qiskit_result: bool = False, 
+    return_qiskit_result: bool = False,
     return_padded_counts: bool = False,
-) -> Dict[str, int] | Result:
-    simulator = Aer.get_backend('aer_simulator')
+    device: str = "CPU",
+    method: str = "automatic",
+    noise_model: NoiseModel | None = None,
+    **_: Dict[Any, Any],
+) -> Dict[str, int] | Result:	
+    
+    simulator = AerSimulator(device=device, method=method)
 
-    result = simulator.run(circuit, shots=n_shots, memory=True).result()
+    result = simulator.run(circuit, shots=n_shots, memory=True, noise_model=noise_model).result()
     if return_qiskit_result:
         return result
 
