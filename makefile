@@ -1,20 +1,37 @@
+## GUI
+.PHONY: build
 
-imageG=./assets/test_images/grayscale/test_image.png
-imageC=./assets/test_images/rgb/rgb.png
+build:
+	cd gui && docker-compose build web
 
-frqci :
-	echo "FRQCI encoding"
-	./piaskownica/bin/geqie simulate --image $(imageC) --grayscale false --encoding frqci  --return-padded-counts true
+up:
+	- bash -lc 'cd gui && docker-compose up db pgadmin redis minio minio-setup web worker --attach web --attach worker'
 
-frqi :
-	echo "FRQI encoding"
-	./piaskownica/bin/geqie simulate --image $(imageG) --encoding frqi   --return-padded-counts true
+up-dev: build
+	- bash -lc 'cd gui && docker-compose up db pgadmin redis minio minio-setup web-dev worker-dev --attach web-dev --attach worker-dev'
 
-ncqi : 
-	echo "NCQI encoding"
-	./piaskownica/bin/geqie simulate --image $(imageG) --encoding NCQI  --return-padded-counts true
 
-mcqi :
-	echo "MCQI encoding"
-	./piaskownica/bin/geqie simulate --image $(imageG) --encoding MCQI  --return-padded-counts true
+## Installation Targets
+install-requirements:
+	pip install -r requirements/requirements.in
 
+install-requirements-dev:
+	pip install -r requirements/requirements_dev.in
+
+install-requirements-uv:
+	uv pip install -r requirements/requirements.in
+
+install-requirements-uv-dev:
+	uv pip install -r requirements/requirements_dev.in
+
+## CI Targets
+regenerate-requirements:
+	uv pip compile -o requirements/requirements.txt requirements/requirements.in
+	uv pip compile -o requirements/requirements_dev.txt requirements/requirements_dev.in
+
+install-requirements-ci:
+	pip install -U uv
+	uv pip install -r requirements/requirements_dev.txt --system
+
+test:
+	pytest tests -W ignore::DeprecationWarning
