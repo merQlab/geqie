@@ -36,29 +36,46 @@ def _import_module(name: str, file_path: str) -> types.ModuleType:
 
 
 def _get_encoding_functions(params: Dict) -> EncodingFunctions:
-    if params.get("init") and params.get("data") and params.get("map"):
-        init_path = params.get("init")
-        data_path = params.get("data")
-        map_path = params.get("map")
-    else:
-        encoding_path = params.get("encoding")
-        
-        init_path = f"{encoding_path}/init.py"
-        data_path = f"{encoding_path}/data.py"
-        map_path = f"{encoding_path}/map.py"
+    encoding_name = params.get("encoding")
+    if not encoding_name:
+        raise ValueError("Missing required parameter: 'encoding'.")
 
-    init_function = getattr(_import_module("init", init_path), "init")
-    data_function = getattr(_import_module("data", data_path), "data")
-    map_function = getattr(_import_module("map", map_path), "map")
+    init_path = f"{encoding_name}/init.py"
+    data_path = f"{encoding_name}/data.py"
+    map_path = f"{encoding_name}/map.py"
+
+    # Use unique module names to avoid sys.modules collisions across runs
+    init_mod = _import_module(f"{encoding_name}.init", init_path)
+    data_mod = _import_module(f"{encoding_name}.data", data_path)
+    map_mod  = _import_module(f"{encoding_name}.map",  map_path)
+
+    try:
+        init_function = getattr(init_mod, "init")
+        data_function = getattr(data_mod, "data")
+        map_function  = getattr(map_mod,  "map")
+    except AttributeError as exc:
+        raise ValueError(
+            f"Encoding '{encoding_name}' is missing required functions "
+            f"(init/data/map)."
+        ) from exc
 
     return EncodingFunctions(init_function, data_function, map_function)
 
 
 def _get_retrive_functions(params: Dict):
-    encoding_path = params.get("encoding")
-    retrieve_path = f"{encoding_path}/retrieve.py"
-    retrieve_function = getattr(_import_module("retrieve", retrieve_path), "retrieve")
-    return retrieve_function
+    encoding_name = params.get("encoding")
+    if not encoding_name:
+        raise ValueError("Missing required parameter: 'encoding'.")
+
+    retrieve_path = f"{encoding_name}/retrieve.py"
+    retrieve_mod = _import_module(f"{encoding_name}.retrieve", retrieve_path)
+
+    try:
+        return getattr(retrieve_mod, "retrieve")
+    except AttributeError as exc:
+        raise ValueError(
+            f"Encoding '{encoding_name}' has no retrieve() implementation."
+        ) from exc
 
 
 def _parse_image(image_path, grayscale, image_dimensionality, **_) -> np.ndarray:
@@ -83,18 +100,26 @@ def list_encodings() -> None:
 
 
 def encoding_options(func) -> Callable:
-    @constraints.require_one(
-        cloup.option("--encoding", help="Name of the encoding from 'encodings' directory"),
-        cloup.option_group("Custom encoding plugins",
-            cloup.option("--init"),
-            cloup.option("--data"),
-            cloup.option("--map"),
-            constraint=constraints.If("encoding", then=constraints.accept_none, else_=constraints.require_all),
-        )
+    @cloup.option(
+        "--encoding",
+        required=True,
+        help="Name of the encoding from 'encodings' directory",
     )
     @cloup.option("--image-path", required=True, help="Path to the image file")
-    @cloup.option("--grayscale", type=cloup.BOOL, default=True, show_default=True, help="Indication wether the image is grayscale")
-    @cloup.option("--image-dimensionality", type=int, default=2, show_default=True, help="Number of image dimensions to consider")
+    @cloup.option(
+        "--grayscale",
+        type=cloup.BOOL,
+        default=True,
+        show_default=True,
+        help="Indication wether the image is grayscale",
+    )
+    @cloup.option(
+        "--image-dimensionality",
+        type=int,
+        default=2,
+        show_default=True,
+        help="Number of image dimensions to consider",
+    )
     @cloup.option("--verbosity-level", default=0, help="Set verbosity level, 0-3")
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
@@ -124,8 +149,13 @@ def execute_options(func) -> Callable:
 
 
 def retrieve_options(func) -> Callable:
-    @cloup.option("--encoding", required=True, type=str, help="Name of the encoding from 'encodings' directory")   
-    @cloup.option("--result", required=True, type=str, help="Result from simulation")   
+    @cloup.option(
+        "--encoding",
+        required=True,
+        type=str,
+        help="Encoding folder name under 'encodings/'. (Approval is enforced in Django/worker, not CLI.)",
+    )
+    @cloup.option("--result", required=True, type=str, help="Result from simulation")
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         return func(*args, **kwargs)

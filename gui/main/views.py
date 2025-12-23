@@ -5,6 +5,7 @@ import uuid
 import base64
 import logging
 import mimetypes
+from main.services.method_approval import require_approved_method
 from importlib import import_module
 from pathlib import Path
 from django.conf import settings
@@ -83,6 +84,9 @@ def start_experiment(request):
     if not selected_method:
         return JsonResponse({"success": False, "error": "No method selected."}, status=400)
 
+    # APPROVAL GATE (single source of truth, fail closed)
+    require_approved_method(selected_method)
+
     file_list = request.FILES.getlist("images[]") or list(request.FILES.values())
 
     if not file_list:
@@ -137,6 +141,7 @@ def start_experiment(request):
 
     logger.info("Queued %d job(s) for method=%s shots=%s", len(jobs), selected_method, shots)
     return JsonResponse({"jobs": jobs})
+
 
 
 @require_GET
