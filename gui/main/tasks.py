@@ -1,6 +1,7 @@
 from __future__ import annotations
 import logging
 import io, os, sys, json, tempfile, subprocess, shutil
+from main.services.method_approval import require_approved_method
 from pathlib import Path
 from collections import OrderedDict
 
@@ -107,6 +108,7 @@ def _to_pil(rec) -> Image.Image | None:
 @shared_task(bind=True, queue="processing_queue")
 def run_experiment(self, job_id: str) -> dict:
     job = Job.objects.get(pk=job_id)
+    require_approved_method(str(job.method))
     job.status = "running"
     job.error = ""
     job.save(update_fields=["status", "error", "updated_at"])
