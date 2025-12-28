@@ -9,7 +9,7 @@ from qiskit.result import Result
 from qiskit.transpiler import generate_preset_pass_manager
 from qiskit.quantum_info import Operator, Statevector
 
-import geqie.ibm_qp as ibm_qp
+import geqie.backends.ibm_qp as ibm_qp
 from geqie.logging.logger import setup_logger
 from geqie.logging.tabulate import tabulate_complex
 
