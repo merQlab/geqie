@@ -17,3 +17,7 @@ CLI_VERBOSITY_LEVELS = {
     5: STATE,
     6: TRACE,
 }
+
+
+def cli_verbosity_to_logging_level(verbosity_level: int) -> int:
+    return CLI_VERBOSITY_LEVELS.get(verbosity_level, ERROR)
