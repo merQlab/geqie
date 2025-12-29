@@ -16,6 +16,7 @@ import qiskit
 import numpy as np
 
 import geqie.main as main
+from geqie.logging import levels as logging_levels
 
 ENCODINGS_PATH = Path(__file__).parent / "encodings"
 
@@ -106,21 +107,9 @@ def encoding_options(func) -> Callable:
         help="Name of the encoding from 'encodings' directory",
     )
     @cloup.option("--image-path", required=True, help="Path to the image file")
-    @cloup.option(
-        "--grayscale",
-        type=cloup.BOOL,
-        default=True,
-        show_default=True,
-        help="Indication wether the image is grayscale",
-    )
-    @cloup.option(
-        "--image-dimensionality",
-        type=int,
-        default=2,
-        show_default=True,
-        help="Number of image dimensions to consider",
-    )
-    @cloup.option("--verbosity-level", default=0, help="Set verbosity level, 0-3")
+    @cloup.option("--grayscale", type=cloup.BOOL, default=True, show_default=True, help="Indication wether the image is grayscale")
+    @cloup.option("--image-dimensionality", type=int, default=2, show_default=True, help="Number of image dimensions to consider")
+    @cloup.option("--verbosity-level", default=0, help="Set verbosity level, 0-6 (higher means more verbose)")
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         return func(*args, **kwargs)
@@ -165,6 +154,8 @@ def retrieve_options(func) -> Callable:
 @cli.command()
 @encoding_options
 def encode(**params) -> qiskit.QuantumCircuit:
+    params["verbosity_level"] = logging_levels.cli_verbosity_to_logging_level(params.get("verbosity_level", 0))
+
     image = _parse_image(**params)
     e = _get_encoding_functions(params)
     return main.encode(e.init_function, e.data_function, e.map_function, image, **params)
@@ -175,6 +166,8 @@ def encode(**params) -> qiskit.QuantumCircuit:
 @simulate_options
 @cloup.pass_context
 def simulate(ctx: cloup.Context, **params):
+    params["verbosity_level"] = logging_levels.cli_verbosity_to_logging_level(params.get("verbosity_level", 0))
+
     circuit = ctx.invoke(encode, **params)
     result = main.simulate(circuit, **params)
     print(json.dumps(result))
@@ -189,6 +182,8 @@ def simulate(ctx: cloup.Context, **params):
 @execute_options
 @cloup.pass_context
 def execute(ctx: cloup.Context, **params):
+    params["verbosity_level"] = logging_levels.cli_verbosity_to_logging_level(params.get("verbosity_level", 0))
+
     circuit = ctx.invoke(encode, **params)
     print(json.dumps(main.execute(circuit, **params)))
 
@@ -196,11 +191,13 @@ def execute(ctx: cloup.Context, **params):
 @cli.command()
 @retrieve_options
 def retrieve(**params):
+    params["verbosity_level"] = logging_levels.cli_verbosity_to_logging_level(params.get("verbosity_level", 0))
+
     print('Retrieve CLI')
     # print(f'Params: {params}')
     print(f'Params.get("result"): {params.get("result")}')
 
-    retrieve_fun = _get_retrive_functions(params)
+    retrieve_fun = _get_retrieve_functions(params)
     # print(f'e: {e}')
     print(retrieve_fun(params.get("result")))
     # return retrieve_fun, params

@@ -1,5 +1,6 @@
 # install from top directory, e.g., $ uv pip install -r requirements\requirements_dev.in
 
 -e .
+-r requirements_ibm_qp.in
 
 pytest
