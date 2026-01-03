@@ -4,6 +4,7 @@
 
 ## Table of contents <!-- omit in toc -->
 
+- [Description](#description)
 - [Installation](#installation)
 - [Examples](#examples)
   - [Notebooks](#notebooks)
@@ -11,12 +12,17 @@
     - [Command `geqie list-encodings`](#command-geqie-list-encodings)
     - [Command `geqie encode`](#command-geqie-encode)
     - [Command `geqie simulate`](#command-geqie-simulate)
-- [GUI](#gui)
+- [Playground (GUI)](#playground-gui)
 - [Related research](#related-research)
+- [Citation](#citation)
 - [Acknowledgements](#acknowledgements)
 
 Related documentation:
 - [GEQIE GUI](gui/README.md)
+
+## Description
+
+![geqie_diagram](assets/geqie_diagram.png)
 
 ## Installation
 
@@ -99,14 +105,23 @@ Other options:
 geqie simulate --encoding frqi --image-path assets/test_image.png --n-shots 1024 --return-padded-counts true
 ```
 
-## GUI
+## Playground (GUI)
 
-See the [gui/README.md](gui/README.md) for instructions on running the GEQIE GUI.
+![geqie_gui_screenshot](assets/geqie_gui.png)
+
+See the [gui/README.md](gui/README.md) for instructions on running the GEQIE GUI locally.
 
 ## Related research
 
+- [Main paper - GEQIE Framework for Rapid Quantum Image Encoding](https://arxiv.org/abs/2512.24973)
 - [ICCS 2024 Poster](https://www.researchgate.net/publication/383184874_General_Quantum_Image_Representation_Model_and_Framework)
 
+
+## Citation
+
+If you use this code in your research, please cite the main paper:
+
+*GEQIE Framework for Rapid Quantum Image Encoding* at https://arxiv.org/abs/2512.24973
 
 ## Acknowledgements
 

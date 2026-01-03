@@ -380,6 +380,7 @@ async function pollJobAndRender(job, resultsList, methodName, allResults, needBa
                     retrievedImg.alt = "Retrieved image";
                     retrievedImg.style.width = "50%";
                     retrievedImg.style.imageRendering = "pixelated";
+                    retrievedImg.style.filter = "invert(1)";
                     row.appendChild(retrievedImg);
                 }
 
