@@ -107,6 +107,8 @@ geqie simulate --encoding frqi --image-path assets/test_image.png --n-shots 1024
 
 ## Playground (GUI)
 
+Public GUI access: Under construction.
+
 ![geqie_gui_screenshot](assets/geqie_gui.png)
 
 See the [gui/README.md](gui/README.md) for instructions on running the GEQIE GUI locally.
