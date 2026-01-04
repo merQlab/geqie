@@ -142,7 +142,7 @@ def retrieve_options(func) -> Callable:
         "--encoding",
         required=True,
         type=str,
-        help="Encoding folder name under 'encodings/'. (Approval is enforced in Django/worker, not CLI.)",
+        help="Name of the encoding from 'encodings' directory.",
     )
     @cloup.option("--result", required=True, type=str, help="Result from simulation")
     @functools.wraps(func)
