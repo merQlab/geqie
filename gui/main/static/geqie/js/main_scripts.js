@@ -246,6 +246,17 @@ function jobStatusUrl(jobId) {
     return `/job-status/${jobId}/`;
 }
 
+function stringifyAndSort(obj) {
+    const entries = Object.entries(obj)
+        .sort(([a], [b]) => a.localeCompare(b));
+
+    const lines = entries.map(
+        ([k, v]) => `"${k}": ${JSON.stringify(v)}`
+    );
+
+    return `{${lines.join(", ")}}`;
+}
+
 async function pollJobAndRender(job, resultsList, methodName, allResults, needBase64ForSave) {
     const listItem = document.createElement("li");
     listItem.className = "list-group-item";
@@ -322,7 +333,7 @@ async function pollJobAndRender(job, resultsList, methodName, allResults, needBa
                             }
 
                             resultObj = obj;
-                            resultText = JSON.stringify(obj);
+                            resultText = stringifyAndSort(obj);
                         } else {
                             resultText = await r.text();
                         }

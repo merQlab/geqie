@@ -8,13 +8,15 @@ import mimetypes
 from main.services.method_approval import require_approved_method
 from importlib import import_module
 from pathlib import Path
+
 from django.conf import settings
-from django.http import JsonResponse, Http404
+from django.core import signing
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
+from django.http import JsonResponse, Http404, FileResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
-from django.core.files.storage import default_storage
-from django.core.files.base import ContentFile
 
 from .models import QuantumMethod, QuantumComputer, Job
 from .utils import all_methods, approved_methods, refresh_quantum_methods
@@ -22,6 +24,9 @@ from .tasks import run_experiment
 
 logger = logging.getLogger(__name__)
 loggerFront = logging.getLogger("frontend_logs")
+
+# Temporary proxy TTL (seconds)
+PROXY_URL_TTL = getattr(settings, "PROXY_URL_TTL", 300)
 
 
 def home(request):
@@ -48,7 +53,6 @@ def edit_method(request):
 
 def _s3_client(endpoint_url: str):
     import boto3
-    from django.conf import settings
     from botocore.config import Config
 
     return boto3.client(
@@ -61,15 +65,72 @@ def _s3_client(endpoint_url: str):
     )
 
 
-def _presigned_url(key: str, ttl: int = 3600) -> str | None:
+def _proxy_url(request, job_id: str, key: str, content_type: str | None = None) -> str | None:
+    """
+    Returns a temporary Django-hosted URL that streams the object from S3/MinIO.
+    The token is signed and expires via max_age in proxy_file().
+    """
     if not key:
         return None
-    s3_public = _s3_client(getattr(settings, "AWS_S3_PUBLIC_ENDPOINT_URL", settings.AWS_S3_ENDPOINT_URL))
-    return s3_public.generate_presigned_url(
-        ClientMethod="get_object",
-        Params={"Bucket": settings.AWS_STORAGE_BUCKET_NAME, "Key": key},
-        ExpiresIn=ttl,
-    )
+    token = signing.dumps({"job_id": str(job_id), "key": key, "content_type": content_type})
+    return request.build_absolute_uri(f"/media/proxy/{token}/")
+
+
+@require_GET
+def proxy_file(request, token: str):
+    """
+    Streams an object from S3/MinIO through Django using a short-lived signed token.
+    """
+    try:
+        data = signing.loads(token, max_age=PROXY_URL_TTL)
+    except signing.BadSignature:
+        raise Http404("Invalid or expired link")
+
+    job_id = data.get("job_id")
+    key = data.get("key")
+    if not job_id or not key:
+        raise Http404("Invalid token payload")
+
+    # Fetch job and ensure the key belongs to this job
+    try:
+        job = Job.objects.get(pk=job_id)
+    except Job.DoesNotExist:
+        raise Http404("Job not found")
+
+    allowed_keys = {
+        job.input_key,
+        job.output_json_key,
+        job.original_png_key,
+        job.retrieved_png_key,
+    }
+    if key not in allowed_keys:
+        raise Http404("Not allowed")
+
+    content_type = data.get("content_type")
+    if not content_type:
+        guessed, _ = mimetypes.guess_type(key)
+        content_type = guessed or "application/octet-stream"
+
+    s3 = _s3_client(settings.AWS_S3_ENDPOINT_URL)
+
+    try:
+        obj = s3.get_object(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=key)
+    except Exception:
+        raise Http404("File not found")
+
+    body = obj["Body"]
+    resp = FileResponse(body, content_type=content_type)
+
+    content_length = obj.get("ContentLength")
+    if content_length is not None:
+        resp["Content-Length"] = str(content_length)
+
+    etag = obj.get("ETag")
+    if etag:
+        resp["ETag"] = etag
+
+    resp["Cache-Control"] = "no-store"
+    return resp
 
 
 @csrf_exempt
@@ -160,9 +221,9 @@ def job_status(request, job_id):
     if job.status == "done":
         payload.update(
             {
-                "output_json_url": _presigned_url(job.output_json_key),
-                "original_url": _presigned_url(job.original_png_key),
-                "retrieved_url": _presigned_url(job.retrieved_png_key),
+                "output_json_url": _proxy_url(request, job.id, job.output_json_key, "application/json"),
+                "original_url": _proxy_url(request, job.id, job.original_png_key, "image/png"),
+                "retrieved_url": _proxy_url(request, job.id, job.retrieved_png_key, "image/png"),
             }
         )
     return JsonResponse(payload)
@@ -245,9 +306,6 @@ def check_folder_exists(request):
     exists = os.path.exists(folder_path) and os.path.isdir(folder_path)
     return JsonResponse({"exists": exists})
 
-
-from django.http import JsonResponse
-from django.views.decorators.http import require_GET
 
 @require_GET
 def get_all_images(request):
