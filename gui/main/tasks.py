@@ -108,8 +108,8 @@ def _to_pil(rec) -> Image.Image | None:
 @shared_task(
     bind=True, 
     queue="processing_queue",
-    soft_time_limit=settings.EXPERIMENT_SOFT_TIME_LIMIT,
-    time_limit=settings.EXPERIMENT_HARD_TIME_LIMIT,
+    soft_time_limit=settings.CELERY_EXPERIMENT_SOFT_TIME_LIMIT,
+    time_limit=settings.CELERY_EXPERIMENT_HARD_TIME_LIMIT,
 )
 def run_experiment(self, job_id: str) -> dict:
     job = Job.objects.get(pk=job_id)
