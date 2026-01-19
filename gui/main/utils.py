@@ -24,6 +24,11 @@ def read_method_files(method_name):
             files[key] = ""
     return files
 
+
+def sorted_methods(methods):    
+    return sorted(methods, key=lambda x: x["name"].lower()) 
+
+
 def all_methods():
     methods = []
     if os.path.exists(ENCODINGS_DIR):
@@ -36,7 +41,7 @@ def all_methods():
             logger.exception("Error listing methods in %s: %s", ENCODINGS_DIR, e)
     else:
         logger.warning("The ENCODINGS_DIR directory does not exist: %s", ENCODINGS_DIR)
-    return sorted(methods)
+    return sorted_methods(methods)
 
 def approved_methods():
     methods = []
@@ -54,7 +59,7 @@ def approved_methods():
                         })
         except Exception as e:
             logger.exception("Error retrieving approved methods: %s", e)
-    return sorted(methods)
+    return sorted_methods(methods)
 
 def refresh_quantum_methods():
     methods = all_methods()
