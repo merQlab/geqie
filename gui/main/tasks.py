@@ -105,7 +105,12 @@ def _to_pil(rec) -> Image.Image | None:
     return None
 
 
-@shared_task(bind=True, queue="processing_queue")
+@shared_task(
+    bind=True, 
+    queue="processing_queue",
+    soft_time_limit=60,
+    time_limit=90,
+)
 def run_experiment(self, job_id: str) -> dict:
     job = Job.objects.get(pk=job_id)
     require_approved_method(str(job.method))
