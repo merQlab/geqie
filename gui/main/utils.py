@@ -54,7 +54,7 @@ def approved_methods():
                         })
         except Exception as e:
             logger.exception("Error retrieving approved methods: %s", e)
-    return sroted(methods)
+    return sorted(methods)
 
 def refresh_quantum_methods():
     methods = all_methods()
