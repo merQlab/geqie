@@ -107,7 +107,7 @@ geqie simulate --encoding frqi --image-path assets/test_image.png --n-shots 1024
 
 ## Playground (GUI)
 
-Public GUI access: Under construction.
+Public GUI access: temporary url - [https://web-staging-eb84.up.railway.app](https://web-staging-eb84.up.railway.app/) (Under construction).
 
 ![geqie_gui_screenshot](assets/geqie_gui.png)
 
