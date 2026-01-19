@@ -17,6 +17,9 @@ from django.core.files.storage import default_storage
 from importlib.util import spec_from_file_location, module_from_spec
 from .models import Job
 
+logger = logging.getLogger(__name__)
+
+
 class UserVisibleError(Exception):
     pass
 
@@ -112,6 +115,8 @@ def _to_pil(rec) -> Image.Image | None:
     time_limit=settings.CELERY_EXPERIMENT_HARD_TIME_LIMIT,
 )
 def run_experiment(self, job_id: str) -> dict:
+    logger.debug(f"Starting run_experiment for job_id: '{job_id}'")
+
     job = Job.objects.get(pk=job_id)
     require_approved_method(str(job.method))
     job.status = "running"
@@ -129,10 +134,7 @@ def run_experiment(self, job_id: str) -> dict:
 
         ok, ordered_output, err = _try_geqie_cli_simulate(str(job.method), tmp_path, shots)
         if not ok:
-            logging.getLogger(__name__).error(
-            "geqie simulate failed for method=%s file=%s: %s",
-            job.method, job.filename, err
-        )
+            logger.error("geqie simulate failed for method=%s file=%s: %s", job.method, job.filename, err)
             raise UserVisibleError("Experiment failed: method error.")
 
         out_json_key = f"results/{job.id}_output.json"
@@ -170,6 +172,7 @@ def run_experiment(self, job_id: str) -> dict:
         job.save(update_fields=[
             "output_json_key", "original_png_key", "retrieved_png_key", "status", "error", "updated_at"
         ])
+        logger.debug(f"Job with job_id: '{job_id}' finished successfully")
         return {"ok": True}
 
     except UserVisibleError as e:
@@ -178,7 +181,7 @@ def run_experiment(self, job_id: str) -> dict:
         job.save(update_fields=["status", "error", "updated_at"])
         return {"ok": False}
     except Exception as e:
-        logging.getLogger(__name__).exception("Unexpected error in run_experiment job_id=%s", job.id)
+        logger.exception("Unexpected error in run_experiment job_id=%s", job.id)
         job.status = "error"
         job.error = "Experiment failed: internal error."
         job.save(update_fields=["status", "error", "updated_at"])
