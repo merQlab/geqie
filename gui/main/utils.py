@@ -36,7 +36,7 @@ def all_methods():
             logger.exception("Error listing methods in %s: %s", ENCODINGS_DIR, e)
     else:
         logger.warning("The ENCODINGS_DIR directory does not exist: %s", ENCODINGS_DIR)
-    return methods
+    return sorted(methods)
 
 def approved_methods():
     methods = []
