@@ -12,12 +12,13 @@ SECRET_KEY = os.environ.get(
     "django-insecure-change-me"
 )
 
-DEBUG = os.environ.get("DEBUG", "False") == "True"
+DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
 
 ALLOWED_HOSTS = os.environ.get(
     "ALLOWED_HOSTS",
     "localhost,127.0.0.1"
 ).split(",")
+CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",")
 
 # --- APPLICATIONS -------------------------------------------------------------
 INSTALLED_APPS = [
