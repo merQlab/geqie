@@ -295,7 +295,7 @@ function getCSRFToken() {
 
 function checkFolderExists(methodName) {
     logToServer('debug', `Checking if folder exists for method: ${methodName}`);
-    return fetch(`/check_folder/?folder_name=${encodeURIComponent(methodName)}`)
+    return fetch(`/check-folder/?folder_name=${encodeURIComponent(methodName)}`)
         .then(response => response.json())
         .then(data => {
             if (data.exists) {

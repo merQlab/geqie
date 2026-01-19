@@ -9,7 +9,7 @@ urlpatterns = [
     path("job-status/<uuid:job_id>", job_status),
     path("jobs/<uuid:job_id>/", job_status),
     path("jobs/<uuid:job_id>", job_status),
-    path("start-Experiment/", start_experiment, name="start_experiment"),
+    path("start-experiment/", start_experiment, name="start_experiment"),
 
     path("get-all-images/", get_all_images, name="get_all_images"),
     path("media/proxy/<str:token>/", views.proxy_file, name="proxy-file"),
@@ -19,5 +19,5 @@ urlpatterns = [
     path("save-method/", save_method_files, name="save-method"),
 
     path("logs/", log_from_js, name="log_from_js"),
-    path("check_folder/", check_folder_exists, name="check_folder"),
+    path("check-folder/", check_folder_exists, name="check_folder"),
 ]

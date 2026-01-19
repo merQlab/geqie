@@ -36,7 +36,6 @@ def home(request):
 def experiment_config(request):
     methods = approved_methods()
     computers = QuantumComputer.objects.all()
-    logger.debug("Experiment_config card")
     return render(request, "experiment_config.html", {"methods": methods, "computers": computers})
 
 
@@ -136,7 +135,7 @@ def proxy_file(request, token: str):
 @csrf_exempt
 @require_POST
 def start_experiment(request):
-    logger.info("Processing POST /start-Experiment/")
+    logger.info("Processing POST /start-experiment/")
 
     selected_method = request.POST.get("selected_method")
     shots = request.POST.get("shots", "1024")
