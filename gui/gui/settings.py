@@ -186,6 +186,8 @@ CELERY_TASK_DEFAULT_QUEUE = "processing_queue"
 CELERY_TASK_ROUTES = {
     "main.tasks.run_experiment": {"queue": "processing_queue"},
 }
+CELERY_EXPERIMENT_SOFT_TIME_LIMIT = int(os.environ.get("EXPERIMENT_SOFT_TIME_LIMIT", 60))
+CELERY_EXPERIMENT_HARD_TIME_LIMIT = int(os.environ.get("EXPERIMENT_HARD_TIME_LIMIT", 90))
 
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
