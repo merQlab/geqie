@@ -299,15 +299,24 @@ async function pollJobAndRender(job, resultsList, methodName, allResults, needBa
 
         if (s.status === "error" || s.status === "failed") {
             if (s.error) {
-                const em = document.createElement("div");
-                em.className = "text-danger mt-1";
-                em.style.paddingLeft = "4px";
-                em.style.textAlign = "left";
-                em.style.fontFamily = "monospace";
-                em.style.whiteSpace = "pre-wrap";
-                em.textContent = s.error;
+                const details = document.createElement("details");
+                const summary = document.createElement("summary");
+                const error_message = document.createElement("div");
+
+                error_message.className = "text-danger mt-1";
+                error_message.style.paddingLeft = "4px";
+                error_message.style.textAlign = "left";
+                error_message.style.fontFamily = "monospace";
+                error_message.style.whiteSpace = "pre-wrap";
+                error_message.textContent = s.error;
+                
+                summary.textContent = "Error details";
+                summary.style.cursor = "pointer";
+                
+                details.appendChild(summary);
+                details.appendChild(error_message);
                 listItem.appendChild(document.createElement("br"));
-                listItem.appendChild(em);
+                listItem.appendChild(details);
                 stopProgress();
             }
             break;
