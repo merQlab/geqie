@@ -2,13 +2,13 @@
 .PHONY: build
 
 build:
-	cd gui && docker-compose build web
+	cd gui && docker compose build web
 
 up:
-	- bash -lc 'cd gui && docker-compose up db pgadmin redis minio minio-setup web worker --attach web --attach worker'
+	- bash -lc 'cd gui && docker compose up db pgadmin redis minio minio-setup web worker --attach web --attach worker'
 
 up-dev: build
-	- bash -lc 'cd gui && docker-compose up db pgadmin redis minio minio-setup web-dev worker-dev --attach web-dev --attach worker-dev'
+	- bash -lc 'cd gui && docker compose up db pgadmin redis minio minio-setup web-dev worker-dev --attach web-dev --attach worker-dev'
 
 
 ## Installation Targets

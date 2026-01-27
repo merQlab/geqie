@@ -57,11 +57,12 @@ services:
       - .env
     environment:
       PYTHONPATH: /app/gui
+      LOG_LEVEL: INFO
     working_dir: /app
     command: >
       sh -lc '
         set -e
-        exec celery -A gui worker -l info -Q processing_queue
+        exec celery -A gui worker -l info -Q processing_queue --autoscale=1,0
       '
     restart: unless-stopped
     depends_on:
@@ -117,7 +118,7 @@ services:
 
   pgadmin:
     container_name: pgadmin
-    image: dpage/pgadmin4
+    image: dpage/pgadmin4:9.10
     environment:
       PGADMIN_DEFAULT_EMAIL: pgadmin4@pgadmin.org
       PGADMIN_DEFAULT_PASSWORD: mypassword

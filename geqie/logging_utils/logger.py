@@ -1,5 +1,5 @@
-import logging
-from geqie.logging import levels
+import logging as logging
+from geqie.logging_utils import levels
 
 LOG_FORMAT = "%(levelname)s\t %(asctime)s --- %(message)s (geqie.%(module)s:%(lineno)d)"
 LOGGER = None

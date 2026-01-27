@@ -18,6 +18,8 @@ from importlib.util import spec_from_file_location, module_from_spec
 from .models import Job
 
 logger = logging.getLogger(__name__)
+DEFAULT_JOB_TIMEOUT_SECONDS = 300  # 5 minutes
+JOB_TIMEOUT_SECONDS = os.getenv("JOB_TIMEOUT_SECONDS", DEFAULT_JOB_TIMEOUT_SECONDS)
 
 
 class UserVisibleError(Exception):
@@ -59,32 +61,24 @@ def _try_geqie_cli_simulate(method: str, image_path: str, shots: int) -> tuple[b
                "--encoding", str(method),
                "--image-path", image_path,
                "--n-shots", str(shots),
-               "--return-padded-counts", "true"
+               "--return-padded-counts", "true",
+               "--verbosity-level", "INFO",
             ]
 
-    proc = subprocess.run(cmd, capture_output=True, text=True)
-    if proc.returncode != 0:
-        err = (
-            f"geqie simulate failed (rc={proc.returncode})\n"
-            f"CMD: {' '.join(cmd)}\n"
-            f"PATH={os.environ.get('PATH','')}\n"
-            f"STDOUT:\n{proc.stdout}\n"
-            f"STDERR:\n{proc.stderr}\n"
-        )
-        return (False, None, err)
-
     try:
-        return (True, OrderedDict(json.loads(proc.stdout)), "")
-    except json.JSONDecodeError as e:
-        return (False, None, f"Invalid JSON from geqie: {e}\nSTDOUT head:\n{proc.stdout[:500]}")
-    
+        proc = subprocess.run(args=cmd, capture_output=True, text=True, timeout=JOB_TIMEOUT_SECONDS)
+        if proc.returncode != 0:
+            raise subprocess.CalledProcessError(proc.returncode, cmd, output=proc.stdout, stderr=proc.stderr)
 
-def _fake_simulation(image_path: str, shots: int) -> OrderedDict:
-    img = Image.open(image_path).convert("L")
-    s = int(sum(img.getdata()))
-    c00 = s % shots
-    c11 = max(0, shots - c00)
-    return OrderedDict([("counts", OrderedDict([("00", c00), ("11", c11)]))])
+        return (True, OrderedDict(json.loads(proc.stdout)), "")
+    except subprocess.TimeoutExpired:
+        return (False, None, f"Timeout ({JOB_TIMEOUT_SECONDS} seconds) running the job.")
+    except json.JSONDecodeError as e:
+        return (False, None, f"Invalid JSON from geqie.simulate(): {e}")
+    except subprocess.CalledProcessError as e:
+        return (False, None, f"geqie.simulate() process returned non-zero status code: {proc.returncode} {e.stderr[:500]}")
+    except Exception as e:
+        return (False, None, f"Unexpected error running geqie.simulate(): {str(e)}")
 
 
 def _to_pil(rec) -> Image.Image | None:
@@ -135,7 +129,7 @@ def run_experiment(self, job_id: str) -> dict:
         ok, ordered_output, err = _try_geqie_cli_simulate(str(job.method), tmp_path, shots)
         if not ok:
             logger.error("geqie simulate failed for method=%s file=%s: %s", job.method, job.filename, err)
-            raise UserVisibleError("Experiment failed: method error.")
+            raise UserVisibleError(f"Experiment failed: '{str(err)}'")
 
         out_json_key = f"results/{job.id}_output.json"
         payload = ordered_output.get("counts", ordered_output)
@@ -179,10 +173,10 @@ def run_experiment(self, job_id: str) -> dict:
         job.status = "error"
         job.error = str(e)
         job.save(update_fields=["status", "error", "updated_at"])
-        return {"ok": False}
+        return {"ok": False, "error": job.error}
     except Exception as e:
         logger.exception("Unexpected error in run_experiment job_id=%s", job.id)
         job.status = "error"
-        job.error = "Experiment failed: internal error."
+        job.error = "Experiment failed: internal error: " + str(e)
         job.save(update_fields=["status", "error", "updated_at"])
-        return {"ok": False}
+        return {"ok": False,"error": job.error}

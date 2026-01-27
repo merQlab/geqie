@@ -10,8 +10,8 @@ from qiskit.transpiler import generate_preset_pass_manager
 from qiskit.quantum_info import Operator, Statevector
 
 import geqie.backends.ibm_qp as ibm_qp
-from geqie.logging.logger import setup_logger
-from geqie.logging.tabulate import tabulate_complex
+from geqie.logging_utils.logger import setup_logger
+from geqie.logging_utils.tabulate import tabulate_complex
 
 
 def encode(
@@ -21,10 +21,10 @@ def encode(
     map_function: Callable[..., Operator],
     image: np.ndarray,
     image_dimensionality: int = 2,
-    verbosity_level: int | None = None,
+    logging_level: int | None = None,
     **_: Dict[Any, Any],
 ) -> QuantumCircuit:
-    logger = setup_logger(verbosity_level, reset=True)
+    logger = setup_logger(logging_level, reset=True)
 
     shape = image.shape[:image_dimensionality]
 
@@ -62,7 +62,7 @@ def encode(
     circuit.append(U_op, range(n_qubits))
     circuit.measure_all()
 
-    logger.debug(circuit.draw())
+    logger.info("\n" + str(circuit.draw()))
 
     return circuit
 
@@ -75,10 +75,10 @@ def simulate(
     device: str = "CPU",
     method: str = "automatic",
     noise_model: NoiseModel | None = None,
-    verbosity_level: int | None = None,
+    logging_level: int | None = None,
     **_: Dict[Any, Any],
 ) -> Result | Dict[str, int]:
-    logger = setup_logger(verbosity_level, reset=True)
+    logger = setup_logger(logging_level, reset=True)
 
     simulator = AerSimulator(device=device, method=method)
     
@@ -112,10 +112,10 @@ def execute(
     channel: str = "ibm_quantum_platform",
     ibm_qp_runtime_args: Dict[str, Any] = {},
     transpiler_args: Dict[str, Any] = {},
-    verbosity_level: int | None = None,
+    logging_level: int | None = None,
     **_: Dict[Any, Any],
 ) -> Result | Dict[str, int] | None:
-    logger = setup_logger(verbosity_level, reset=True)
+    logger = setup_logger(logging_level, reset=True)
 
     logger.info("Setting up IBM Quantum backend...")
     ibm_qp_backend = ibm_qp.get_ibm_quantum_backend(
