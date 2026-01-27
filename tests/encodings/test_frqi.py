@@ -1,5 +1,4 @@
 import numpy as np
-import subprocess
 from PIL import Image, ImageOps
 
 import geqie

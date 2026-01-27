@@ -12,13 +12,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY gui/requirements/requirements.txt /app/requirements.txt
-RUN --mount=type=cache,target=/root/.cache/uv \
+RUN --mount=type=cache,id=uv-cache,target=/root/.cache/uv \
     uv pip install -r /app/requirements.txt --system
 
 # app source
 COPY . .
 
-RUN --mount=type=cache,target=/root/.cache/uv \
+RUN --mount=type=cache,id=uv-cache,target=/root/.cache/uv \
     uv pip install /app --system
 
 RUN cp gui/entrypoint.sh /app/entrypoint.sh \
