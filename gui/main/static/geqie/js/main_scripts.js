@@ -301,6 +301,10 @@ async function pollJobAndRender(job, resultsList, methodName, allResults, needBa
             if (s.error) {
                 const em = document.createElement("div");
                 em.className = "text-danger mt-1";
+                em.style.paddingLeft = "4px";
+                em.style.textAlign = "left";
+                em.style.fontFamily = "monospace";
+                em.style.whiteSpace = "pre-wrap";
                 em.textContent = s.error;
                 listItem.appendChild(document.createElement("br"));
                 listItem.appendChild(em);
