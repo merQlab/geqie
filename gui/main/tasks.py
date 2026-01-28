@@ -76,7 +76,10 @@ def _try_geqie_cli_simulate(method: str, image_path: str, shots: int) -> tuple[b
     except json.JSONDecodeError as e:
         return (False, None, f"Invalid JSON from geqie.simulate(): {e}")
     except subprocess.CalledProcessError as e:
-        return (False, None, f"geqie.simulate() process returned non-zero status code: {proc.returncode} {e.stderr}")
+        if proc.returncode == -9:  # KILLED
+            return (False, None, f"geqie.simulate() process was killed (possible out-of-memory). Please consider using a smaller image.")
+        else:
+            return (False, None, f"geqie.simulate() process returned non-zero status code: {proc.returncode}, Error message: {e.stderr}")
     except Exception as e:
         return (False, None, f"Unexpected error running geqie.simulate(): {str(e)}")
 
