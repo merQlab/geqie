@@ -1,4 +1,3 @@
-import io
 import os
 import json
 import uuid
@@ -6,7 +5,6 @@ import base64
 import logging
 import mimetypes
 from main.services.method_approval import require_approved_method
-from importlib import import_module
 from pathlib import Path
 
 from django.conf import settings
@@ -18,9 +16,9 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
 
-from .models import QuantumMethod, QuantumComputer, Job
-from .utils import all_methods, approved_methods, refresh_quantum_methods
+from .models import Job, QuantumMethod, QuantumComputer
 from .tasks import run_experiment
+from .utils import all_methods, approved_methods, refresh_quantum_methods
 
 logger = logging.getLogger(__name__)
 loggerFront = logging.getLogger("frontend_logs")
@@ -132,7 +130,6 @@ def proxy_file(request, token: str):
     return resp
 
 
-@csrf_exempt
 @require_POST
 def start_experiment(request):
     logger.info("Processing POST /start-experiment/")
@@ -202,6 +199,14 @@ def start_experiment(request):
     logger.info("Queued %d job(s) for method=%s shots=%s", len(jobs), selected_method, shots)
     return JsonResponse({"jobs": jobs})
 
+
+
+@require_GET
+def get_config(request):
+    """Return configuration values needed by the frontend."""
+    return JsonResponse({
+        "max_image_size": settings.MAX_IMAGE_SIZE,
+    })
 
 
 @require_GET

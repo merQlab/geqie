@@ -1,6 +1,7 @@
 import uuid
 from django.db import models
 
+
 class QuantumMethod(models.Model):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(default='', blank=True)

@@ -178,6 +178,8 @@ LOGGING = {
 }
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+DEFAULT_MAX_IMAGE_SIZE = 8
+MAX_IMAGE_SIZE = int(os.environ.get("MAX_IMAGE_SIZE", DEFAULT_MAX_IMAGE_SIZE))
 
 # --- CELERY ----------------------------------------------------------------
 CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "redis://redis:6379/0")

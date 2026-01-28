@@ -72,11 +72,27 @@
                     <div class="card-body">
                         <h4 class="card-title mb-3">Prepare Experiment</h4>
                         <div class="d-flex justify-content-center gap-3 mb-3">
-                            <form id="uploadForm" enctype="multipart/form-data" style="display: none;">
-                                <input type="file" id="imageFile" name="images[]" accept="image/*" multiple required />
-                            </form>
+                            <input type="file" id="imageFile" accept="image/*" multiple style="display: none;">
                             <button class="btn btn-primary" id="selectImage">Select images</button>
                         </div>
+                        
+                        <!-- Selected Images List -->
+                        <div id="selectedImagesContainer" class="mb-3" style="display: none;">
+                            <h6 class="text-start">Selected Images:</h6>
+                            <div id="selectedImagesList" class="list-group text-start" style="max-height: 200px; overflow-y: auto;"></div>
+                        </div>
+                        
+                        <style>
+                            .image-item-trash {
+                                opacity: 0;
+                                transition: opacity 0.2s;
+                                cursor: pointer;
+                            }
+                            .list-group-item:hover .image-item-trash {
+                                opacity: 1;
+                            }
+                        </style>
+                        
                         <div class="my-3">
                             <p class="d-inline">Selected method:</p>
                             <span id="selected-submethod" class="fw-bold text-primary">No method</span>
@@ -98,6 +114,7 @@
                     <div class="card-body">
                         <h4 class="card-title mb-3">Experiments List</h4>
                         <form id="experimentsForm" enctype="multipart/form-data">
+                            {% csrf_token %}
                             <div class="table-responsive mb-3" style="max-height: 346px; overflow-y: auto;">
                                 <table class="table table-bordered" id="experimentsTable">
                                     <thead>

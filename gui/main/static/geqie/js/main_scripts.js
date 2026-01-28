@@ -2,8 +2,29 @@ let formData = new FormData();
 let experiments = [];
 let animationFrameId;
 let isResponseOk;
+let maxImageSize = 8; // Default value
+let selectedFiles = []; // Array to track selected files persistently
+
+const csrftoken = document.querySelector(
+  'input[name="csrfmiddlewaretoken"]'
+).value;
+
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Fetch configuration from server
+    fetch('/config/')
+        .then(response => response.json())
+        .then(data => {
+            maxImageSize = data.max_image_size;
+            logToServer('debug', `Loaded MAX_IMAGE_SIZE: ${maxImageSize}`);
+        })
+        .catch(error => {
+            logToServer('warning', `Failed to load config, using default MAX_IMAGE_SIZE: ${maxImageSize}. Error: ${error}`);
+        });
+
+    // Load default images
+    loadDefaultImages();
+
     const selectedSubMethod = document.getElementById('selected-submethod');
     const selectedComputer = document.getElementById('selected-computer');
 
@@ -26,32 +47,271 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+
 document.getElementById('selectImage').addEventListener('click', () => {
     document.getElementById('imageFile').click();
 });
 
+
+async function validateImageDimensions(file) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        const objectUrl = URL.createObjectURL(file);
+        
+        img.onload = () => {
+            URL.revokeObjectURL(objectUrl);
+            const width = img.width;
+            const height = img.height;
+            
+            if (width > maxImageSize || height > maxImageSize) {
+                resolve({
+                    valid: false,
+                    width: width,
+                    height: height,
+                    filename: file.name
+                });
+            } else {
+                resolve({
+                    valid: true,
+                    width: width,
+                    height: height,
+                    filename: file.name
+                });
+            }
+        };
+        
+        img.onerror = () => {
+            URL.revokeObjectURL(objectUrl);
+            reject(new Error(`Failed to load image: ${file.name}`));
+        };
+        
+        img.src = objectUrl;
+    });
+}
+
+
+async function loadDefaultImages() {
+    try {
+        logToServer('debug', 'Loading default images...');
+        
+        // Fetch all available images from server
+        const response = await fetch('/get-all-images/');
+        if (!response.ok) {
+            logToServer('warning', 'Failed to fetch default images');
+            return;
+        }
+        
+        const data = await response.json();
+        if (!data.images || data.images.length === 0) {
+            logToServer('warning', 'No default images available');
+            return;
+        }
+        
+        // Filter for the specific mnist images we want
+        const defaultImageNames = ['0_8x8.png', '1_8x8.png', '5_8x8.png'];
+        const defaultImages = data.images.filter(img => defaultImageNames.includes(img.name));
+        
+        if (defaultImages.length === 0) {
+            logToServer('warning', 'Default mnist images not found');
+            return;
+        }
+        
+        // Sort images alphabetically by name
+        defaultImages.sort((a, b) => a.name.localeCompare(b.name));
+        
+        // Convert base64 images to File objects
+        for (const imgData of defaultImages) {
+            try {
+                // Decode base64 to binary
+                const binaryString = atob(imgData.data);
+                const bytes = new Uint8Array(binaryString.length);
+                for (let i = 0; i < binaryString.length; i++) {
+                    bytes[i] = binaryString.charCodeAt(i);
+                }
+                
+                // Create a Blob from the binary data
+                const blob = new Blob([bytes], { type: imgData.type });
+                
+                // Create a File object
+                const file = new File([blob], imgData.name, { type: imgData.type });
+                
+                // Validate dimensions
+                const result = await validateImageDimensions(file);
+                
+                if (result.valid) {
+                    selectedFiles.push({
+                        file: file,
+                        validation: result
+                    });
+                    logToServer('debug', `Added default image: ${imgData.name} (${result.width}x${result.height}px)`);
+                } else {
+                    logToServer('warning', `Default image ${imgData.name} exceeds size limit: ${result.width}x${result.height}px`);
+                }
+            } catch (error) {
+                logToServer('error', `Error processing default image ${imgData.name}: ${error}`);
+            }
+        }
+        
+        // Update the file input and display
+        if (selectedFiles.length > 0) {
+            updateFileInput();
+            updateSelectedImagesList();
+            logToServer('info', `Loaded ${selectedFiles.length} default images`);
+        }
+        
+    } catch (error) {
+        logToServer('error', `Error loading default images: ${error}`);
+    }
+}
+
+
 document.getElementById('imageFile').addEventListener('change', async () => {
-    let formData = new FormData();
     const files = document.getElementById('imageFile').files;
 
     if (!files.length) return;
 
-    logToServer('debug', `Selected ${files.length} images: ${[...files].map(f => f.name).join(', ')}`);
+    logToServer('debug', `Selected ${files.length} new images: ${[...files].map(f => f.name).join(', ')}`);
 
+    // Validate all newly selected images
+    const validationResults = [];
+    const newFiles = [];
+    
     for (let i = 0; i < files.length; i++) {
-        formData.append('images[]', files[i]);
+        const file = files[i];
+        
+        // Check if file already exists in selectedFiles
+        const isDuplicate = selectedFiles.some(existingFile => 
+            existingFile.file.name === file.name && 
+            existingFile.file.size === file.size &&
+            existingFile.file.lastModified === file.lastModified
+        );
+        
+        if (isDuplicate) {
+            logToServer('debug', `Skipping duplicate file: ${file.name}`);
+            continue;
+        }
+        
+        try {
+            const result = await validateImageDimensions(file);
+            validationResults.push(result);
+            newFiles.push(file);
+        } catch (error) {
+            logToServer('error', `Error validating image ${file.name}: ${error}`);
+            alert(`Error loading image ${file.name}. Please select valid images.`);
+            document.getElementById('imageFile').value = ''; // Clear selection
+            return;
+        }
     }
+
+    // Check if any images failed validation
+    const invalidImages = validationResults.filter(r => !r.valid);
+    if (invalidImages.length > 0) {
+        const errorMessages = invalidImages.map(img => 
+            `${img.filename}: ${img.width}x${img.height} pixels`
+        ).join('\n');
+        alert(`The following images exceed the maximum size of ${maxImageSize}x${maxImageSize} pixels:\n\n${errorMessages}\n\nPlease select images with smaller dimensions.`);
+        logToServer('warning', `Image validation failed for ${invalidImages.length} images`);
+        document.getElementById('imageFile').value = ''; // Clear selection
+        return;
+    }
+
+    if (validationResults.length === 0) {
+        logToServer('debug', 'No new images to add (all were duplicates)');
+        document.getElementById('imageFile').value = ''; // Clear selection
+        return;
+    }
+
+    logToServer('info', `All ${validationResults.length} new images passed dimension validation`);
+
+    // Add new files to selectedFiles array
+    validationResults.forEach((result, index) => {
+        selectedFiles.push({
+            file: newFiles[index],
+            validation: result
+        });
+    });
+
+    // Update the file input with all selected files
+    updateFileInput();
+
+    // Display the selected images
+    updateSelectedImagesList();
 });
 
+
+function updateFileInput() {
+    // Update the file input's FileList using DataTransfer
+    const dataTransfer = new DataTransfer();
+    selectedFiles.forEach(item => {
+        dataTransfer.items.add(item.file);
+    });
+    document.getElementById('imageFile').files = dataTransfer.files;
+}
+
+
+function removeSelectedImage(index) {
+    logToServer('debug', `Removing image at index ${index}: ${selectedFiles[index].validation.filename}`);
+    selectedFiles.splice(index, 1);
+    updateFileInput();
+    updateSelectedImagesList();
+}
+
+
+function updateSelectedImagesList() {
+    const container = document.getElementById('selectedImagesContainer');
+    const listElement = document.getElementById('selectedImagesList');
+    
+    // Clear previous list
+    listElement.innerHTML = '';
+    
+    if (selectedFiles.length === 0) {
+        container.style.display = 'none';
+        return;
+    }
+    
+    // Show container
+    container.style.display = 'block';
+    
+    // Add each image to the list
+    selectedFiles.forEach((item, index) => {
+        const result = item.validation;
+        const listItem = document.createElement('div');
+        listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
+        listItem.innerHTML = `
+            <div>
+                <strong>${result.filename}</strong>
+                <small class="text-muted ms-2">(${result.width}x${result.height}px)</small>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-success rounded-pill">✓</span>
+                <img src="${trashIconPath}" 
+                     class="image-item-trash" 
+                     alt="Remove" 
+                     style="width:20px;height:20px;" 
+                     data-index="${index}">
+            </div>
+        `;
+        
+        // Add click handler for trash icon
+        const trashIcon = listItem.querySelector('.image-item-trash');
+        trashIcon.addEventListener('click', (e) => {
+            e.stopPropagation();
+            removeSelectedImage(index);
+        });
+        
+        listElement.appendChild(listItem);
+    });
+}
+
+
 document.getElementById('addExperiment').addEventListener('click', () => {
-    const files = document.getElementById('imageFile').files;
     const selectedMethod = document.getElementById('selected-submethod').textContent.trim();
     const selectedComputer = document.getElementById('selected-computer').textContent.trim();
     const shots = document.getElementById('shots').value;
 
-    logToServer('debug', `Trying to add an experiment: method=${selectedMethod}, computer=${selectedComputer}, shots=${shots}, number of files=${files.length}`);
+    logToServer('debug', `Trying to add an experiment: method=${selectedMethod}, computer=${selectedComputer}, shots=${shots}, number of files=${selectedFiles.length}`);
 
-    if (files.length === 0) {
+    if (selectedFiles.length === 0) {
         alert("Please select an image first!");
         return;
     }
@@ -67,7 +327,7 @@ document.getElementById('addExperiment').addEventListener('click', () => {
     }
 
     const experiment = {
-        images: Array.from(files),
+        images: selectedFiles.map(item => item.file),
         method: selectedMethod,
         computer: selectedComputer,
         shots: shots
@@ -76,6 +336,7 @@ document.getElementById('addExperiment').addEventListener('click', () => {
     experiments.push(experiment);
     updateExperimentsTable();
 });
+
 
 function updateExperimentsTable() {
     const tableBody = document.getElementById('experimentsTableBody');
@@ -111,11 +372,13 @@ function updateExperimentsTable() {
     logToServer('debug', `Experiment table updated, number of experiments: ${experiments.length}`);
 }
 
+
 function removeExperiment(index) {
     logToServer('debug', `Deleting an experiment by index ${index}`);
     experiments.splice(index, 1);
     updateExperimentsTable();
 }
+
 
 document.getElementById('startExperiment').addEventListener('click', async function(event) {
     event.preventDefault();
@@ -124,6 +387,36 @@ document.getElementById('startExperiment').addEventListener('click', async funct
         alert("Please add experiments first!");
         return;
     }
+
+    // Validate all images in experiments before starting
+    logToServer('debug', 'Validating all experiment images before starting...');
+    const allInvalidImages = [];
+    
+    for (const experiment of experiments) {
+        for (const image of experiment.images) {
+            try {
+                const result = await validateImageDimensions(image);
+                if (!result.valid) {
+                    allInvalidImages.push(result);
+                }
+            } catch (error) {
+                logToServer('error', `Error validating image ${image.name}: ${error}`);
+                alert(`Error validating image ${image.name}. Please remove this experiment and try again.`);
+                return;
+            }
+        }
+    }
+
+    if (allInvalidImages.length > 0) {
+        const errorMessages = allInvalidImages.map(img => 
+            `${img.filename}: ${img.width}x${img.height} pixels`
+        ).join('\n');
+        alert(`Cannot start experiments. The following images exceed the maximum size of ${maxImageSize}x${maxImageSize} pixels:\n\n${errorMessages}\n\nPlease remove these experiments and select images with smaller dimensions.`);
+        logToServer('warning', `Experiment start blocked: ${allInvalidImages.length} images failed validation`);
+        return;
+    }
+
+    logToServer('info', 'All experiment images passed validation, starting experiments...');
 
     const startExperimentBtn = document.getElementById('startExperiment');
     startExperimentBtn.disabled = true;
@@ -180,10 +473,8 @@ document.getElementById('startExperiment').addEventListener('click', async funct
                 const response = await fetch(startExperimentUrl, {
                     method: "POST",
                     credentials: "same-origin",
+                    headers: csrftoken ? { "X-CSRFToken": csrftoken } : {},
                     body: formData,
-                    headers: {
-                        "X-CSRFToken": "{{ csrf_token }}",
-                    },
                 });
 
                 if (response.ok) {
@@ -242,9 +533,11 @@ document.getElementById('startExperiment').addEventListener('click', async funct
     }
 });
 
+
 function jobStatusUrl(jobId) {
     return `/job-status/${jobId}/`;
 }
+
 
 function stringifyAndSort(obj) {
     const entries = Object.entries(obj)
@@ -256,6 +549,7 @@ function stringifyAndSort(obj) {
 
     return `{${lines.join(", ")}}`;
 }
+
 
 async function pollJobAndRender(job, resultsList, methodName, allResults, needBase64ForSave) {
     const listItem = document.createElement("li");
@@ -387,6 +681,7 @@ async function pollJobAndRender(job, resultsList, methodName, allResults, needBa
                     originalImg.alt = "Original image";
                     originalImg.style.width = "50%";
                     originalImg.style.imageRendering = "pixelated";
+                    originalImg.style.border = "1px solid #d3d3d3";
                     row.appendChild(originalImg);
                 }
 
@@ -405,6 +700,7 @@ async function pollJobAndRender(job, resultsList, methodName, allResults, needBa
                     retrievedImg.style.width = "50%";
                     retrievedImg.style.imageRendering = "pixelated";
                     retrievedImg.style.filter = "invert(1)";
+                    retrievedImg.style.border = "1px solid #d3d3d3";
                     row.appendChild(retrievedImg);
                 }
 
@@ -433,12 +729,14 @@ async function pollJobAndRender(job, resultsList, methodName, allResults, needBa
     }
 }
 
+
 async function fetchToBase64(url) {
     const r = await fetch(url);
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
     const blob = await r.blob();
     return await blobToBase64(blob);
 }
+
 
 function blobToBase64(blob) {
     return new Promise((resolve, reject) => {
@@ -452,6 +750,7 @@ function blobToBase64(blob) {
         reader.readAsDataURL(blob);
     });
 }
+
 
 async function getUniqueFileHandle(dirHandle, baseName, extension) {
     let fileName = baseName + extension;
@@ -467,6 +766,7 @@ async function getUniqueFileHandle(dirHandle, baseName, extension) {
         }
     }
 }
+
 
 async function getUpscaledImageBlob(base64Image, scale) {
     return new Promise((resolve, reject) => {
@@ -490,6 +790,7 @@ async function getUpscaledImageBlob(base64Image, scale) {
         img.src = 'data:image/png;base64,' + base64Image;
     });
 }
+
 
 async function saveResultsToFolder(results, mainDirHandle, methodDirHandles) {
     for (const result of results) {
@@ -548,12 +849,14 @@ async function saveResultsToFolder(results, mainDirHandle, methodDirHandles) {
     alert("XLSX files have been successfully saved!");
 }
 
+
 function updateProgress(value) {
     const progressBar = document.getElementById('progress-bar');
     progressBar.innerText = value + '%';
     progressBar.style.width = value + '%';
     progressBar.setAttribute('aria-valuenow', value);
 }
+
 
 function initProgress() {
     const progressBar = document.getElementById('progress-bar');
@@ -562,11 +865,13 @@ function initProgress() {
     progressBar.style.width = '100%';
 }
 
+
 function stopProgress() {
     const progressBar = document.getElementById('progress-bar');
     progressBar.classList.remove('progress-bar-animated', 'progress-bar-striped');
     progressBar.style.width = '100%';
 }
+
 
 function animateProgress(from, to, duration) {
     logToServer('info', `Progress animation started: ${from}% -> ${to}% przez ${duration} ms`);

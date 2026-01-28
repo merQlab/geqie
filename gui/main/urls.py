@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from .views import start_experiment, job_status, read_method_files, save_method_files, check_folder_exists, get_all_images, log_from_js
+from .views import start_experiment, job_status, read_method_files, save_method_files, check_folder_exists, get_all_images, log_from_js, get_config
 
 urlpatterns = [
     path("", views.experiment_config, name="experiment_config"),
@@ -10,6 +10,7 @@ urlpatterns = [
     path("jobs/<uuid:job_id>/", job_status),
     path("jobs/<uuid:job_id>", job_status),
     path("start-experiment/", start_experiment, name="start_experiment"),
+    path("config/", get_config, name="get_config"),
 
     path("get-all-images/", get_all_images, name="get_all_images"),
     path("media/proxy/<str:token>/", views.proxy_file, name="proxy-file"),
