@@ -21,71 +21,36 @@ from geqie.logging_utils import levels as logging_levels
 ENCODINGS_PATH = Path(__file__).parent / "encodings"
 
 
-class EncodingFunctions(NamedTuple):
-    init_function: Callable
-    data_function: Callable
-    map_function: Callable
-
-
-def _import_module(name: str, file_path: str) -> types.ModuleType:
-    path = ENCODINGS_PATH / file_path
-    spec = importlib.util.spec_from_file_location(name, path.absolute())
+def _import_encoding(encoding: str, **_) -> types.ModuleType:
+    encoding_dir = ENCODINGS_PATH / encoding
+    init_file = encoding_dir / "__init__.py"
+    
+    if not init_file.exists():
+        raise ValueError(f"Encoding '{encoding}' not found at {init_file}")
+    
+    # Create a unique module name to avoid collisions
+    module_name = f"geqie.encodings.{encoding}"
+    
+    spec = importlib.util.spec_from_file_location(
+        module_name, 
+        init_file,
+        submodule_search_locations=[str(encoding_dir)]
+    )
+    
+    if spec is None or spec.loader is None:
+        raise ValueError(f"Failed to create module spec for '{encoding}'")
+    
     module = importlib.util.module_from_spec(spec)
-    sys.modules[name] = module
+    sys.modules[module_name] = module
     spec.loader.exec_module(module)
+    
     return module
 
 
-def _get_encoding_functions(params: Dict) -> EncodingFunctions:
-    encoding_name = params.get("encoding")
-    if not encoding_name:
-        raise ValueError("Missing required parameter: 'encoding'.")
-
-    init_path = f"{encoding_name}/init.py"
-    data_path = f"{encoding_name}/data.py"
-    map_path = f"{encoding_name}/map.py"
-
-    # Use unique module names to avoid sys.modules collisions across runs
-    init_mod = _import_module(f"{encoding_name}.init", init_path)
-    data_mod = _import_module(f"{encoding_name}.data", data_path)
-    map_mod  = _import_module(f"{encoding_name}.map",  map_path)
-
-    try:
-        init_function = getattr(init_mod, "init")
-        data_function = getattr(data_mod, "data")
-        map_function  = getattr(map_mod,  "map")
-    except AttributeError as exc:
-        raise ValueError(
-            f"Encoding '{encoding_name}' is missing required functions "
-            f"(init/data/map)."
-        ) from exc
-
-    return EncodingFunctions(init_function, data_function, map_function)
-
-
-def _get_retrieve_functions(params: Dict):
-    encoding_name = params.get("encoding")
-    if not encoding_name:
-        raise ValueError("Missing required parameter: 'encoding'.")
-
-    retrieve_path = f"{encoding_name}/retrieve.py"
-    retrieve_mod = _import_module(f"{encoding_name}.retrieve", retrieve_path)
-
-    try:
-        return getattr(retrieve_mod, "retrieve")
-    except AttributeError as exc:
-        raise ValueError(
-            f"Encoding '{encoding_name}' has no retrieve() implementation."
-        ) from exc
-
-
-def _parse_image(image_path, grayscale, image_dimensionality, **_) -> np.ndarray:
+def _parse_image(image_path, image_dimensionality, **_) -> np.ndarray:
     if image_dimensionality == 2:
         image = Image.open(image_path)
-        if grayscale:
-            return np.asarray(ImageOps.grayscale(image))
-        else:
-            return np.asarray(image)
+        return np.asarray(image)
     else:
         return np.load(image_path)
 
@@ -107,7 +72,6 @@ def encoding_options(func) -> Callable:
         help="Name of the encoding from 'encodings' directory",
     )
     @cloup.option("--image-path", required=True, help="Path to the image file")
-    @cloup.option("--grayscale", type=cloup.BOOL, default=True, show_default=True, help="Indication wether the image is grayscale")
     @cloup.option("--image-dimensionality", type=int, default=2, show_default=True, help="Number of image dimensions to consider")
     @cloup.option("--verbosity-level", default="ERROR", help=f"Set verbosity level, 0-6 (higher means more verbose) or use names {logging_levels.CLI_VERBOSITY_LEVELS.values()}")
     @functools.wraps(func)
@@ -157,8 +121,8 @@ def encode(**params) -> qiskit.QuantumCircuit:
     params["logging_level"] = logging_levels.cli_verbosity_to_logging_level(params.get("verbosity_level", 0))
 
     image = _parse_image(**params)
-    e = _get_encoding_functions(params)
-    return main.encode(e.init_function, e.data_function, e.map_function, image, **params)
+    encoding_module = _import_encoding(**params)
+    return main.encode(encoding_module.init_function, encoding_module.data_function, encoding_module.map_function, image, **params)
 
 
 @cli.command()
@@ -193,12 +157,8 @@ def execute(ctx: cloup.Context, **params):
 def retrieve(**params):
     params["logging_level"] = logging_levels.cli_verbosity_to_logging_level(params.get("verbosity_level", 0))
 
-    print('Retrieve CLI')
-    # print(f'Params: {params}')
-    print(f'Params.get("result"): {params.get("result")}')
-
-    retrieve_fun = _get_retrieve_functions(params)
-    print(retrieve_fun(params.get("result")))
+    retrieve_function = _import_encoding(**params).retrieve_function
+    print(retrieve_function(params.get("result")))
 
 
 if __name__ == '__main__':

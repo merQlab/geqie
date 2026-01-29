@@ -7,7 +7,6 @@ from typing import List, Optional
 @dataclass
 class CLIParameters:
     image_path: str
-    grayscale: bool
     image_dimensionality: Optional[int] = None
 
     def to_list(self) -> List[str]:
@@ -20,16 +19,16 @@ class CLIParameters:
 
 
 METHOD_CLI_MAPPING = {
-    "frqi": CLIParameters(image_path="assets/test_images/grayscale/test_image.png", grayscale=True),
-    "ifrqi": CLIParameters(image_path="assets/test_images/grayscale/test_image.png", grayscale=True),
-    "neqr": CLIParameters(image_path="assets/test_images/grayscale/test_image.png", grayscale=True),
-    "qualpi": CLIParameters(image_path="assets/test_images/grayscale/test_image.png", grayscale=True),
+    "frqi": CLIParameters(image_path="assets/test_images/grayscale/test_image.png"),
+    "ifrqi": CLIParameters(image_path="assets/test_images/grayscale/test_image.png"),
+    "neqr": CLIParameters(image_path="assets/test_images/grayscale/test_image.png"),
+    "qualpi": CLIParameters(image_path="assets/test_images/grayscale/test_image.png"),
 
-    "frqci": CLIParameters(image_path="assets/test_images/rgb/rgb.png", grayscale=False),
-    "mcqi": CLIParameters(image_path="assets/test_images/rgb/rgb.png", grayscale=False),
-    "ncqi": CLIParameters(image_path="assets/test_images/rgb/rgb.png", grayscale=False),
+    "frqci": CLIParameters(image_path="assets/test_images/rgb/rgb.png"),
+    "mcqi": CLIParameters(image_path="assets/test_images/rgb/rgb.png"),
+    "ncqi": CLIParameters(image_path="assets/test_images/rgb/rgb.png"),
 
-    "mfrqi": CLIParameters(image_path="assets/test_images/3d/image_0_2x2x2.npy", grayscale=True, image_dimensionality=3),
+    "mfrqi": CLIParameters(image_path="assets/test_images/3d/image_0_2x2x2.npy", image_dimensionality=3),
 }
 
 

@@ -6,10 +6,7 @@ from pathlib import Path
 from collections import OrderedDict
 
 from PIL import Image, ImageOps
-try:
-    import numpy as np
-except Exception:
-    np = None
+import numpy as np
 
 from celery import shared_task
 from django.conf import settings
@@ -54,7 +51,8 @@ def _try_geqie_cli_simulate(method: str, image_path: str, shots: int) -> tuple[b
                 "--encoding", str(method),
                 "--image-path", image_path,
                 "--n-shots", str(shots),
-                "--return-padded-counts", "true"
+                "--return-padded-counts", "true",
+               "--verbosity-level", "INFO",
             ]
     else:
         cmd = [sys.executable, "-m", "geqie.cli", "simulate",
@@ -84,25 +82,23 @@ def _try_geqie_cli_simulate(method: str, image_path: str, shots: int) -> tuple[b
         return (False, None, f"Unexpected error running geqie.simulate(): {str(e)}")
 
 
-def _to_pil(rec) -> Image.Image | None:
-    if isinstance(rec, Image.Image):
-        return rec.convert("RGB")
-    if np is not None:
-        try:
-            arr = np.asarray(rec)
-            if arr.dtype != 'uint8':
-                arr = arr.astype('float32')
-                arr = arr - arr.min()
-                mx = arr.max() or 1.0
-                arr = (arr / mx * 255.0).clip(0, 255).astype('uint8')
-            if arr.ndim == 2:
-                return Image.fromarray(arr, mode="L").convert("RGB")
-            if arr.ndim == 3 and arr.shape[2] in (3, 4):
-                mode = "RGB" if arr.shape[2] == 3 else "RGBA"
-                return Image.fromarray(arr, mode=mode).convert("RGB")
-        except Exception:
-            return None
-    return None
+def _to_pil(result) -> Image.Image | None:
+    if isinstance(result, Image.Image):
+        return result.convert("RGB")
+    try:
+        arr = np.asarray(result)
+        if arr.dtype != 'uint8':
+            arr = arr.astype('float32')
+            arr = arr - arr.min()
+            mx = arr.max() or 1.0
+            arr = (arr / mx * 255.0).clip(0, 255).astype('uint8')
+        if arr.ndim == 2:
+            return Image.fromarray(arr, mode="L").convert("RGB")
+        if arr.ndim == 3 and arr.shape[2] in (3, 4):
+            mode = "RGB" if arr.shape[2] == 3 else "RGBA"
+            return Image.fromarray(arr, mode=mode).convert("RGB")
+    except Exception:
+        return None
 
 
 @shared_task(
@@ -148,8 +144,8 @@ def run_experiment(self, job_id: str) -> dict:
             mod = _load_method_module(str(job.method))
             if mod and hasattr(mod, "retrieve_function"):
                 try:
-                    rec = mod.retrieve_function(ordered_output)
-                    retrieved_img = _to_pil(rec)
+                    result = mod.retrieve_function(ordered_output)
+                    retrieved_img = _to_pil(result)
                 except Exception as e:
                     job.error = (job.error + "\n" if job.error else "") + f"retrieve_function error: {e}"
             if retrieved_img is None:

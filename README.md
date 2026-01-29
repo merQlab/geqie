@@ -60,7 +60,6 @@ Custom encoding plugins:
 Other options:
   --encoding TEXT      Name of the encoding from 'encodings' directory
   --image-path TEXT    Path to the image file  [required]
-  --grayscale BOOLEAN  Indication wether the image is grayscale  [default: True]
   -v, --verbose        Increase verbosity (can be used multiple times, up to
                        '-vvv')
   --help               Show this message and exit.
@@ -87,8 +86,6 @@ Other options:
   --encoding TEXT                 Name of the encoding from 'encodings'
                                   directory
   --image-path TEXT               Path to the image file  [required]
-  --grayscale BOOLEAN             Indication wether the image is grayscale
-                                  [default: True]
   -v, --verbose                   Increase verbosity (can be used multiple
                                   times, up to '-vvv')
   --n-shots INTEGER               Number of simulation shots
