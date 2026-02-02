@@ -153,7 +153,6 @@ def run_experiment(self, job_id: str) -> dict:
 
         out_json_key = f"results/{job.id}_output.json"
         payload = ordered_output.get("counts", ordered_output)
-        logger.debug(payload)
         default_storage.save(out_json_key, io.BytesIO(json.dumps(payload, separators=(",", ":")).encode("utf-8")))
 
         orig_key = f"results/{job.id}_original.png"

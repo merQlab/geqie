@@ -14,6 +14,9 @@ up-dev: build-dev
 	- bash -lc 'cd gui && docker compose up db pgadmin redis minio minio-setup web-dev worker-dev --attach web-dev --attach worker-dev'
 
 
+down:
+	- bash -lc 'cd gui && docker compose down'
+
 ## Installation Targets
 install-requirements:
 	pip install -r requirements/requirements.in
