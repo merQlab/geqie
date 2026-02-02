@@ -19,3 +19,5 @@ redis
 tabulate
 uvicorn
 whitenoise
+
+debugpy

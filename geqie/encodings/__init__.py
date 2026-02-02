@@ -3,7 +3,7 @@
 import numpy as np
 
 
-def ensure_2d(image: np.ndarray, strategy: str = "first_channel") -> np.ndarray:
+def ensure_2d(image: np.ndarray, strategy: str = "luminance") -> np.ndarray:
     """
     Convert 3D image to 2D for encodings that expect grayscale images.
     
@@ -22,7 +22,7 @@ def ensure_2d(image: np.ndarray, strategy: str = "first_channel") -> np.ndarray:
     """
     if image.ndim == 2:
         return image
-    
+
     if image.ndim == 3:
         if strategy == "first_channel":
             return image[:, :, 0]
@@ -31,11 +31,8 @@ def ensure_2d(image: np.ndarray, strategy: str = "first_channel") -> np.ndarray:
         elif strategy == "luminance":
             # Standard RGB to grayscale conversion
             weights = np.array([0.299, 0.587, 0.114])
-            return (image @ weights).astype(image.dtype)
+            return (image[:,:,:3] @ weights).astype(image.dtype)
         else:
-            raise ValueError(
-                f"Unknown strategy '{strategy}'. "
-                f"Use 'first_channel', 'average', or 'luminance'."
-            )
+            raise ValueError(f"Unknown strategy '{strategy}'. Use 'first_channel', 'average', or 'luminance'.")
     
-    raise ValueError(f"Expected 2D or 3D image, got {image.ndim}D")
+    raise ValueError(f"Expected 2D single- or multi-channel or image, received shape: '{image.shape}'")

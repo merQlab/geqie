@@ -4,10 +4,13 @@
 build:
 	cd gui && docker compose build web
 
+build-dev:
+	cd gui && docker compose build web web-dev
+
 up:
 	- bash -lc 'cd gui && docker compose up db pgadmin redis minio minio-setup web worker --attach web --attach worker'
 
-up-dev: build
+up-dev: build-dev
 	- bash -lc 'cd gui && docker compose up db pgadmin redis minio minio-setup web-dev worker-dev --attach web-dev --attach worker-dev'
 
 

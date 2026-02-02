@@ -32,8 +32,8 @@ services:
     container_name: web-dev
     build:
       context: ..
-      dockerfile: gui/Dockerfile
-    image: geqie-app:latest
+      dockerfile: gui/Dockerfile_dev
+    image: geqie-app-dev:latest
     env_file: .env
     environment:
       PYTHONPATH: /app/gui
@@ -74,7 +74,7 @@ services:
 
   worker-dev:
     container_name: worker-dev
-    image: geqie-app:latest
+    image: geqie-app-dev:latest
     env_file:
       - .env
     environment:
@@ -84,8 +84,11 @@ services:
     command: >
       sh -lc '
         set -e
-        exec celery -A gui worker -l info -Q processing_queue
+        python -m debugpy --listen 0.0.0.0:5678 --wait-for-client \
+        -m celery -A gui worker -l INFO --pool=solo --concurrency=1
       '
+    ports:
+      - "5678:5678"
     restart: unless-stopped
     # volumes:
     #   - ../gui:/app

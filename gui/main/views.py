@@ -200,7 +200,6 @@ def start_experiment(request):
     return JsonResponse({"jobs": jobs})
 
 
-
 @require_GET
 def get_config(request):
     """Return configuration values needed by the frontend."""
