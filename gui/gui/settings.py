@@ -3,6 +3,9 @@ from botocore.config import Config
 import os
 import geqie
 
+ENV = os.getenv("ENV", "dev")  # "dev" or "prod"
+DEBUG = os.getenv("DEBUG", "false").lower() == "true"
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 os.makedirs(BASE_DIR / "logs", exist_ok=True)
@@ -19,6 +22,19 @@ ALLOWED_HOSTS = os.environ.get(
     "localhost,127.0.0.1"
 ).split(",")
 CSRF_TRUSTED_ORIGINS = [origin for origin in os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",") if origin]
+
+
+if ENV == "prod":
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 60 * 60 * 24 * 7  # start with 1 week
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = False  # enable later once you’re sure
+else:
+    pass
+
 
 # --- APPLICATIONS -------------------------------------------------------------
 INSTALLED_APPS = [

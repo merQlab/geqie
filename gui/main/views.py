@@ -70,7 +70,7 @@ def _proxy_url(request, job_id: str, key: str, content_type: str | None = None) 
     if not key:
         return None
     token = signing.dumps({"job_id": str(job_id), "key": key, "content_type": content_type})
-    return request.build_absolute_uri(f"/media/proxy/{token}/")
+    return f"/media/proxy/{token}/"
 
 
 @require_GET

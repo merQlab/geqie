@@ -36,9 +36,23 @@ services:
     image: geqie-app-dev:latest
     env_file: .env
     environment:
-      PYTHONPATH: /app/gui
       DEV_MODE: "1"
-    command: ["gunicorn", "gui.wsgi:application", "--bind", "0.0.0.0:8000", "--reload"]
+      LOG_LEVEL: DEBUG
+      PYTHONPATH: /app/gui
+    command:
+      [
+        "gunicorn",
+        "gui.wsgi:application",
+        "--bind",
+        "0.0.0.0:8000",
+        "--reload",
+        "--access-logfile",
+        "-",
+        "--error-logfile",
+        "-",
+        "--log-level",
+        "debug"
+      ]
     ports:
       - "8000:8000"
     restart: unless-stopped
@@ -56,8 +70,8 @@ services:
     env_file:
       - .env
     environment:
-      PYTHONPATH: /app/gui
       LOG_LEVEL: INFO
+      PYTHONPATH: /app/gui
     working_dir: /app
     command: >
       sh -lc '
@@ -78,8 +92,9 @@ services:
     env_file:
       - .env
     environment:
-      PYTHONPATH: /app/gui
       DEV_MODE: "1"
+      LOG_LEVEL: DEBUG
+      PYTHONPATH: /app/gui
     working_dir: /app
     command: >
       sh -lc '
@@ -90,8 +105,6 @@ services:
     ports:
       - "5678:5678"
     restart: unless-stopped
-    # volumes:
-    #   - ../gui:/app
     depends_on:
       redis:
         condition: service_healthy
