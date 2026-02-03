@@ -23,7 +23,7 @@
                     <div class="card-body">
                         <div class="d-flex align-items-center position-relative">
                             <h4 class="card-title text-center flex-grow-1">Methods</h4>
-                            <a class="btn btn-primary edit-button btn-sm position-absolute end-0" href="{% url 'edit_method' %}">Edit</a>
+                            <a class="btn btn-primary edit-button btn-sm position-absolute end-0" href="{% url 'edit_method' %}" id="edit-method-btn">Edit</a>
                         </div>
                         
                         <ul class="list-group" id="methods-list">
@@ -163,5 +163,23 @@
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        {% if not allow_edit_methods %}
+        document.addEventListener('DOMContentLoaded', function() {
+            const editBtn = document.getElementById('edit-method-btn');
+            if (editBtn) {
+                editBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    alert('Editing methods is currently under development');
+                });
+            }
+        });
+        {% endif %}
+        {% if error_message %}
+        document.addEventListener('DOMContentLoaded', function() {
+            alert('{{ error_message }}');
+        });
+        {% endif %}
+    </script>
 </body>
 </html>

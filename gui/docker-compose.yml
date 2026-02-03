@@ -36,6 +36,7 @@ services:
     image: geqie-app-dev:latest
     env_file: .env
     environment:
+      ALLOW_EDIT_METHODS: "false"
       DEV_MODE: "1"
       LOG_LEVEL: DEBUG
       PYTHONPATH: /app/gui

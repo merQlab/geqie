@@ -34,10 +34,23 @@ def home(request):
 def experiment_config(request):
     methods = approved_methods()
     computers = QuantumComputer.objects.all()
-    return render(request, "experiment_config.html", {"methods": methods, "computers": computers})
+    allow_edit_methods = settings.ALLOW_EDIT_METHODS
+    return render(request, "experiment_config.html", {
+        "methods": methods, 
+        "computers": computers,
+        "allow_edit_methods": allow_edit_methods
+    })
 
 
 def edit_method(request):
+    if not settings.ALLOW_EDIT_METHODS:
+        return render(request, "experiment_config.html", {
+            "methods": approved_methods(),
+            "computers": QuantumComputer.objects.all(),
+            "allow_edit_methods": False,
+            "error_message": "Editing methods is currently under development"
+        })
+    
     methods = all_methods()
     default_methods_content = settings.DEFAULT_METHODS_CONTENT
     logger.debug("Edit_method card")
