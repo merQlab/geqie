@@ -144,13 +144,18 @@ def execute(
         logger.info("Dry run mode. Exiting before job submission.")
         return None
 
-    logger.info(f"Submitting job to backend '{ibm_qp_backend.name}'...")
-    job = sampler.run([(transpiled_circuit, circuit_param_values)], shots=n_shots)
-    logger.debug(f"{job.job_id()=}")
+    try:
+        logger.info(f"Submitting job to backend '{ibm_qp_backend.name}'...")
+        job = sampler.run([(transpiled_circuit, circuit_param_values)], shots=n_shots)
+        logger.debug(f"{job.job_id()=}")
 
-    result = job.result()
-    logger.info("Job completed.")
-    logger.debug(f"{job.metrics()=}")
+        result = job.result()
+        logger.info("Job completed.")
+        logger.debug(f"{job.metrics()=}")
+    except Exception as e:
+        logger.error(f"An error occurred during job execution: {e}")
+        job.cancel()
+        raise e
 
     if return_qiskit_result:
         return result

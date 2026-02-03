@@ -1,3 +1,5 @@
+-r ../../requirements/requirements.in
+
 boto3
 celery
 channels
@@ -9,15 +11,10 @@ django-crispy-forms
 django-storages
 dj-database-url
 gunicorn
-matplotlib
 setuptools<81
 pillow
 psycopg2-binary
-qiskit<2.0.0
-qiskit-aer
 redis
 tabulate
 uvicorn
 whitenoise
-
-debugpy

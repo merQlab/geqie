@@ -1,7 +1,7 @@
 cloup
 matplotlib
 pillow
-qiskit<2.0.0
+qiskit>=2.0.0
 qiskit-aer
 qiskit_ibm_runtime
 tabulate

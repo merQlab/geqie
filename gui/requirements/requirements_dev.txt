@@ -2,6 +2,8 @@
 #    uv pip compile .\requirements\requirements_dev.in -o .\requirements\requirements_dev.txt
 amqp==5.3.1
     # via kombu
+annotated-types==0.7.0
+    # via pydantic
 asgiref==3.11.0
     # via
     #   channels
@@ -17,12 +19,18 @@ botocore==1.42.39
     #   s3transfer
 celery==5.6.2
     # via -r ./requirements/requirements.in
+certifi==2026.1.4
+    # via requests
+cffi==2.0.0
+    # via cryptography
 channels==4.3.2
     # via
     #   -r ./requirements/requirements.in
     #   channels-redis
 channels-redis==4.3.0
     # via -r ./requirements/requirements.in
+charset-normalizer==3.4.4
+    # via requests
 click==8.3.1
     # via
     #   celery
@@ -38,19 +46,23 @@ click-plugins==1.1.1.2
 click-repl==0.3.0
     # via celery
 cloup==3.0.8
-    # via -r ./requirements/requirements.in
+    # via
+    #   -r ./requirements/../../requirements/requirements.in
+    #   -r ./requirements/requirements.in
 colorama==0.4.6
     # via click
 contourpy==1.3.3
     # via matplotlib
 crispy-bootstrap5==2025.6
     # via -r ./requirements/requirements.in
+cryptography==46.0.4
+    # via
+    #   pyspnego
+    #   requests-ntlm
 cycler==0.12.1
     # via matplotlib
 debugpy==1.8.20
-    # via
-    #   -r ./requirements/requirements.in
-    #   -r ./requirements/requirements_dev.in
+    # via -r ./requirements/requirements_dev.in
 dill==0.4.1
     # via qiskit
 dj-database-url==3.1.0
@@ -75,6 +87,12 @@ gunicorn==25.0.0
     # via -r ./requirements/requirements.in
 h11==0.16.0
     # via uvicorn
+ibm-cloud-sdk-core==3.24.4
+    # via ibm-platform-services
+ibm-platform-services==0.73.2
+    # via qiskit-ibm-runtime
+idna==3.11
+    # via requests
 jmespath==1.1.0
     # via
     #   boto3
@@ -84,9 +102,7 @@ kiwisolver==1.4.9
 kombu==5.6.2
     # via celery
 matplotlib==3.10.8
-    # via -r ./requirements/requirements.in
-mpmath==1.3.0
-    # via sympy
+    # via -r ./requirements/../../requirements/requirements.in
 msgpack==1.1.2
     # via channels-redis
 numpy==2.4.2
@@ -95,6 +111,7 @@ numpy==2.4.2
     #   matplotlib
     #   qiskit
     #   qiskit-aer
+    #   qiskit-ibm-runtime
     #   rustworkx
     #   scipy
 packaging==26.0
@@ -102,8 +119,10 @@ packaging==26.0
     #   gunicorn
     #   kombu
     #   matplotlib
+    #   qiskit-ibm-runtime
 pillow==12.1.0
     # via
+    #   -r ./requirements/../../requirements/requirements.in
     #   -r ./requirements/requirements.in
     #   matplotlib
 prompt-toolkit==3.0.52
@@ -112,25 +131,46 @@ psutil==7.2.2
     # via qiskit-aer
 psycopg2-binary==2.9.11
     # via -r ./requirements/requirements.in
+pycparser==3.0
+    # via cffi
+pydantic==2.12.5
+    # via qiskit-ibm-runtime
+pydantic-core==2.41.5
+    # via pydantic
+pyjwt==2.11.0
+    # via ibm-cloud-sdk-core
 pyparsing==3.3.2
     # via matplotlib
+pyspnego==0.12.0
+    # via requests-ntlm
 python-dateutil==2.9.0.post0
     # via
     #   botocore
     #   celery
+    #   ibm-cloud-sdk-core
     #   matplotlib
-    #   qiskit
     #   qiskit-aer
-qiskit==1.4.5
+    #   qiskit-ibm-runtime
+qiskit==2.3.0
     # via
-    #   -r ./requirements/requirements.in
+    #   -r ./requirements/../../requirements/requirements.in
     #   qiskit-aer
+    #   qiskit-ibm-runtime
 qiskit-aer==0.17.2
-    # via -r ./requirements/requirements.in
+    # via -r ./requirements/../../requirements/requirements.in
+qiskit-ibm-runtime==0.45.0
+    # via -r ./requirements/../../requirements/requirements.in
 redis==7.1.0
     # via
     #   -r ./requirements/requirements.in
     #   channels-redis
+requests==2.32.5
+    # via
+    #   ibm-cloud-sdk-core
+    #   qiskit-ibm-runtime
+    #   requests-ntlm
+requests-ntlm==1.3.0
+    # via qiskit-ibm-runtime
 rustworkx==0.17.1
     # via qiskit
 s3transfer==0.16.0
@@ -145,16 +185,22 @@ six==1.17.0
     # via python-dateutil
 sqlparse==0.5.5
     # via django
+sspilib==0.5.0
+    # via pyspnego
 stevedore==5.6.0
     # via qiskit
-symengine==0.13.0
-    # via qiskit
-sympy==1.14.0
-    # via qiskit
 tabulate==0.9.0
-    # via -r ./requirements/requirements.in
+    # via
+    #   -r ./requirements/../../requirements/requirements.in
+    #   -r ./requirements/requirements.in
 typing-extensions==4.15.0
-    # via qiskit
+    # via
+    #   pydantic
+    #   pydantic-core
+    #   qiskit
+    #   typing-inspection
+typing-inspection==0.4.2
+    # via pydantic
 tzdata==2025.3
     # via
     #   django
@@ -163,7 +209,11 @@ tzdata==2025.3
 tzlocal==5.3.1
     # via celery
 urllib3==2.6.3
-    # via botocore
+    # via
+    #   botocore
+    #   ibm-cloud-sdk-core
+    #   qiskit-ibm-runtime
+    #   requests
 uvicorn==0.40.0
     # via -r ./requirements/requirements.in
 vine==5.1.0
