@@ -106,7 +106,7 @@ geqie simulate --encoding frqi --image-path assets/test_image.png --n-shots 1024
 
 Public GUI access: [https://web-staging-eb84.up.railway.app](https://web-staging-eb84.up.railway.app/) (Pending deployment on the university infrastructure).
 
-![geqie_gui_screenshot](assets/geqie_gui.png)
+![geqie_gui_gif](assets/geqie_gui.gif)
 
 See the [gui/README.md](gui/README.md) for instructions on running the GEQIE GUI locally.
 
