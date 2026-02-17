@@ -15,6 +15,7 @@ from geqie.encodings import frqi
 from qiskit_machine_learning.neural_networks import SamplerQNN
 from qiskit.primitives import StatevectorSampler as Sampler
 from qiskit.circuit import CircuitInstruction
+import tqdm
 
 	
 class Simple_QNN:
@@ -155,7 +156,7 @@ def train_QCNN(epochs=10, X=None, y=None, num_classes=2):
 	qnn_model.train()  # Set the model to training mode
 	loss_list = []
 	
-	
+	progress_bar = tqdm(range(epochs), desc="Training")
 	for epoch in range(epochs):
 		total_loss = []
 		for image, label in zip(X, y):			
@@ -168,7 +169,10 @@ def train_QCNN(epochs=10, X=None, y=None, num_classes=2):
 			optimizer.step()  # Optimize weights			
 			
 			total_loss.append(loss.item())  # Store loss
-		loss_list.append(sum(total_loss) / len(total_loss))
-		if (epoch + 1) % 10 == 0:
-			print(f"Epoch {epoch + 1}/{epochs}, Loss: {loss_list[-1]:.4f}")
+		epoch_loss = sum(total_loss) / len(total_loss)
+		loss_list.append(epoch_loss)
+
+		progress_bar.update(1)
+		progress_bar.set_postfix({"loss": f"{epoch_loss:.4f}"})
+		
 	return loss_list, qnn_model
