@@ -16,6 +16,7 @@ from qiskit_machine_learning.neural_networks import SamplerQNN
 from qiskit.primitives import StatevectorSampler as Sampler
 from qiskit.circuit import CircuitInstruction
 import tqdm
+import time
 
 	
 class Simple_QNN:
@@ -148,7 +149,7 @@ def load_and_process_mnist_dataset(labels_to_include=[0, 1], n_samples_per_label
 
 	return X, y
 
-def train_QCNN(epochs=10, X=None, y=None, num_classes=2):
+def train_QCNN(epochs=10, X=None, y=None, num_classes=2, debugg_level=2):
 	f_loss = CrossEntropyLoss()
 	qnn_model = QNN_Pythorch_Module(num_classes=num_classes)  # Example values for num_qubits and num_classes
 	qnn_model.initialize(image=X[0])  # Build the circuit with the first image to initialize parameters
@@ -161,14 +162,17 @@ def train_QCNN(epochs=10, X=None, y=None, num_classes=2):
 		total_loss = []
 		for image, label in zip(X, y):			
 			# Wyzeruj gradient:
+			start_time = time.time()
 			optimizer.zero_grad(set_to_none=True)
 			output = qnn_model(x=image)  # Forward pass
 			label_tensor = torch.tensor(label, dtype=torch.long)  # Scalar tensor for unbatched loss
 			loss = f_loss(output, label_tensor)  # Calculate loss
 			loss.backward()  # Backward pass
 			optimizer.step()  # Optimize weights			
-			
 			total_loss.append(loss.item())  # Store loss
+			stop_time = time.time()
+			if debugg_level > 1:
+				print(f"Image processed in {stop_time - start_time:.2f} seconds.")
 		epoch_loss = sum(total_loss) / len(total_loss)
 		loss_list.append(epoch_loss)
 
