@@ -7,3 +7,4 @@ qiskit-machine-learning
 qiskit
 torch
 qiskit-aer
+parquet
