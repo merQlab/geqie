@@ -8,3 +8,4 @@ qiskit
 torch
 qiskit-aer
 parquet
+tqdm
