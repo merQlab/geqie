@@ -15,7 +15,7 @@ from geqie.encodings import frqi
 from qiskit_machine_learning.neural_networks import SamplerQNN
 from qiskit.primitives import StatevectorSampler as Sampler
 from qiskit.circuit import CircuitInstruction
-import tqdm
+from tqdm import tqdm
 import time
 
 	
