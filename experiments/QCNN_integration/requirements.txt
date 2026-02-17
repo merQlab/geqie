@@ -1,0 +1,6 @@
+scikit-learn
+torch
+matplotlib
+datasets
+pylatexenc
+qiskit-machine-learning
