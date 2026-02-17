@@ -130,7 +130,7 @@ class QNN_Pythorch_Module(nn.Module):
 		"""
 		self.update_geqie_unitary_matrix_inplace_in_Sampler(new_image=x)
 		output = self.layer_TorchConnector()
-		return torch.log_softmax(output, dim=-1)
+		return output
 
 def load_and_process_mnist_dataset(labels_to_include=[0, 1], n_samples_per_label=100, resize=(8, 8), path_to_mnist_dataset=None):
 	mnist_dataset = load_dataset("parquet", data_files=path_to_mnist_dataset)
