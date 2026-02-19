@@ -15,6 +15,7 @@ from geqie.encodings import frqi
 from qiskit_machine_learning.neural_networks import SamplerQNN
 from qiskit.primitives import StatevectorSampler as Sampler
 from qiskit.circuit import CircuitInstruction
+from qiskit.circuit.library import UnitaryGate
 from tqdm import tqdm
 import time
 
@@ -69,6 +70,7 @@ class QNN_Pythorch_Module(nn.Module):
 		self.simple_qnn_as_sampler_qnn: SamplerQNN = None
 		self.layer_TorchConnector: TorchConnector = None
 		self.is_model_initialized = False
+		self._geqie_unitary_instruction_index: int | None = None
 
 	def build_new_circuit(self, image: np.ndarray):
 		'''Update the quantum circuit with the new image encoding.'''
@@ -102,20 +104,36 @@ class QNN_Pythorch_Module(nn.Module):
 	def initialize(self, image: np.ndarray):
 		self.build_new_circuit(image=image)
 		self.SimpleQNN_to_SamplerQNN()
+		self._geqie_unitary_instruction_index = self._find_geqie_unitary_instruction_index(
+			self.simple_qnn_as_sampler_qnn.circuit
+		)
 		self.SamplerQNN_to_TorchConnector()
+
+	def _find_geqie_unitary_instruction_index(self, circuit: QuantumCircuit) -> int:
+		"""Return index of GEQIE's unitary instruction inside a circuit."""
+		for idx, instruction in enumerate(circuit.data):
+			if isinstance(instruction.operation, UnitaryGate):
+				return idx
+
+		raise RuntimeError("Could not find GEQIE unitary instruction in circuit.")
 
 	def update_geqie_unitary_matrix_inplace_in_Sampler(self, new_image: np.ndarray):
 		'''Update the GEQIE unitary matrix in-place with the new image encoding.'''
 		new_circuit:QuantumCircuit = geqie.encode(frqi.init_function, frqi.data_function, frqi.map_function, new_image, perform_measurement=False)
+		new_geqie_idx = self._find_geqie_unitary_instruction_index(new_circuit)
+		new_geqie_instruction = new_circuit.data[new_geqie_idx].operation
 
-		# More robust: find instruction by name/type
-		for idx, instruction in enumerate(self.simple_qnn_as_sampler_qnn.circuit.data):
-			if instruction.operation.name == 'Unitary':  # Adjust based on actual operation name
-				geqie_unitary_matrix, qargs, cargs = new_circuit.data[1]
-				self.simple_qnn_as_sampler_qnn.circuit.data[idx] = CircuitInstruction(
-					geqie_unitary_matrix, qargs, cargs
-				)
-				break
+		if self._geqie_unitary_instruction_index is None:
+			self._geqie_unitary_instruction_index = self._find_geqie_unitary_instruction_index(
+				self.simple_qnn_as_sampler_qnn.circuit
+			)
+
+		target_instruction = self.simple_qnn_as_sampler_qnn.circuit.data[self._geqie_unitary_instruction_index]
+		self.simple_qnn_as_sampler_qnn.circuit.data[self._geqie_unitary_instruction_index] = CircuitInstruction(
+			new_geqie_instruction,
+			target_instruction.qubits,
+			target_instruction.clbits,
+		)
 
 		# geqie_unitary_matrix, qargs, cargs = new_circuit.data[geqie_unitary_matrix_position] 
 		# self.simple_qnn_as_sampler_qnn.circuit.data[geqie_unitary_matrix_position] = CircuitInstruction(geqie_unitary_matrix, qargs, cargs)
