@@ -373,7 +373,7 @@ def load_and_process_mnist_dataset(labels_to_include=[0, 1],
 								   resize=(8, 8), 
 								   path_to_mnist_dataset=None):
 
-	mnist_dataset = load_dataset("parquet", data_files=path_to_mnist_dataset)
+	mnist_dataset = load_dataset("parquet", data_files=str(path_to_mnist_dataset))
 
 	selected_images = []
 	images_per_label_count = {label: 0 for label in labels_to_include}
