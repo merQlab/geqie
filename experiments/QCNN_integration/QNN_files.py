@@ -114,7 +114,49 @@ def load_precomputed_batches(split_dir):
 		labels = data["labels"]
 		yield matrices, labels
 
-def train_QNN(epochs=20, num_classes=-1, train_dir=None, val_dir=None) -> dict:
+
+def _save_training_checkpoint(
+	checkpoint_path,
+	qnn_model,
+	optimizer,
+	epoch,
+	best_val_loss,
+	train_losses,
+	val_losses,
+	quantum_layer_weights_history,
+	classical_head_weights_history,
+	best_epoch,
+	num_classes,
+):
+	if checkpoint_path is None:
+		return
+
+	os.makedirs(os.path.dirname(checkpoint_path), exist_ok=True)
+	torch.save(
+		{
+			"epoch": epoch,
+			"best_epoch": best_epoch,
+			"best_val_loss": best_val_loss,
+			"num_classes": num_classes,
+			"model_state_dict": qnn_model.state_dict(),
+			"optimizer_state_dict": optimizer.state_dict(),
+			"train_losses": train_losses,
+			"val_losses": val_losses,
+			"quantum_layer_weights_history": quantum_layer_weights_history,
+			"classical_head_weights_history": classical_head_weights_history,
+		},
+		checkpoint_path,
+	)
+
+
+def train_QNN(
+	epochs=20,
+	num_classes=-1,
+	train_dir=None,
+	val_dir=None,
+	checkpoint_path=None,
+	resume_training=True,
+) -> dict:
 	f_loss = NLLLoss()
 	qnn_model = QNN_Pythorch_Module(num_classes=num_classes, num_qubits=7, num_layers=1)
 	
@@ -123,15 +165,42 @@ def train_QNN(epochs=20, num_classes=-1, train_dir=None, val_dir=None) -> dict:
 		{'params': qnn_model.classical_head.parameters(), 'lr': 0.001}
 	])
 	
-	qnn_model.train()
-	# loss_list = []
-	progress_bar_training = tqdm(range(epochs), desc="Training")
+	start_epoch = 0
+	best_epoch = -1
+	best_val_loss = np.inf
 	quantum_layer_weights_history = []
 	classical_head_weights_history = []
 	train_losses = []
-	val_losses = []	
-	
-	for epoch in range(epochs):
+	val_losses = []
+
+	if checkpoint_path is not None and resume_training and os.path.exists(checkpoint_path):
+		checkpoint = torch.load(checkpoint_path, map_location="cpu")
+		qnn_model.load_state_dict(checkpoint["model_state_dict"])
+		optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
+		start_epoch = int(checkpoint.get("epoch", -1)) + 1
+		best_epoch = int(checkpoint.get("best_epoch", -1))
+		best_val_loss = float(checkpoint.get("best_val_loss", np.inf))
+		train_losses = list(checkpoint.get("train_losses", []))
+		val_losses = list(checkpoint.get("val_losses", []))
+		quantum_layer_weights_history = list(checkpoint.get("quantum_layer_weights_history", []))
+		classical_head_weights_history = list(checkpoint.get("classical_head_weights_history", []))
+
+	if start_epoch >= epochs:
+		return {
+			'train_losses': train_losses,
+			'val_losses': val_losses,
+			'qnn_model': qnn_model,
+			'quantum_layer_weights_history': quantum_layer_weights_history,
+			'classical_head_weights_history': classical_head_weights_history,
+			'best_val_loss': best_val_loss,
+			'best_epoch': best_epoch,
+			'last_epoch': start_epoch - 1,
+		}
+
+	qnn_model.train()
+	progress_bar_training = tqdm(range(start_epoch, epochs), desc="Training")
+
+	for epoch in range(start_epoch, epochs):
 		qnn_model.train()		
 
 		for (i, (matrices, labels)) in enumerate(load_precomputed_batches(train_dir)):			
@@ -152,8 +221,9 @@ def train_QNN(epochs=20, num_classes=-1, train_dir=None, val_dir=None) -> dict:
 		quantum_layer_weights_history.append(qnn_model.quantum_weight.detach().cpu().numpy().copy().flatten())
 		classical_head_weights_history.append(qnn_model.classical_head.weight.detach().cpu().numpy().copy().flatten())	
 
-		train_losses.append(loss.item())
-		postfix = {"loss": f"{loss.item():.2f}"}			
+		epoch_train_loss = float(loss.item())
+		train_losses.append(epoch_train_loss)
+		postfix = {"loss": f"{epoch_train_loss:.2f}"}			
 
 		qnn_model.eval()
 		correct = 0
@@ -174,8 +244,26 @@ def train_QNN(epochs=20, num_classes=-1, train_dir=None, val_dir=None) -> dict:
 					correct += int(pred == label)
 					total += 1
 
-		val_losses.append(loss.item())
-		postfix["val_loss"] = f"{loss.item():.2f}"
+		epoch_val_loss = float(loss.item())
+		val_losses.append(epoch_val_loss)
+		postfix["val_loss"] = f"{epoch_val_loss:.2f}"
+
+		if epoch_val_loss < best_val_loss:
+			best_val_loss = epoch_val_loss
+			best_epoch = epoch
+			_save_training_checkpoint(
+				checkpoint_path=checkpoint_path,
+				qnn_model=qnn_model,
+				optimizer=optimizer,
+				epoch=epoch,
+				best_val_loss=best_val_loss,
+				train_losses=train_losses,
+				val_losses=val_losses,
+				quantum_layer_weights_history=quantum_layer_weights_history,
+				classical_head_weights_history=classical_head_weights_history,
+				best_epoch=best_epoch,
+				num_classes=num_classes,
+			)
 
 		val_acc = correct / total if total > 0 else 0.0
 		# print(
@@ -188,11 +276,16 @@ def train_QNN(epochs=20, num_classes=-1, train_dir=None, val_dir=None) -> dict:
 		progress_bar_training.update(1)
 		progress_bar_training.set_postfix(postfix)			
 
-	return {'train_losses': train_losses, 
-		 'val_losses': val_losses, 
-		 'qnn_model': qnn_model, 
-		 'quantum_layer_weights_history': quantum_layer_weights_history, 
-		 'classical_head_weights_history': classical_head_weights_history}
+	return {
+		'train_losses': train_losses,
+		'val_losses': val_losses,
+		'qnn_model': qnn_model,
+		'quantum_layer_weights_history': quantum_layer_weights_history,
+		'classical_head_weights_history': classical_head_weights_history,
+		'best_val_loss': best_val_loss,
+		'best_epoch': best_epoch,
+		'last_epoch': epochs - 1,
+	}
 
 def test_QNN(qnn_model=None, num_classes=-1, test_dir=None):
 	''' 
