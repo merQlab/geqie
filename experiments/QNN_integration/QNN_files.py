@@ -462,8 +462,10 @@ def precompute_and_save_split(
 			labels=np.array(batch_labels),
 		)
 		batch_files.append(batch_filename)
-		progress_bar.update(batch_size)
+		progress_bar.update(1)
 		# print(f"[{split_name}] saved: {batch_filename}")
+
+	print(f"Google Colab has {num_workers} workers available.")
 
 	if num_workers is None or int(num_workers) <= 1:
 		for i in range(0, num_samples, batch_size):
