@@ -449,7 +449,7 @@ def precompute_and_save_split(
 	split_dir = os.path.join(save_dir, split_name)
 	os.makedirs(split_dir, exist_ok=True)
 
-	progress_bar = tqdm(total=range(0, len(X_data), batch_size), desc=f"Precomputing {split_name}")
+	progress_bar = tqdm(range(0, len(X_data), batch_size), desc=f"Precomputing {split_name}")
 
 	num_samples = len(X_data)
 	batch_files = []
