@@ -1,4 +1,5 @@
 import os, glob, json
+from concurrent import futures
 
 import numpy as np
 
@@ -442,7 +443,8 @@ def precompute_and_save_split(
 	y_data,
 	batch_size=5,
 	save_dir=".circuits",
-	split_name="train"
+	split_name="train",
+	num_workers=1,
 ):
 	split_dir = os.path.join(save_dir, split_name)
 	os.makedirs(split_dir, exist_ok=True)
@@ -450,60 +452,94 @@ def precompute_and_save_split(
 	num_samples = len(X_data)
 	batch_files = []
 
-	for i in range(0, num_samples, batch_size):
-		batch_X = X_data[i:i + batch_size]
-		batch_y = y_data[i:i + batch_size]
-
-		batch_matrices = []
-
-		for img in batch_X:
-			qc = geqie.encode(
-				frqi.init_function,
-				frqi.data_function,
-				frqi.map_function,
-				img
-			)
-
-			flat_qc = qc.decompose()
-			while len(flat_qc.data) != len(flat_qc.decompose().data):
-				flat_qc = flat_qc.decompose()
-
-			pure_qc = QuantumCircuit(flat_qc.num_qubits)
-			for instruction in flat_qc.data:
-				op_name = (
-					instruction.operation.name
-					if hasattr(instruction, "operation")
-					else instruction[0].name
-				)
-
-				if op_name not in ["reset", "measure", "barrier"]:
-					pure_qc.append(instruction)
-
-			unitary_matrix = np.array(Operator(pure_qc).data, dtype=np.complex128)
-			batch_matrices.append(unitary_matrix)
-
-		batch_filename = os.path.join(split_dir, f"batch_{i // batch_size:04d}.npz")
+	def _save_batch(batch_idx, batch_matrices, batch_labels):
+		batch_filename = os.path.join(split_dir, f"batch_{batch_idx:04d}.npz")
 		np.savez_compressed(
 			batch_filename,
 			matrices=np.array(batch_matrices, dtype=np.complex128),
-			labels=np.array(batch_y)
+			labels=np.array(batch_labels),
 		)
 		batch_files.append(batch_filename)
-
 		print(f"[{split_name}] saved: {batch_filename}")
+
+	if num_workers is None or int(num_workers) <= 1:
+		for i in range(0, num_samples, batch_size):
+			batch_idx = i // batch_size
+			batch_X = X_data[i:i + batch_size]
+			batch_y = y_data[i:i + batch_size]
+			batch_idx, batch_matrices, batch_labels = _precompute_batch(
+				batch_idx=batch_idx,
+				batch_X=batch_X,
+				batch_y=batch_y,
+			)
+			_save_batch(batch_idx, batch_matrices, batch_labels)
+	else:
+		future_to_batch = {}
+		with futures.ProcessPoolExecutor(max_workers=int(num_workers)) as executor:
+			for i in range(0, num_samples, batch_size):
+				batch_idx = i // batch_size
+				batch_X = X_data[i:i + batch_size]
+				batch_y = y_data[i:i + batch_size]
+				future = executor.submit(
+					_precompute_batch,
+					batch_idx,
+					batch_X,
+					batch_y,
+				)
+				future_to_batch[future] = batch_idx
+
+			for future in tqdm(
+				futures.as_completed(future_to_batch),
+				total=len(future_to_batch),
+				desc=f"Precomputing {split_name}",
+			):
+				batch_idx, batch_matrices, batch_labels = future.result()
+				_save_batch(batch_idx, batch_matrices, batch_labels)
 
 	metadata = {
 		"split_name": split_name,
 		"num_samples": int(num_samples),
 		"batch_size": int(batch_size),
 		"num_batches": int(len(batch_files)),
-		"files": [os.path.basename(f) for f in batch_files],
+		"files": [os.path.basename(f) for f in sorted(batch_files)],
 	}
 
 	with open(os.path.join(split_dir, "metadata.json"), "w", encoding="utf-8") as f:
 		json.dump(metadata, f, indent=2)
 
 	return split_dir
+
+
+def _precompute_batch(batch_idx, batch_X, batch_y):
+	batch_matrices = []
+
+	for img in batch_X:
+		qc = geqie.encode(
+			frqi.init_function,
+			frqi.data_function,
+			frqi.map_function,
+			img,
+		)
+
+		flat_qc = qc.decompose()
+		while len(flat_qc.data) != len(flat_qc.decompose().data):
+			flat_qc = flat_qc.decompose()
+
+		pure_qc = QuantumCircuit(flat_qc.num_qubits)
+		for instruction in flat_qc.data:
+			op_name = (
+				instruction.operation.name
+				if hasattr(instruction, "operation")
+				else instruction[0].name
+			)
+
+			if op_name not in ["reset", "measure", "barrier"]:
+				pure_qc.append(instruction)
+
+		unitary_matrix = np.array(Operator(pure_qc).data, dtype=np.complex128)
+		batch_matrices.append(unitary_matrix)
+
+	return batch_idx, batch_matrices, np.array(batch_y)
 
 def prepare_train_val_precomputed(
 	X,
@@ -512,7 +548,8 @@ def prepare_train_val_precomputed(
 	batch_size=5,
 	save_dir=".circuits",
 	random_state=42,
-	stratify=True
+	stratify=True,
+	num_workers=1,
 ):
 	stratify_labels = y if stratify else None
 
@@ -530,7 +567,8 @@ def prepare_train_val_precomputed(
 		y_train,
 		batch_size=batch_size,
 		save_dir=save_dir,
-		split_name="train"
+		split_name="train",
+		num_workers=num_workers,
 	)
 
 	val_dir = precompute_and_save_split(
@@ -538,7 +576,8 @@ def prepare_train_val_precomputed(
 		y_val,
 		batch_size=batch_size,
 		save_dir=save_dir,
-		split_name="val"
+		split_name="val",
+		num_workers=num_workers,
 	)
 
 	return {
@@ -556,7 +595,8 @@ def prepare_test_precomputed(
 	batch_size=5,
 	save_dir=".circuits",
 	random_state=42,
-	stratify=True
+	stratify=True,
+	num_workers=1,
 ):
 	stratify_labels = y if stratify else None
 
@@ -565,7 +605,8 @@ def prepare_test_precomputed(
 		y,
 		batch_size=batch_size,
 		save_dir=save_dir,
-		split_name="test"
+		split_name="test",
+		num_workers=num_workers,
 	)
 
 	return {
