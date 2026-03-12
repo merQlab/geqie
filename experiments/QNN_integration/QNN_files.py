@@ -397,7 +397,7 @@ def precompute_and_save_circuits(X_data, y_data, batch_size=5, save_dir=".circui
 		os.makedirs(save_dir)
 		
 	num_samples = len(X_data)
-	
+
 	for i in range(0, num_samples, batch_size):
 		batch_X = X_data[i : i + batch_size]
 		batch_y = y_data[i : i + batch_size]
@@ -435,7 +435,7 @@ def precompute_and_save_circuits(X_data, y_data, batch_size=5, save_dir=".circui
 		# Save to .npz file
 		batch_filename = os.path.join(save_dir, f"batch_{i//batch_size}.npz")
 		np.savez(batch_filename, matrices=batch_matrices, labels=batch_y)
-		
+
 		print(f"Saved {batch_filename} with dtype {batch_matrices[0].dtype}")
 
 def precompute_and_save_split(
@@ -449,6 +449,8 @@ def precompute_and_save_split(
 	split_dir = os.path.join(save_dir, split_name)
 	os.makedirs(split_dir, exist_ok=True)
 
+	progress_bar = tqdm(total=range(0, len(X_data), batch_size), desc=f"Precomputing {split_name}")
+
 	num_samples = len(X_data)
 	batch_files = []
 
@@ -460,10 +462,12 @@ def precompute_and_save_split(
 			labels=np.array(batch_labels),
 		)
 		batch_files.append(batch_filename)
-		print(f"[{split_name}] saved: {batch_filename}")
+		progress_bar.update(batch_size)
+		# print(f"[{split_name}] saved: {batch_filename}")
 
 	if num_workers is None or int(num_workers) <= 1:
 		for i in range(0, num_samples, batch_size):
+
 			batch_idx = i // batch_size
 			batch_X = X_data[i:i + batch_size]
 			batch_y = y_data[i:i + batch_size]
