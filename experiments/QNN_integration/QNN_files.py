@@ -445,18 +445,39 @@ def precompute_and_save_split(
 	save_dir=".circuits",
 	split_name="train",
 	num_workers=1,
+	resume=True,
+	compress=True,
 ):
 	split_dir = os.path.join(save_dir, split_name)
 	os.makedirs(split_dir, exist_ok=True)
 
-	progress_bar = tqdm(range(0, len(X_data), batch_size), desc=f"Precomputing {split_name}")
-
 	num_samples = len(X_data)
 	batch_files = []
+	total_batches = int(np.ceil(num_samples / batch_size))
+
+	existing_batch_indices = set()
+	if resume:
+		for existing_file in os.listdir(split_dir):
+			if not (existing_file.startswith("batch_") and existing_file.endswith(".npz")):
+				continue
+
+			try:
+				existing_batch_indices.add(int(existing_file[6:-4]))
+			except ValueError:
+				continue
+
+	progress_bar = tqdm(total=total_batches, desc=f"Precomputing {split_name}")
+	if existing_batch_indices:
+		progress_bar.update(len(existing_batch_indices))
+		print(
+			f"[{split_name}] resume enabled: found {len(existing_batch_indices)} existing batches "
+			f"in {split_dir}"
+		)
 
 	def _save_batch(batch_idx, batch_matrices, batch_labels):
 		batch_filename = os.path.join(split_dir, f"batch_{batch_idx:04d}.npz")
-		np.savez_compressed(
+		save_fn = np.savez_compressed if compress else np.savez
+		save_fn(
 			batch_filename,
 			matrices=np.array(batch_matrices, dtype=np.complex128),
 			labels=np.array(batch_labels),
@@ -471,6 +492,9 @@ def precompute_and_save_split(
 		for i in range(0, num_samples, batch_size):
 
 			batch_idx = i // batch_size
+			if batch_idx in existing_batch_indices:
+				continue
+
 			batch_X = X_data[i:i + batch_size]
 			batch_y = y_data[i:i + batch_size]
 			batch_idx, batch_matrices, batch_labels = _precompute_batch(
@@ -484,6 +508,9 @@ def precompute_and_save_split(
 		with futures.ProcessPoolExecutor(max_workers=int(num_workers)) as executor:
 			for i in range(0, num_samples, batch_size):
 				batch_idx = i // batch_size
+				if batch_idx in existing_batch_indices:
+					continue
+
 				batch_X = X_data[i:i + batch_size]
 				batch_y = y_data[i:i + batch_size]
 				future = executor.submit(
@@ -497,17 +524,29 @@ def precompute_and_save_split(
 			for future in tqdm(
 				futures.as_completed(future_to_batch),
 				total=len(future_to_batch),
-				desc=f"Precomputing {split_name}",
+				desc=f"Computing {split_name} batches",
 			):
 				batch_idx, batch_matrices, batch_labels = future.result()
 				_save_batch(batch_idx, batch_matrices, batch_labels)
+
+	progress_bar.close()
+
+	all_batch_files = []
+	for file_name in sorted(os.listdir(split_dir)):
+		if file_name.startswith("batch_") and file_name.endswith(".npz"):
+			all_batch_files.append(file_name)
 
 	metadata = {
 		"split_name": split_name,
 		"num_samples": int(num_samples),
 		"batch_size": int(batch_size),
-		"num_batches": int(len(batch_files)),
-		"files": [os.path.basename(f) for f in sorted(batch_files)],
+		"num_batches": int(total_batches),
+		"num_existing_batches": int(len(existing_batch_indices)),
+		"num_new_batches": int(len(batch_files)),
+		"num_saved_batches": int(len(all_batch_files)),
+		"resume": bool(resume),
+		"compress": bool(compress),
+		"files": all_batch_files,
 	}
 
 	with open(os.path.join(split_dir, "metadata.json"), "w", encoding="utf-8") as f:
