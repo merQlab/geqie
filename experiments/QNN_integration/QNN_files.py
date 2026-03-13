@@ -488,46 +488,30 @@ def precompute_and_save_split(
 
 	print(f"Google Colab has {num_workers} workers available.")
 
-	if num_workers is None or int(num_workers) <= 1:
+	future_to_batch = {}
+	with futures.ProcessPoolExecutor(max_workers=int(num_workers)) as executor:
 		for i in range(0, num_samples, batch_size):
-
 			batch_idx = i // batch_size
 			if batch_idx in existing_batch_indices:
 				continue
 
 			batch_X = X_data[i:i + batch_size]
 			batch_y = y_data[i:i + batch_size]
-			batch_idx, batch_matrices, batch_labels = _precompute_batch(
-				batch_idx=batch_idx,
-				batch_X=batch_X,
-				batch_y=batch_y,
+			future = executor.submit(
+				_precompute_batch,
+				batch_idx,
+				batch_X,
+				batch_y,
 			)
+			future_to_batch[future] = batch_idx
+
+		for future in tqdm(
+			futures.as_completed(future_to_batch),
+			total=len(future_to_batch),
+			desc=f"Computing {split_name} batches",
+		):
+			batch_idx, batch_matrices, batch_labels = future.result()
 			_save_batch(batch_idx, batch_matrices, batch_labels)
-	else:
-		future_to_batch = {}
-		with futures.ProcessPoolExecutor(max_workers=int(num_workers)) as executor:
-			for i in range(0, num_samples, batch_size):
-				batch_idx = i // batch_size
-				if batch_idx in existing_batch_indices:
-					continue
-
-				batch_X = X_data[i:i + batch_size]
-				batch_y = y_data[i:i + batch_size]
-				future = executor.submit(
-					_precompute_batch,
-					batch_idx,
-					batch_X,
-					batch_y,
-				)
-				future_to_batch[future] = batch_idx
-
-			for future in tqdm(
-				futures.as_completed(future_to_batch),
-				total=len(future_to_batch),
-				desc=f"Computing {split_name} batches",
-			):
-				batch_idx, batch_matrices, batch_labels = future.result()
-				_save_batch(batch_idx, batch_matrices, batch_labels)
 
 	progress_bar.close()
 
