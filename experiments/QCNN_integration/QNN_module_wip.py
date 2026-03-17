@@ -413,70 +413,70 @@ def train_QCNN(epochs=20, num_classes=2, batch_size=5,
 # Original batch training function (kept for comparison)
 # ---------------------------------------------------------------------------
 
-def train_QCNN_batch_old(epochs=20, num_classes=2, circuits_directory="circuits"):
-    f_loss = NLLLoss()
-    qnn_model = QNN_Pythorch_Module(num_classes=num_classes, num_qubits=9, num_layers=1)
+# def train_QCNN_batch_old(epochs=20, num_classes=2, circuits_directory="circuits"):
+#     f_loss = NLLLoss()
+#     qnn_model = QNN_Pythorch_Module(num_classes=num_classes, num_qubits=9, num_layers=1)
 
-    optimizer = Adam([
-        {'params': qnn_model.quantum_weight, 'lr': 0.001},
-        {'params': qnn_model.classical_head.parameters(), 'lr': 0.01}
-    ])
+#     optimizer = Adam([
+#         {'params': qnn_model.quantum_weight, 'lr': 0.001},
+#         {'params': qnn_model.classical_head.parameters(), 'lr': 0.01}
+#     ])
 
-    qnn_model.train()
-    loss_list = []
-    batch_files = sorted(glob.glob(f"{circuits_directory}/batch_*.npz"))
+#     qnn_model.train()
+#     loss_list = []
+#     batch_files = sorted(glob.glob(f"{circuits_directory}/batch_*.npz"))
 
-    for epoch in range(epochs):
-        start = time.time()
-        total_loss = []
+#     for epoch in range(epochs):
+#         start = time.time()
+#         total_loss = []
 
-        for batch_file in batch_files:
-            data = np.load(batch_file)
-            matrices = data["matrices"]
-            labels = data["labels"]
+#         for batch_file in batch_files:
+#             data = np.load(batch_file)
+#             matrices = data["matrices"]
+#             labels = data["labels"]
 
-            optimizer.zero_grad()
+#             optimizer.zero_grad()
 
-            for matrix, label in zip(matrices, labels):
-                output = qnn_model(matrix)
-                label_tensor = torch.tensor(label, dtype=torch.long)
-                loss = f_loss(output, label_tensor) / len(matrices)
-                loss.backward()
-                total_loss.append(loss.item() * len(matrices))
+#             for matrix, label in zip(matrices, labels):
+#                 output = qnn_model(matrix)
+#                 label_tensor = torch.tensor(label, dtype=torch.long)
+#                 loss = f_loss(output, label_tensor) / len(matrices)
+#                 loss.backward()
+#                 total_loss.append(loss.item() * len(matrices))
 
-            optimizer.step()
+#             optimizer.step()
 
-        loss_list.append(sum(total_loss) / len(total_loss))
-        print(f"Epoch {epoch + 1}/{epochs}, Loss: {loss_list[-1]:.4f}")
-        end = time.time()
-        print(f"Time: {end - start:.2f}s")
+#         loss_list.append(sum(total_loss) / len(total_loss))
+#         print(f"Epoch {epoch + 1}/{epochs}, Loss: {loss_list[-1]:.4f}")
+#         end = time.time()
+#         print(f"Time: {end - start:.2f}s")
 
-    return loss_list, qnn_model
+#     return loss_list, qnn_model
 
 
 # ---------------------------------------------------------------------------
 # Data loading & circuit precomputation  (unchanged)
 # ---------------------------------------------------------------------------
 
-def _load_and_process_mnist_dataset(path_to_mnist_dataset, labels_to_include=[0, 1],
-                                   n_samples_per_label=100, resize=(8, 8)):
-    mnist_dataset = load_dataset("parquet", data_files=path_to_mnist_dataset)
+# def _load_and_process_mnist_dataset(path_to_mnist_dataset, labels_to_include=[0, 1],
+#                                    n_samples_per_label=100, resize=(8, 8)):
+#     mnist_dataset = load_dataset("parquet", data_files=path_to_mnist_dataset)
 
-    selected_images = []
-    for image_idx in range(len(mnist_dataset["train"])):
-        if mnist_dataset["train"][image_idx]["label"] in labels_to_include:
-            img_8x8 = mnist_dataset["train"][image_idx]["image"].resize(
-                resize, resample=Image.BILINEAR
-            )
-            img = np.array(img_8x8)
-            selected_images.append({
-                "image": img,
-                "label": mnist_dataset["train"][image_idx]["label"]
-            })
+#     selected_images = []
+#     for image_idx in range(len(mnist_dataset["train"])):
+#         if mnist_dataset["train"][image_idx]["label"] in labels_to_include:
+#             img_8x8 = mnist_dataset["train"][image_idx]["image"].resize(
+#                 resize, resample=Image.BILINEAR
+#             )
+#             img = np.array(img_8x8)
+#             selected_images.append({
+#                 "image": img,
+#                 "label": mnist_dataset["train"][image_idx]["label"]
+#             })
 
-    X = np.array([item["image"] for item in selected_images])
-    y = np.array([item["label"] for item in selected_images])
-    return X, y
+#     X = np.array([item["image"] for item in selected_images])
+#     y = np.array([item["label"] for item in selected_images])
+#     return X, y
 
 def load_and_process_mnist_dataset(path_to_mnist_dataset, labels_to_include=[0, 1],
                                    n_samples_per_label=100, resize=(8, 8)):
@@ -500,61 +500,6 @@ def load_and_process_mnist_dataset(path_to_mnist_dataset, labels_to_include=[0, 
     X = np.array([item["image"] for item in selected_images])
     y = np.array([item["label"] for item in selected_images])
     return X, y
-
-
-def precompute_and_save_circuits_batched(X_data, y_data, batch_size=5, save_dir="circuits"):
-    if not os.path.exists(save_dir):
-        os.makedirs(save_dir)
-
-    num_samples = len(X_data)
-
-    for i in range(0, num_samples, batch_size):
-        batch_X = X_data[i : i + batch_size]
-        batch_y = y_data[i : i + batch_size]
-        batch_matrices = []
-
-        for img in batch_X:
-            qc = geqie.encode(frqi.init_function, frqi.data_function,
-                              frqi.map_function, img)
-            flat_qc = qc.decompose()
-            while len(flat_qc.data) != len(flat_qc.decompose().data):
-                flat_qc = flat_qc.decompose()
-
-            pure_qc = QuantumCircuit(flat_qc.num_qubits)
-            for instruction in flat_qc.data:
-                op_name = (instruction.operation.name
-                           if hasattr(instruction, 'operation')
-                           else instruction[0].name)
-                if op_name not in ['reset', 'measure', 'barrier']:
-                    pure_qc.append(instruction)
-
-            unitary_matrix = np.array(Operator(pure_qc).data, dtype=np.complex128)
-            batch_matrices.append(unitary_matrix)
-
-        batch_filename = os.path.join(save_dir, f"batch_{i//batch_size}.npz")
-        np.savez(batch_filename, matrices=batch_matrices, labels=batch_y)
-        print(f"Saved {batch_filename} with dtype {batch_matrices[0].dtype}")
-
-
-def precompute_and_save_circuits_short(X_data, y_data,
-                                       samples_numerals: list[int] = None,
-                                       save_dir="circuits"):
-    print(samples_numerals)
-    os.makedirs(save_dir, exist_ok=True)
-
-    if samples_numerals is None:
-        samples_numerals = range(len(X_data))
-
-    for input_matrix, label, sample_number in zip(X_data, y_data, samples_numerals):
-        qc = geqie.encode(frqi.init_function, frqi.data_function,
-                          frqi.map_function, input_matrix)
-        for instr in qc.data:
-            if isinstance(instr.operation, UnitaryGate):
-                unitary = instr.operation.to_matrix()
-                break
-
-        filename = os.path.join(save_dir, f"matrix_{sample_number}")
-        np.savez(filename, matrix=unitary, label=label, dtype=np.complex128)
 
 _U_INIT_CACHE = {}
 
@@ -626,15 +571,16 @@ if __name__ == "__main__":
     path_to_mnist_dataset = os.path.join(current_dir, mnist_dataset)
     X, y = load_and_process_mnist_dataset(
         path_to_mnist_dataset,
-        labels_to_include=[x for x in range(10)],
-        n_samples_per_label=100,
+        labels_to_include=[0, 1],
+        # labels_to_include=[x for x in range(10)],
+        n_samples_per_label=10,
         resize=(16, 16)
     )
 
-    circuits_directory = 'circuits'
+    circuits_directory = 'C:\\test_circuits'
 
     print("Running")
     compute_and_save_circuits(X, y, save_dir=circuits_directory, 
                               number_of_workers=4)
     print("Circuits computed")
-    train_QCNN(epochs= 50, num_classes=10 ,circuits_directory=circuits_directory)
+    train_QCNN(epochs= 10, num_classes=2 ,circuits_directory=circuits_directory)
