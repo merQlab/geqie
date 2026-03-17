@@ -2,7 +2,6 @@ import time
 import os
 import glob
 import torch
-import psutil
 import numpy as np
 import torch.nn as nn
 from PIL import Image
@@ -13,15 +12,13 @@ from torch.nn import Linear, CrossEntropyLoss, MSELoss, NLLLoss
 from torch.optim import LBFGS, Adam
 from torch.utils.data import Dataset, DataLoader
 from qiskit import QuantumCircuit
+from qiskit_aer import AerSimulator
 from qiskit.circuit import ParameterVector
-from qiskit.circuit import CircuitInstruction
 from qiskit.circuit.library import UnitaryGate
 from qiskit.primitives import StatevectorSampler as Sampler
 from qiskit.quantum_info import Operator
-from qiskit_machine_learning.connectors import TorchConnector
 from qiskit_machine_learning.neural_networks import SamplerQNN
-from qiskit_machine_learning.gradients import ParamShiftSamplerGradient, SPSASamplerGradient
-from qiskit_machine_learning.connectors.torch_connector import _TorchNNFunction
+from qiskit_machine_learning.gradients import SPSASamplerGradient
 
 import geqie
 from geqie.encodings import frqi
@@ -43,23 +40,6 @@ class MatrixDataset(Dataset):
         matrix = torch.tensor(data["matrix"], dtype=torch.complex128)
         label = torch.tensor(data["label"], dtype=torch.long)
         return matrix, label
-
-
-class ImageDataset(Dataset):
-    def __init__(self, selected_images, transform=None):
-        self.transform = transform
-        # Flatten the dict into parallel lists
-        self.images = [image for images in selected_images.values() for image in images]
-        self.labels = [label for label, images in selected_images.items() for image in images]
-
-    def __len__(self):
-        return len(self.images)
-
-    def __getitem__(self, idx):
-        image, label = self.images[idx], self.labels[idx]
-        if self.transform:
-            image = self.transform(image)
-        return image, label
 
 # ---------------------------------------------------------------------------
 # Module-level picklable helpers for ProcessPoolExecutor workers
@@ -161,20 +141,6 @@ def _init_training_worker():
 
 # ---------------------------------------------------------------------------
 # Custom autograd Function — the core of the parallelisation
-#
-# Why a custom Function and not just torch.multiprocessing?
-#
-# PyTorch's autograd graph is built in the *main* process.  We cannot run
-# backward() across processes because the computation graph doesn't exist
-# in the workers.  The solution is:
-#
-#   forward()  — fan out N circuit simulations to N workers, collect probs.
-#   backward() — fan out N×(2P parameter-shift) evaluations to N workers,
-#                collect the Jacobians, then apply the chain rule ourselves.
-#
-# This replaces the sequential per-sample _TorchNNFunction.apply() loop
-# and lets all CPUs work simultaneously on both the forward and backward
-# passes.
 # ---------------------------------------------------------------------------
 
 class ParallelQNNBatchFunction(torch.autograd.Function):
@@ -196,11 +162,11 @@ class ParallelQNNBatchFunction(torch.autograd.Function):
 
         # --- Submit all forward evaluations simultaneously ---
         args_list = [
-            (m, weights_np, num_qubits, num_layers, shots)
-            for m in matrices_np_list
+            (matrix, weights_np, num_qubits, num_layers, shots)
+            for matrix in matrices_np_list
         ]
-        futs = [executor.submit(_worker_forward_eval, a) for a in args_list]
-        probs_list = [f.result() for f in futs]  # blocks until all done
+        jobs_list = [executor.submit(_worker_forward_eval, a) for a in args_list]
+        probs_list = [f.result() for f in jobs_list]  # blocks until all done
 
         probs_np = np.stack(probs_list)  # (batch_size, output_size)
 
@@ -302,31 +268,31 @@ class QNN_Pythorch_Module(nn.Module):
     # ------------------------------------------------------------------
     # Sequential forward (original, kept as fallback / reference)
     # ------------------------------------------------------------------
-    def _forward_sequential(self, batched_matrices):
-        batched_probs = []
-        for single_matrix_tensor in batched_matrices:
-            matrix_np = single_matrix_tensor.detach().cpu().numpy()
-            qc = QuantumCircuit(self.num_qubits)
-            qc.append(UnitaryGate(matrix_np), range(self.num_qubits))
-            qc.compose(self.vqc_circuit, inplace=True)
+    # def _forward_sequential(self, batched_matrices):
+    #     batched_probs = []
+    #     for single_matrix_tensor in batched_matrices:
+    #         matrix_np = single_matrix_tensor.detach().cpu().numpy()
+    #         qc = QuantumCircuit(self.num_qubits)
+    #         qc.append(UnitaryGate(matrix_np), range(self.num_qubits))
+    #         qc.compose(self.vqc_circuit, inplace=True)
 
-            fresh_sampler = Sampler(default_shots=self.num_shots)
-            fresh_qnn = SamplerQNN(
-                circuit=qc,
-                input_params=None,
-                weight_params=list(qc.parameters),
-                sampler=fresh_sampler,
-                gradient=ParamShiftSamplerGradient(sampler=fresh_sampler)
-            )
-            probs = _TorchNNFunction.apply(
-                torch.empty(0),
-                self.quantum_weight,
-                fresh_qnn,
-                False
-            )
-            batched_probs.append(probs)
+    #         fresh_sampler = Sampler(default_shots=self.num_shots)
+    #         fresh_qnn = SamplerQNN(
+    #             circuit=qc,
+    #             input_params=None,
+    #             weight_params=list(qc.parameters),
+    #             sampler=fresh_sampler,
+    #             gradient=ParamShiftSamplerGradient(sampler=fresh_sampler)
+    #         )
+    #         probs = _TorchNNFunction.apply(
+    #             torch.empty(0),
+    #             self.quantum_weight,
+    #             fresh_qnn,
+    #             False
+    #         )
+    #         batched_probs.append(probs)
 
-        return torch.stack(batched_probs)
+    #     return torch.stack(batched_probs)
 
     # ------------------------------------------------------------------
     # Parallel forward — uses ParallelQNNBatchFunction
@@ -361,31 +327,6 @@ class QNN_Pythorch_Module(nn.Module):
 
         logits = self.classical_head(scaled_probs)
         return torch.log_softmax(logits, dim=-1)
-
-    # Kept for reference / single-sample use
-    def forward_(self, matrix):
-        qc = QuantumCircuit(self.num_qubits)
-        qc.append(UnitaryGate(matrix), range(self.num_qubits))
-        qc.compose(self.vqc_circuit, inplace=True)
-
-        fresh_sampler = Sampler(default_shots=None)
-        fresh_qnn = SamplerQNN(
-            circuit=qc,
-            input_params=None,
-            weight_params=list(qc.parameters),
-            sampler=fresh_sampler,
-            gradient=ParamShiftSamplerGradient(sampler=fresh_sampler)
-        )
-        probs = _TorchNNFunction.apply(
-            torch.empty(0),
-            self.quantum_weight,
-            fresh_qnn,
-            False
-        )
-        scaled_probs = probs * (2 ** self.num_qubits)
-        logits = self.classical_head(scaled_probs)
-        return torch.log_softmax(logits, dim=-1)
-
 
 # ---------------------------------------------------------------------------
 # Training loop — now with parallel circuit evaluation
@@ -615,11 +556,7 @@ def precompute_and_save_circuits_short(X_data, y_data,
         filename = os.path.join(save_dir, f"matrix_{sample_number}")
         np.savez(filename, matrix=unitary, label=label, dtype=np.complex128)
 
-
-from qiskit_aer import AerSimulator
-
 _U_INIT_CACHE = {}
-
 
 def _compute_circuit(image, geqie_encoding=frqi):
     global _sim
@@ -645,21 +582,6 @@ def _compute_circuit(image, geqie_encoding=frqi):
 
     return U_rest @ _U_INIT_CACHE[n_qubits]
 
-
-def _compute_save_circuits(data, labels, save_dir="circuits",
-                          file_prefix='matrix', samples_numerals: list[int] = None):
-    os.makedirs(save_dir, exist_ok=True)
-    if samples_numerals is None:
-        samples_numerals = range(len(data))
-    for sample, label, sample_number in zip(data, labels, samples_numerals):
-        start = time.time()
-        filename = os.path.join(save_dir, f"{file_prefix}_{sample_number}")
-        unitary_matrix = _compute_circuit(sample)
-        np.savez(filename, matrix=unitary_matrix, label=label, dtype=np.complex128)
-        end = time.time()
-        print(f"{filename} saved with {end - start:.2f}s processing time")
-
-
 def _init_worker():
     """Called once when each precompute worker process starts."""
     os.environ["OMP_NUM_THREADS"] = "1"
@@ -670,34 +592,6 @@ def _init_worker():
     global _sim
     _sim = AerSimulator(method='unitary', max_parallel_threads=1,
                         max_parallel_shots=1, max_parallel_experiments=1)
-
-
-def __compute_and_save_circuits(data, labels, number_of_workers = 4):
-
-    X_short = data[:20]
-    y_short = labels[:20]
-    interval = len(X_short) // number_of_workers
-    if interval > 10:
-        interval = 10
-    data_split = [(interval * (n-1), interval * n) for n in range(1, number_of_workers+1)]
-    data_split[-1] = (data_split[-1][0], len(X_short))
-    print(data_split)
-
-    with futures.ProcessPoolExecutor(
-        max_workers=number_of_workers,
-        initializer=_init_worker
-    ) as executor:
-        precompute_futures = [executor.submit(
-            _compute_save_circuits,
-            X_short[index[0]:index[1]],
-            y_short[index[0]:index[1]],
-            "new_pool_circuits",
-            "matrix",
-            range(index[0], index[1]),
-        ) for index in data_split]
-
-    for future in futures.as_completed(precompute_futures):
-        future.result()
 
 def _compute_save_single(args):
     """Single-sample worker — picklable at module level."""
@@ -737,12 +631,10 @@ if __name__ == "__main__":
         resize=(16, 16)
     )
 
-    # circuits_directory = 'nevererer_pool_circuits'
-    # circuits_directory = 'new_pool_circuits'
-    circuits_directory = 'C:\\new_pool_circuits'
+    circuits_directory = 'circuits'
 
     print("Running")
-    # compute_and_save_circuits(X, y, save_dir=circuits_directory, 
-    #                           number_of_workers=4)
-    # print("Circuits computed")
-    train_QCNN(num_classes=10 ,circuits_directory=circuits_directory)
+    compute_and_save_circuits(X, y, save_dir=circuits_directory, 
+                              number_of_workers=4)
+    print("Circuits computed")
+    train_QCNN(epochs= 50, num_classes=10 ,circuits_directory=circuits_directory)
