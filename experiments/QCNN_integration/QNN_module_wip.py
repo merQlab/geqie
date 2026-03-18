@@ -4,6 +4,7 @@ import glob
 import torch
 import numpy as np
 import torch.nn as nn
+
 from PIL import Image
 from concurrent import futures
 from multiprocessing import cpu_count
@@ -15,10 +16,11 @@ from qiskit import QuantumCircuit
 from qiskit_aer import AerSimulator
 from qiskit.circuit import ParameterVector
 from qiskit.circuit.library import UnitaryGate
-from qiskit.primitives import StatevectorSampler as Sampler
 from qiskit.quantum_info import Operator
+from qiskit.primitives import StatevectorSampler as Sampler
+from qiskit_machine_learning.gradients import SPSASamplerGradient, ParamShiftSamplerGradient
 from qiskit_machine_learning.neural_networks import SamplerQNN
-from qiskit_machine_learning.gradients import SPSASamplerGradient
+from qiskit_machine_learning.connectors.torch_connector import _TorchNNFunction
 
 import geqie
 from geqie.encodings import frqi
@@ -268,31 +270,31 @@ class QNN_Pythorch_Module(nn.Module):
     # ------------------------------------------------------------------
     # Sequential forward (original, kept as fallback / reference)
     # ------------------------------------------------------------------
-    # def _forward_sequential(self, batched_matrices):
-    #     batched_probs = []
-    #     for single_matrix_tensor in batched_matrices:
-    #         matrix_np = single_matrix_tensor.detach().cpu().numpy()
-    #         qc = QuantumCircuit(self.num_qubits)
-    #         qc.append(UnitaryGate(matrix_np), range(self.num_qubits))
-    #         qc.compose(self.vqc_circuit, inplace=True)
+    def _forward_sequential(self, batched_matrices):
+        batched_probs = []
+        for single_matrix_tensor in batched_matrices:
+            matrix_np = single_matrix_tensor.detach().cpu().numpy()
+            qc = QuantumCircuit(self.num_qubits)
+            qc.append(UnitaryGate(matrix_np), range(self.num_qubits))
+            qc.compose(self.vqc_circuit, inplace=True)
 
-    #         fresh_sampler = Sampler(default_shots=self.num_shots)
-    #         fresh_qnn = SamplerQNN(
-    #             circuit=qc,
-    #             input_params=None,
-    #             weight_params=list(qc.parameters),
-    #             sampler=fresh_sampler,
-    #             gradient=ParamShiftSamplerGradient(sampler=fresh_sampler)
-    #         )
-    #         probs = _TorchNNFunction.apply(
-    #             torch.empty(0),
-    #             self.quantum_weight,
-    #             fresh_qnn,
-    #             False
-    #         )
-    #         batched_probs.append(probs)
+            fresh_sampler = Sampler(default_shots=self.num_shots)
+            fresh_qnn = SamplerQNN(
+                circuit=qc,
+                input_params=None,
+                weight_params=list(qc.parameters),
+                sampler=fresh_sampler,
+                gradient=ParamShiftSamplerGradient(sampler=fresh_sampler)
+            )
+            probs = _TorchNNFunction.apply(
+                torch.empty(0),
+                self.quantum_weight,
+                fresh_qnn,
+                False
+            )
+            batched_probs.append(probs)
 
-    #     return torch.stack(batched_probs)
+        return torch.stack(batched_probs)
 
     # ------------------------------------------------------------------
     # Parallel forward — uses ParallelQNNBatchFunction
