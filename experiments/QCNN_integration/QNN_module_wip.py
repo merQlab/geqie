@@ -284,7 +284,7 @@ class QNN_Pythorch_Module(nn.Module):
                 input_params=None,
                 weight_params=list(qc.parameters),
                 sampler=fresh_sampler,
-                gradient=ParamShiftSamplerGradient(sampler=fresh_sampler)
+                gradient=SPSASamplerGradient(sampler=fresh_sampler)
             )
             probs = _TorchNNFunction.apply(
                 torch.empty(0),
