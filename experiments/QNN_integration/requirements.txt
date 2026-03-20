@@ -1,0 +1,11 @@
+scikit-learn
+torch
+matplotlib
+datasets
+pylatexenc
+qiskit-machine-learning
+qiskit
+torch
+qiskit-aer
+parquet
+tqdm

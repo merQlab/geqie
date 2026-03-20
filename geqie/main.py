@@ -21,6 +21,7 @@ def encode(
     map_function: Callable[..., Operator],
     image: np.ndarray,
     image_dimensionality: int = 2,
+    perform_measurement: bool = True,
     logging_level: int | None = None,
     **_: Dict[Any, Any],
 ) -> QuantumCircuit:
@@ -60,7 +61,8 @@ def encode(
     circuit = QuantumCircuit(n_qubits)
     circuit.initialize(init_state, range(n_qubits), normalize=True)
     circuit.append(U_op, range(n_qubits))
-    circuit.measure_all()
+    if perform_measurement:
+        circuit.measure_all()
 
     logger.info("\n" + str(circuit.draw()))
 
