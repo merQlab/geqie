@@ -21,7 +21,6 @@ from qiskit.quantum_info import Operator
 from qiskit.primitives import StatevectorSampler as Sampler
 from qiskit_machine_learning.gradients import SPSASamplerGradient
 from qiskit_machine_learning.neural_networks import SamplerQNN
-from qiskit_machine_learning.connectors.torch_connector import _TorchNNFunction
 
 import geqie
 from geqie.encodings import frqi
@@ -144,37 +143,69 @@ def _init_training_worker():
 
 
 # ---------------------------------------------------------------------------
-# Custom autograd Function — the core of the parallelisation
+# Custom autograd Function — unified sequential and parallel paths
 # ---------------------------------------------------------------------------
 
-class ParallelQNNBatchFunction(torch.autograd.Function):
+def _work_dispatch(fn, args_list, executor):
+    """
+    Dispatch per-sample work either sequentially or in parallel.
+
+    When executor is None, calls fn(args) in a plain loop on the current
+    process — identical computation to the parallel path, just no pool.
+    When executor is a ProcessPoolExecutor, submits all jobs simultaneously
+    and collects results.
+
+    Parameters
+    ----------
+    fn        : callable — _worker_forward_eval or _worker_grad_eval
+    args_list : list of arg tuples, one per sample
+    executor  : ProcessPoolExecutor | None
+
+    Returns
+    -------
+    list of results, one per sample, in input order
+    """
+    if executor is None:
+        return [fn(args) for args in args_list]
+    jobs = [executor.submit(fn, args) for args in args_list]
+    return [f.result() for f in jobs]
+
+
+class QNNBatchFunction(torch.autograd.Function):
+    """
+    Custom autograd Function that evaluates a batch of quantum circuits and
+    computes parameter-shift gradients.
+
+    Both the forward and backward passes are built on the same per-sample
+    worker functions (_worker_forward_eval, _worker_grad_eval).  The only
+    difference between sequential and parallel execution is whether those
+    functions are called in a loop or dispatched to a ProcessPoolExecutor —
+    controlled by the ``executor`` argument.
+
+    Parameters (positional, as required by torch.autograd.Function)
+    ----------
+    weights           : (num_params,) tensor — the trainable quantum weights
+    executor          : ProcessPoolExecutor | None
+                        None  → sequential evaluation on the calling process
+                        Pool  → parallel evaluation across worker processes
+    matrices_np_list  : list of np.ndarray, each (2^n, 2^n) image unitary
+    num_qubits        : int
+    num_layers        : int
+    shots             : int
+    """
 
     @staticmethod
     def forward(ctx, weights, executor, matrices_np_list,
                 num_qubits, num_layers, shots):
-        """
-        Parameters
-        ----------
-        weights           : (num_params,) tensor — the trainable quantum weights
-        executor          : ProcessPoolExecutor shared across batches
-        matrices_np_list  : list of np.ndarray, each (2^n, 2^n) image unitary
-        num_qubits        : int
-        num_layers        : int
-        shots             : int | None
-        """
         weights_np = weights.detach().numpy()
 
-        # --- Submit all forward evaluations simultaneously ---
         args_list = [
             (matrix, weights_np, num_qubits, num_layers, shots)
             for matrix in matrices_np_list
         ]
-        jobs_list = [executor.submit(_worker_forward_eval, a) for a in args_list]
-        probs_list = [f.result() for f in jobs_list]  # blocks until all done
-
+        probs_list = _work_dispatch(_worker_forward_eval, args_list, executor)
         probs_np = np.stack(probs_list)  # (batch_size, output_size)
 
-        # Save context for backward
         ctx.save_for_backward(weights)
         ctx.executor = executor
         ctx.matrices_np_list = matrices_np_list
@@ -195,14 +226,11 @@ class ParallelQNNBatchFunction(torch.autograd.Function):
         weights, = ctx.saved_tensors
         weights_np = weights.detach().numpy()
 
-        # --- Submit all gradient evaluations simultaneously ---
         args_list = [
             (m, weights_np, ctx.num_qubits, ctx.num_layers, ctx.shots)
             for m in ctx.matrices_np_list
         ]
-        futs = [ctx.executor.submit(_worker_grad_eval, a) for a in args_list]
-        # Each result: (output_size, num_weights)
-        jac_list = [f.result() for f in futs]
+        jac_list = _work_dispatch(_worker_grad_eval, args_list, ctx.executor)
 
         jac_np = np.stack(jac_list)             # (batch, output, num_weights)
         grad_np = grad_output.detach().numpy()  # (batch, output)
@@ -213,7 +241,7 @@ class ParallelQNNBatchFunction(torch.autograd.Function):
 
         return (
             torch.tensor(weight_grad_np, dtype=weights.dtype),  # weights
-            None,   # executor        — not differentiable
+            None,   # executor         — not differentiable
             None,   # matrices_np_list — not differentiable
             None,   # num_qubits
             None,   # num_layers
@@ -233,6 +261,12 @@ class VQCLayer(nn.Module):
     probability vectors over all 2**num_qubits basis states.  Classical
     post-processing (linear head, activation, loss) is left to the caller,
     so this layer composes freely inside any nn.Sequential or custom Module.
+
+    Both the sequential (default) and parallel paths are driven by the same
+    per-sample worker functions — ``_worker_forward_eval`` for the forward
+    pass and ``_worker_grad_eval`` for the parameter-shift backward pass.
+    The only difference is whether those functions are called in a plain loop
+    or dispatched to a ``ProcessPoolExecutor`` via ``parallel_context()``.
 
     Parameters
     ----------
@@ -281,18 +315,16 @@ class VQCLayer(nn.Module):
         self.num_shots = shots
         self.scale_output = scale_output
 
-        # Build the parameterised VQC once; workers reconstruct it independently
-        # via _build_vqc_circuit so that they don't need to pickle this object.
-        self.vqc_circuit = _build_vqc_circuit(num_qubits, num_layers)
-
         # Trainable quantum weights, registered as a proper nn.Parameter so
         # that optimisers, state_dict, and requires_grad all work out of the box.
+        # Workers reconstruct the circuit independently via _build_vqc_circuit,
+        # so the Qiskit QuantumCircuit object does not need to be stored here.
         num_params = 3 * num_qubits * num_layers
         self.quantum_weight = nn.Parameter(
             torch.empty(num_params).uniform_(-np.pi, np.pi)
         )
 
-        # Executor is None by default; set only while inside parallel_context().
+        # Executor is None by default; populated only inside parallel_context().
         self._executor: futures.ProcessPoolExecutor | None = None
 
     # ------------------------------------------------------------------
@@ -302,8 +334,11 @@ class VQCLayer(nn.Module):
     @contextmanager
     def parallel_context(self, num_workers: int | None = None):
         """
-        Context manager that starts a process pool and enables the fast
-        parallel forward/backward path for the duration of the ``with`` block.
+        Context manager that starts a process pool and enables parallel
+        circuit evaluation for the duration of the ``with`` block.
+
+        Without this context, forward() and backward() run sequentially on
+        the calling process using the same underlying per-sample functions.
 
         Parameters
         ----------
@@ -336,54 +371,7 @@ class VQCLayer(nn.Module):
                 self._executor = None
 
     # ------------------------------------------------------------------
-    # Sequential forward (fallback when no parallel context is active)
-    # ------------------------------------------------------------------
-
-    def _forward_sequential(self, batched_matrices):
-        batched_probs = []
-        for single_matrix_tensor in batched_matrices:
-            matrix_np = single_matrix_tensor.detach().cpu().numpy()
-            qc = QuantumCircuit(self.num_qubits)
-            qc.append(UnitaryGate(matrix_np), range(self.num_qubits))
-            qc.compose(self.vqc_circuit, inplace=True)
-
-            fresh_sampler = Sampler(default_shots=self.num_shots)
-            fresh_qnn = SamplerQNN(
-                circuit=qc,
-                input_params=None,
-                weight_params=list(qc.parameters),
-                sampler=fresh_sampler,
-                gradient=SPSASamplerGradient(sampler=fresh_sampler)
-            )
-            probs = _TorchNNFunction.apply(
-                torch.empty(0),
-                self.quantum_weight,
-                fresh_qnn,
-                False
-            )
-            batched_probs.append(probs)
-
-        return torch.stack(batched_probs)
-
-    # ------------------------------------------------------------------
-    # Parallel forward — uses ParallelQNNBatchFunction
-    # ------------------------------------------------------------------
-
-    def _forward_parallel(self, batched_matrices):
-        matrices_np_list = [
-            m.detach().cpu().numpy() for m in batched_matrices
-        ]
-        return ParallelQNNBatchFunction.apply(
-            self.quantum_weight,
-            self._executor,
-            matrices_np_list,
-            self.num_qubits,
-            self.num_layers,
-            self.num_shots,
-        )
-
-    # ------------------------------------------------------------------
-    # forward — validates input shape, dispatches, applies optional scaling
+    # forward — validates shape, delegates to QNNBatchFunction
     # ------------------------------------------------------------------
 
     def forward(self, batched_matrices: torch.Tensor) -> torch.Tensor:
@@ -400,18 +388,25 @@ class VQCLayer(nn.Module):
             If ``scale_output=True``, values are multiplied by 2**num_qubits.
         """
         dim = 2 ** self.num_qubits
-        expected_shape = torch.Size([dim, dim])
-        if batched_matrices.shape[1:] != expected_shape:
+        if batched_matrices.shape[1:] != torch.Size([dim, dim]):
             raise ValueError(
                 f"VQCLayer expects unitary matrices of shape {(dim, dim)}, "
                 f"but got input with shape {tuple(batched_matrices.shape[1:])}. "
                 f"Check that num_qubits={self.num_qubits} matches your encoded data."
             )
 
-        if self._executor is not None:
-            probs = self._forward_parallel(batched_matrices)
-        else:
-            probs = self._forward_sequential(batched_matrices)
+        matrices_np_list = [m.detach().cpu().numpy() for m in batched_matrices]
+
+        # QNNBatchFunction runs sequentially when self._executor is None,
+        # or fans out to the process pool when parallel_context() is active.
+        probs = QNNBatchFunction.apply(
+            self.quantum_weight,
+            self._executor,
+            matrices_np_list,
+            self.num_qubits,
+            self.num_layers,
+            self.num_shots,
+        )
 
         if self.scale_output:
             probs = probs * dim
