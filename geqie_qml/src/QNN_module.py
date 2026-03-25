@@ -5,12 +5,13 @@ import torch
 import numpy as np
 import torch.nn as nn
 
+from contextlib import contextmanager
 from PIL import Image
 from concurrent import futures
 from multiprocessing import cpu_count
 from datasets import load_dataset
-from torch.nn import Linear, CrossEntropyLoss, MSELoss, NLLLoss
-from torch.optim import LBFGS, Adam
+from torch.nn import NLLLoss
+from torch.optim import Adam
 from torch.utils.data import Dataset, DataLoader
 from qiskit import QuantumCircuit
 from qiskit_aer import AerSimulator
@@ -18,7 +19,7 @@ from qiskit.circuit import ParameterVector
 from qiskit.circuit.library import UnitaryGate
 from qiskit.quantum_info import Operator
 from qiskit.primitives import StatevectorSampler as Sampler
-from qiskit_machine_learning.gradients import SPSASamplerGradient, ParamShiftSamplerGradient
+from qiskit_machine_learning.gradients import SPSASamplerGradient
 from qiskit_machine_learning.neural_networks import SamplerQNN
 from qiskit_machine_learning.connectors.torch_connector import _TorchNNFunction
 
@@ -42,6 +43,7 @@ class MatrixDataset(Dataset):
         matrix = torch.tensor(data["matrix"], dtype=torch.complex128)
         label = torch.tensor(data["label"], dtype=torch.long)
         return matrix, label
+
 
 # ---------------------------------------------------------------------------
 # Module-level picklable helpers for ProcessPoolExecutor workers
@@ -202,7 +204,7 @@ class ParallelQNNBatchFunction(torch.autograd.Function):
         # Each result: (output_size, num_weights)
         jac_list = [f.result() for f in futs]
 
-        jac_np = np.stack(jac_list)         # (batch, output, num_weights)
+        jac_np = np.stack(jac_list)             # (batch, output, num_weights)
         grad_np = grad_output.detach().numpy()  # (batch, output)
 
         # Chain rule: accumulate over batch and output dimensions
@@ -220,56 +222,123 @@ class ParallelQNNBatchFunction(torch.autograd.Function):
 
 
 # ---------------------------------------------------------------------------
-# QNN Module
+# VQCLayer — a composable PyTorch layer
 # ---------------------------------------------------------------------------
 
-class QNN_Pythorch_Module(nn.Module):
-    def __init__(self, num_classes, num_qubits=8, num_layers=3, shots=1024):
-        super().__init__()
-        self.num_qubits = num_qubits
-        self.num_classes = num_classes
-        self.num_shots = shots
-        self.num_layers = num_layers  # stored so workers can reconstruct
+class VQCLayer(nn.Module):
+    """
+    Variational Quantum Circuit layer, usable as a standard PyTorch nn.Module.
 
-        # 1. Create the parameterized VQC circuit ONCE
-        self.vqc_circuit = QuantumCircuit(num_qubits)
-        self.thetas = ParameterVector("theta", length=3 * num_qubits * num_layers)
+    Accepts a batch of pre-encoded unitary matrices and returns a batch of
+    probability vectors over all 2**num_qubits basis states.  Classical
+    post-processing (linear head, activation, loss) is left to the caller,
+    so this layer composes freely inside any nn.Sequential or custom Module.
 
-        # Apply the brickwork architecture to the VQC circuit
-        for layer in range(num_layers):
-            offset = layer * 3 * num_qubits
-            for i in range(num_qubits):
-                self.vqc_circuit.rx(self.thetas[offset + i], i)
-            for i in range(num_qubits):
-                self.vqc_circuit.ry(self.thetas[offset + num_qubits + i], i)
-            for i in range(num_qubits):
-                self.vqc_circuit.rz(self.thetas[offset + 2*num_qubits + i], i)
+    Parameters
+    ----------
+    num_qubits : int
+        Number of qubits.  Input matrices must be square with side 2**num_qubits.
+    num_layers : int
+        Number of brickwork VQC layers (each with Rx/Ry/Rz + entanglement).
+    shots : int
+        Number of measurement shots per circuit evaluation.
+    scale_output : bool
+        When True (default), multiply output probabilities by 2**num_qubits.
+        This rescales the near-zero probability values into a more numerically
+        convenient range before they are passed to a classical head.
 
-            # Alternating brickwork entanglement
-            if layer % 2 == 0:
-                for i in range(0, num_qubits - 1, 2):
-                    self.vqc_circuit.cx(i, i + 1)
-            else:
-                for i in range(1, num_qubits - 1, 2):
-                    self.vqc_circuit.cx(i, i + 1)
-                self.vqc_circuit.cx(num_qubits - 1, 0)
+    Usage
+    -----
+    Minimal classification network::
 
-        # 2. Register the quantum weights directly as a native PyTorch Parameter.
-        self.quantum_weight = nn.Parameter(
-            torch.empty(len(self.thetas)).uniform_(-np.pi, np.pi)
+        model = nn.Sequential(
+            VQCLayer(num_qubits=9, num_layers=1),
+            nn.Linear(2**9, num_classes),
+            nn.LogSoftmax(dim=-1),
         )
 
-        # 3. Classical head
-        self.classical_head = nn.Linear(2**num_qubits, num_classes)
+    Training with parallel circuit evaluation::
 
-        # 4. Optional executor injected by the training loop (see train_QCNN).
-        #    When set, forward() uses the fast parallel path.
-        #    When None, falls back to the original sequential path.
-        self.executor = None
+        vqc = VQCLayer(num_qubits=9, num_layers=1)
+        model = nn.Sequential(vqc, nn.Linear(2**9, num_classes), nn.LogSoftmax(dim=-1))
+
+        with vqc.parallel_context(num_workers=8):
+            for epoch in range(epochs):
+                for batch_matrices, batch_labels in dataloader:
+                    ...
+    """
+
+    def __init__(
+        self,
+        num_qubits: int = 9,
+        num_layers: int = 3,
+        shots: int = 1024,
+        scale_output: bool = True,
+    ):
+        super().__init__()
+        self.num_qubits = num_qubits
+        self.num_layers = num_layers
+        self.num_shots = shots
+        self.scale_output = scale_output
+
+        # Build the parameterised VQC once; workers reconstruct it independently
+        # via _build_vqc_circuit so that they don't need to pickle this object.
+        self.vqc_circuit = _build_vqc_circuit(num_qubits, num_layers)
+
+        # Trainable quantum weights, registered as a proper nn.Parameter so
+        # that optimisers, state_dict, and requires_grad all work out of the box.
+        num_params = 3 * num_qubits * num_layers
+        self.quantum_weight = nn.Parameter(
+            torch.empty(num_params).uniform_(-np.pi, np.pi)
+        )
+
+        # Executor is None by default; set only while inside parallel_context().
+        self._executor: futures.ProcessPoolExecutor | None = None
 
     # ------------------------------------------------------------------
-    # Sequential forward (original, kept as fallback / reference)
+    # Parallel context manager — keeps executor lifecycle self-contained
     # ------------------------------------------------------------------
+
+    @contextmanager
+    def parallel_context(self, num_workers: int | None = None):
+        """
+        Context manager that starts a process pool and enables the fast
+        parallel forward/backward path for the duration of the ``with`` block.
+
+        Parameters
+        ----------
+        num_workers : int | None
+            Number of worker processes.  Defaults to (cpu_count - 1), min 1.
+
+        Example
+        -------
+        ::
+
+            with vqc_layer.parallel_context(num_workers=8):
+                for epoch in range(epochs):
+                    for batch, labels in dataloader:
+                        ...
+        """
+        if num_workers is None:
+            num_workers = max(1, cpu_count() - 1)
+
+        mp_ctx = __import__("multiprocessing").get_context("spawn")
+        with futures.ProcessPoolExecutor(
+            max_workers=num_workers,
+            initializer=_init_training_worker,
+            mp_context=mp_ctx,
+        ) as executor:
+            self._executor = executor
+            try:
+                yield
+            finally:
+                # Always clear the reference, even if the training loop raises.
+                self._executor = None
+
+    # ------------------------------------------------------------------
+    # Sequential forward (fallback when no parallel context is active)
+    # ------------------------------------------------------------------
+
     def _forward_sequential(self, batched_matrices):
         batched_probs = []
         for single_matrix_tensor in batched_matrices:
@@ -299,15 +368,14 @@ class QNN_Pythorch_Module(nn.Module):
     # ------------------------------------------------------------------
     # Parallel forward — uses ParallelQNNBatchFunction
     # ------------------------------------------------------------------
+
     def _forward_parallel(self, batched_matrices):
         matrices_np_list = [
             m.detach().cpu().numpy() for m in batched_matrices
         ]
-        # ParallelQNNBatchFunction.apply fans out workers for both the
-        # forward simulation and the parameter-shift backward pass.
         return ParallelQNNBatchFunction.apply(
             self.quantum_weight,
-            self.executor,
+            self._executor,
             matrices_np_list,
             self.num_qubits,
             self.num_layers,
@@ -315,73 +383,111 @@ class QNN_Pythorch_Module(nn.Module):
         )
 
     # ------------------------------------------------------------------
-    # Main forward — dispatches to parallel or sequential path
+    # forward — validates input shape, dispatches, applies optional scaling
     # ------------------------------------------------------------------
-    def forward(self, batched_matrices):
-        # batched_matrices: (batch_size, 2^n, 2^n) complex tensor
-        if self.executor is not None:
-            batched_probs = self._forward_parallel(batched_matrices)
+
+    def forward(self, batched_matrices: torch.Tensor) -> torch.Tensor:
+        """
+        Parameters
+        ----------
+        batched_matrices : torch.Tensor, shape (batch_size, 2**n, 2**n), complex
+            Batch of pre-encoded image unitary matrices.
+
+        Returns
+        -------
+        torch.Tensor, shape (batch_size, 2**num_qubits), float
+            Probability distribution over basis states for each sample.
+            If ``scale_output=True``, values are multiplied by 2**num_qubits.
+        """
+        dim = 2 ** self.num_qubits
+        expected_shape = torch.Size([dim, dim])
+        if batched_matrices.shape[1:] != expected_shape:
+            raise ValueError(
+                f"VQCLayer expects unitary matrices of shape {(dim, dim)}, "
+                f"but got input with shape {tuple(batched_matrices.shape[1:])}. "
+                f"Check that num_qubits={self.num_qubits} matches your encoded data."
+            )
+
+        if self._executor is not None:
+            probs = self._forward_parallel(batched_matrices)
         else:
-            batched_probs = self._forward_sequential(batched_matrices)
+            probs = self._forward_sequential(batched_matrices)
 
-        # Feature scaling
-        scaled_probs = batched_probs * (2 ** self.num_qubits)
+        if self.scale_output:
+            probs = probs * dim
 
-        logits = self.classical_head(scaled_probs)
-        return torch.log_softmax(logits, dim=-1)
+        return probs
+
+    def extra_repr(self) -> str:
+        """Adds layer details to the standard nn.Module string representation."""
+        return (
+            f"num_qubits={self.num_qubits}, num_layers={self.num_layers}, "
+            f"shots={self.num_shots}, scale_output={self.scale_output}, "
+            f"num_params={self.quantum_weight.numel()}"
+        )
+
 
 # ---------------------------------------------------------------------------
-# Training loop — now with parallel circuit evaluation
+# Training loop
 # ---------------------------------------------------------------------------
 
-def train_QCNN(epochs=20, num_classes=2, batch_size=5,
-               circuits_directory="circuits", num_workers=None):
+def train_QCNN(
+    epochs: int = 20,
+    num_classes: int = 2,
+    batch_size: int = 5,
+    num_qubits: int = 9,
+    num_layers: int = 1,
+    circuits_directory: str = "circuits",
+    num_workers: int | None = None,
+):
     """
-    Train the QNN model.
+    Train a VQCLayer followed by a classical linear head.
+
+    The model is assembled here to illustrate the intended compositional
+    pattern — VQCLayer produces probability features, the linear head maps
+    them to class logits, and LogSoftmax + NLLLoss combine as cross-entropy.
 
     Parameters
     ----------
+    epochs, num_classes, batch_size : int
+    num_qubits : int
+        Must match the unitary matrices stored in circuits_directory.
+    num_layers : int
+        Number of brickwork VQC layers.
+    circuits_directory : str
+        Directory containing .npz files produced by compute_and_save_circuits.
     num_workers : int | None
-        Number of worker processes.  Defaults to (cpu_count - 1), min 1.
-        Each worker handles one sample's circuit simulation independently,
-        so setting this to the number of physical cores works well.
+        Worker processes for parallel simulation.  Defaults to cpu_count - 1.
     """
-    if num_workers is None:
-        num_workers = max(1, cpu_count() - 1)
-
-    f_loss = NLLLoss()
-    qnn_model = QNN_Pythorch_Module(
-        num_classes=num_classes, num_qubits=9, num_layers=1
+    # --- Build model from composable parts ---
+    vqc_layer = VQCLayer(num_qubits=num_qubits, num_layers=num_layers)
+    model = nn.Sequential(
+        vqc_layer,
+        nn.Linear(2 ** num_qubits, num_classes),
+        nn.LogSoftmax(dim=-1),
     )
 
     optimizer = Adam([
-        {'params': qnn_model.quantum_weight, 'lr': 0.001},
-        {'params': qnn_model.classical_head.parameters(), 'lr': 0.01}
+        {"params": vqc_layer.quantum_weight,          "lr": 0.001},
+        {"params": model[1].parameters(),             "lr": 0.01},
     ])
 
-    qnn_model.train()
+    f_loss = NLLLoss()
+    model.train()
     loss_list = []
 
     files = sorted(glob.glob(f"{circuits_directory}/*.npz"))
-    print(len(files))
+    print(f"Found {len(files)} circuit files")
     dataset = MatrixDataset(files)
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
+    if num_workers is None:
+        num_workers = max(1, cpu_count() - 1)
     print(f"Starting training with {num_workers} worker processes")
 
-    # Create the pool ONCE outside the epoch loop.
-    # Workers are initialised with thread-count limits to prevent
-    # oversubscription (each worker is single-threaded; N workers → N cores).
-    with futures.ProcessPoolExecutor(
-        max_workers=num_workers,
-        initializer=_init_training_worker,
-        # "spawn" avoids fork-safety issues with Qiskit's internal threads.
-        mp_context=__import__("multiprocessing").get_context("spawn"),
-    ) as executor:
-
-        # Inject the live executor into the model so forward() can use it.
-        qnn_model.executor = executor
-
+    # The parallel_context() block starts and owns the process pool.
+    # No manual executor injection needed — vqc_layer handles it internally.
+    with vqc_layer.parallel_context(num_workers=num_workers):
         for epoch in range(epochs):
             start = time.time()
             total_loss = []
@@ -389,99 +495,35 @@ def train_QCNN(epochs=20, num_classes=2, batch_size=5,
             for batch_matrices, batch_labels in dataloader:
                 optimizer.zero_grad()
 
-                # forward() now fans out all batch_size circuit simulations
-                # in parallel, then chains gradients via ParallelQNNBatchFunction
-                output = qnn_model(batch_matrices)
-
+                output = model(batch_matrices)
                 loss = f_loss(output, batch_labels)
-                loss.backward()   # triggers parallel parameter-shift evals
+                loss.backward()
 
                 total_loss.append(loss.item())
                 optimizer.step()
 
-            loss_list.append(sum(total_loss) / len(total_loss))
+            epoch_loss = sum(total_loss) / len(total_loss)
+            loss_list.append(epoch_loss)
             elapsed = time.time() - start
-            print(f"Epoch {epoch + 1}/{epochs}  "
-                  f"Loss: {loss_list[-1]:.4f}  "
-                  f"Time: {elapsed:.2f}s")
+            print(
+                f"Epoch {epoch + 1}/{epochs}  "
+                f"Loss: {epoch_loss:.4f}  "
+                f"Time: {elapsed:.2f}s"
+            )
 
-        # Remove the executor reference before it closes
-        qnn_model.executor = None
-
-    return loss_list, qnn_model
-
-
-# ---------------------------------------------------------------------------
-# Original batch training function (kept for comparison)
-# ---------------------------------------------------------------------------
-
-# def train_QCNN_batch_old(epochs=20, num_classes=2, circuits_directory="circuits"):
-#     f_loss = NLLLoss()
-#     qnn_model = QNN_Pythorch_Module(num_classes=num_classes, num_qubits=9, num_layers=1)
-
-#     optimizer = Adam([
-#         {'params': qnn_model.quantum_weight, 'lr': 0.001},
-#         {'params': qnn_model.classical_head.parameters(), 'lr': 0.01}
-#     ])
-
-#     qnn_model.train()
-#     loss_list = []
-#     batch_files = sorted(glob.glob(f"{circuits_directory}/batch_*.npz"))
-
-#     for epoch in range(epochs):
-#         start = time.time()
-#         total_loss = []
-
-#         for batch_file in batch_files:
-#             data = np.load(batch_file)
-#             matrices = data["matrices"]
-#             labels = data["labels"]
-
-#             optimizer.zero_grad()
-
-#             for matrix, label in zip(matrices, labels):
-#                 output = qnn_model(matrix)
-#                 label_tensor = torch.tensor(label, dtype=torch.long)
-#                 loss = f_loss(output, label_tensor) / len(matrices)
-#                 loss.backward()
-#                 total_loss.append(loss.item() * len(matrices))
-
-#             optimizer.step()
-
-#         loss_list.append(sum(total_loss) / len(total_loss))
-#         print(f"Epoch {epoch + 1}/{epochs}, Loss: {loss_list[-1]:.4f}")
-#         end = time.time()
-#         print(f"Time: {end - start:.2f}s")
-
-#     return loss_list, qnn_model
+    return loss_list, model
 
 
 # ---------------------------------------------------------------------------
-# Data loading & circuit precomputation  (unchanged)
+# Data loading & circuit precomputation
 # ---------------------------------------------------------------------------
 
-# def _load_and_process_mnist_dataset(path_to_mnist_dataset, labels_to_include=[0, 1],
-#                                    n_samples_per_label=100, resize=(8, 8)):
-#     mnist_dataset = load_dataset("parquet", data_files=path_to_mnist_dataset)
-
-#     selected_images = []
-#     for image_idx in range(len(mnist_dataset["train"])):
-#         if mnist_dataset["train"][image_idx]["label"] in labels_to_include:
-#             img_8x8 = mnist_dataset["train"][image_idx]["image"].resize(
-#                 resize, resample=Image.BILINEAR
-#             )
-#             img = np.array(img_8x8)
-#             selected_images.append({
-#                 "image": img,
-#                 "label": mnist_dataset["train"][image_idx]["label"]
-#             })
-
-#     X = np.array([item["image"] for item in selected_images])
-#     y = np.array([item["label"] for item in selected_images])
-#     return X, y
-
-def load_and_process_mnist_dataset(path_to_mnist_dataset, labels_to_include=[0, 1],
-                                   n_samples_per_label=100, resize=(8, 8)):
+def load_and_process_mnist_dataset(
+    path_to_mnist_dataset,
+    labels_to_include=[0, 1],
+    n_samples_per_label=100,
+    resize=(8, 8),
+):
     mnist_dataset = load_dataset("parquet", data_files=path_to_mnist_dataset)
 
     selected_images = {x: [] for x in labels_to_include}
@@ -496,19 +538,26 @@ def load_and_process_mnist_dataset(path_to_mnist_dataset, labels_to_include=[0, 
                     "image": np.array(resized_image),
                     "label": label
                 })
-    
+
     selected_images = [item for sublist in selected_images.values() for item in sublist]
 
     X = np.array([item["image"] for item in selected_images])
     y = np.array([item["label"] for item in selected_images])
     return X, y
 
+
 _U_INIT_CACHE = {}
+
 
 def _compute_circuit(image, geqie_encoding=frqi):
     global _sim
-    qc = geqie.encode(geqie_encoding.init_function, geqie_encoding.data_function,
-                      geqie_encoding.map_function, image, perform_measurement=False)
+    qc = geqie.encode(
+        geqie_encoding.init_function,
+        geqie_encoding.data_function,
+        geqie_encoding.map_function,
+        image,
+        perform_measurement=False,
+    )
     qc_d = qc.decompose()
     n_qubits = qc_d.num_qubits
 
@@ -516,18 +565,19 @@ def _compute_circuit(image, geqie_encoding=frqi):
     state_prep_qc = QuantumCircuit(n_qubits)
 
     for instr in qc_d.data:
-        if instr.operation.name == 'state_preparation':
+        if instr.operation.name == "state_preparation":
             state_prep_qc.append(instr.operation, instr.qubits)
-        if instr.operation.name not in ['reset', 'measure', 'barrier', 'state_preparation']:
+        if instr.operation.name not in ["reset", "measure", "barrier", "state_preparation"]:
             rest_qc.append(instr.operation, instr.qubits)
 
     rest_qc.save_unitary()
-    U_rest = np.array(_sim.run(rest_qc).result().data()['unitary'])
+    U_rest = np.array(_sim.run(rest_qc).result().data()["unitary"])
 
     if n_qubits not in _U_INIT_CACHE:
         _U_INIT_CACHE[n_qubits] = Operator(state_prep_qc).data
 
     return U_rest @ _U_INIT_CACHE[n_qubits]
+
 
 def _init_worker():
     """Called once when each precompute worker process starts."""
@@ -537,8 +587,13 @@ def _init_worker():
     os.environ["NUMEXPR_NUM_THREADS"] = "1"
 
     global _sim
-    _sim = AerSimulator(method='unitary', max_parallel_threads=1,
-                        max_parallel_shots=1, max_parallel_experiments=1)
+    _sim = AerSimulator(
+        method="unitary",
+        max_parallel_threads=1,
+        max_parallel_shots=1,
+        max_parallel_experiments=1,
+    )
+
 
 def _compute_save_single(args):
     """Single-sample worker — picklable at module level."""
@@ -548,8 +603,14 @@ def _compute_save_single(args):
     np.savez(filename, matrix=unitary_matrix, label=label, dtype=np.complex128)
     print(f"{filename} saved")
 
-def compute_and_save_circuits(data, labels, save_dir="new_pool_circuits",
-                              file_prefix="matrix", number_of_workers=None):
+
+def compute_and_save_circuits(
+    data,
+    labels,
+    save_dir="new_pool_circuits",
+    file_prefix="matrix",
+    number_of_workers=None,
+):
     if number_of_workers is None:
         number_of_workers = max(1, cpu_count() - 1)
 
@@ -567,6 +628,7 @@ def compute_and_save_circuits(data, labels, save_dir="new_pool_circuits",
         for _ in executor.map(_compute_save_single, args_list):
             pass
 
+
 if __name__ == "__main__":
     current_dir = os.getcwd()
     mnist_dataset = os.path.join("train-00000-of-00001.parquet")
@@ -574,15 +636,13 @@ if __name__ == "__main__":
     X, y = load_and_process_mnist_dataset(
         path_to_mnist_dataset,
         labels_to_include=[0, 1],
-        # labels_to_include=[x for x in range(10)],
         n_samples_per_label=10,
-        resize=(16, 16)
+        resize=(16, 16),
     )
 
-    circuits_directory = 'C:\\test_circuits'
+    circuits_directory = "C:\\test_circuits"
 
     print("Running")
-    compute_and_save_circuits(X, y, save_dir=circuits_directory, 
-                              number_of_workers=4)
+    # compute_and_save_circuits(X, y, save_dir=circuits_directory, number_of_workers=4)
     print("Circuits computed")
-    train_QCNN(epochs= 10, num_classes=2 ,circuits_directory=circuits_directory)
+    train_QCNN(epochs=10, num_classes=2, circuits_directory=circuits_directory)
