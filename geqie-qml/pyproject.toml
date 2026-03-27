@@ -1,0 +1,27 @@
+[project]
+name = "geqie-qml"
+version = "0.1.0"
+description = "GEQIE QML extension"
+requires-python = ">=3.10"
+dependencies = [
+	"geqie>=1.0",
+
+	"cloup",
+	"matplotlib",
+	"pillow",
+	"qiskit>=2.0.0",
+	"qiskit-aer",
+	"qiskit-ibm-runtime",
+	"qiskit-machine-learning[torch]",
+	"tabulate",
+]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
