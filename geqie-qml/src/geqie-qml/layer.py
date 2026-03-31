@@ -1,29 +1,18 @@
-import time
 import os
-import glob
-import torch
 import numpy as np
+import torch
 import torch.nn as nn
 
 from contextlib import contextmanager
-from PIL import Image
 from concurrent import futures
 from multiprocessing import cpu_count
-from datasets import load_dataset
-from torch.nn import NLLLoss
-from torch.optim import Adam
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset
 from qiskit import QuantumCircuit
-from qiskit_aer import AerSimulator
 from qiskit.circuit import ParameterVector
 from qiskit.circuit.library import UnitaryGate
-from qiskit.quantum_info import Operator
 from qiskit.primitives import StatevectorSampler as Sampler
 from qiskit_machine_learning.gradients import SPSASamplerGradient
 from qiskit_machine_learning.neural_networks import SamplerQNN
-
-import geqie
-from geqie.encodings import frqi
 
 
 # ---------------------------------------------------------------------------
@@ -31,6 +20,16 @@ from geqie.encodings import frqi
 # ---------------------------------------------------------------------------
 
 class MatrixDataset(Dataset):
+    """
+    PyTorch Dataset that reads pre-computed unitary matrices from .npz files.
+
+    Each file must contain:
+      - ``matrix``: complex128 array of shape (2**n, 2**n)
+      - ``label``:  integer class label
+
+    These files are produced by :func:`precompute.compute_and_save_circuits`.
+    """
+
     def __init__(self, file_paths):
         self.files = file_paths
 
@@ -95,14 +94,14 @@ def _worker_forward_eval(args):
         input_params=None,
         weight_params=list(qc.parameters),
         sampler=sampler,
-        gradient=SPSASamplerGradient(sampler=sampler)
+        gradient=SPSASamplerGradient(sampler=sampler),
     )
     return qnn.forward(input_data=None, weights=weights_np).flatten()
 
 
 def _worker_grad_eval(args):
     """
-    Parameter-shift gradient for a single sample.  Called inside a worker.
+    SPSA gradient for a single sample.  Called inside a worker process.
 
     Returns
     -------
@@ -142,10 +141,6 @@ def _init_training_worker():
     os.environ["NUMEXPR_NUM_THREADS"] = "1"
 
 
-# ---------------------------------------------------------------------------
-# Custom autograd Function — unified sequential and parallel paths
-# ---------------------------------------------------------------------------
-
 def _work_dispatch(fn, args_list, executor):
     """
     Dispatch per-sample work either sequentially or in parallel.
@@ -170,6 +165,10 @@ def _work_dispatch(fn, args_list, executor):
     jobs = [executor.submit(fn, args) for args in args_list]
     return [f.result() for f in jobs]
 
+
+# ---------------------------------------------------------------------------
+# Custom autograd Function — unified sequential and parallel paths
+# ---------------------------------------------------------------------------
 
 class QNNBatchFunction(torch.autograd.Function):
     """
@@ -327,10 +326,6 @@ class VQCLayer(nn.Module):
         # Executor is None by default; populated only inside parallel_context().
         self._executor: futures.ProcessPoolExecutor | None = None
 
-    # ------------------------------------------------------------------
-    # Parallel context manager — keeps executor lifecycle self-contained
-    # ------------------------------------------------------------------
-
     @contextmanager
     def parallel_context(self, num_workers: int | None = None):
         """
@@ -369,10 +364,6 @@ class VQCLayer(nn.Module):
             finally:
                 # Always clear the reference, even if the training loop raises.
                 self._executor = None
-
-    # ------------------------------------------------------------------
-    # forward — validates shape, delegates to QNNBatchFunction
-    # ------------------------------------------------------------------
 
     def forward(self, batched_matrices: torch.Tensor) -> torch.Tensor:
         """
@@ -420,224 +411,3 @@ class VQCLayer(nn.Module):
             f"shots={self.num_shots}, scale_output={self.scale_output}, "
             f"num_params={self.quantum_weight.numel()}"
         )
-
-
-# ---------------------------------------------------------------------------
-# Training loop
-# ---------------------------------------------------------------------------
-
-def train_QCNN(
-    epochs: int = 20,
-    num_classes: int = 2,
-    batch_size: int = 5,
-    num_qubits: int = 9,
-    num_layers: int = 1,
-    circuits_directory: str = "circuits",
-    num_workers: int | None = None,
-):
-    """
-    Train a VQCLayer followed by a classical linear head.
-
-    The model is assembled here to illustrate the intended compositional
-    pattern — VQCLayer produces probability features, the linear head maps
-    them to class logits, and LogSoftmax + NLLLoss combine as cross-entropy.
-
-    Parameters
-    ----------
-    epochs, num_classes, batch_size : int
-    num_qubits : int
-        Must match the unitary matrices stored in circuits_directory.
-    num_layers : int
-        Number of brickwork VQC layers.
-    circuits_directory : str
-        Directory containing .npz files produced by compute_and_save_circuits.
-    num_workers : int | None
-        Worker processes for parallel simulation.  Defaults to cpu_count - 1.
-    """
-    # --- Build model from composable parts ---
-    vqc_layer = VQCLayer(num_qubits=num_qubits, num_layers=num_layers)
-    model = nn.Sequential(
-        vqc_layer,
-        nn.Linear(2 ** num_qubits, num_classes),
-        nn.LogSoftmax(dim=-1),
-    )
-
-    optimizer = Adam([
-        {"params": vqc_layer.quantum_weight,          "lr": 0.001},
-        {"params": model[1].parameters(),             "lr": 0.01},
-    ])
-
-    f_loss = NLLLoss()
-    model.train()
-    loss_list = []
-
-    files = sorted(glob.glob(f"{circuits_directory}/*.npz"))
-    print(f"Found {len(files)} circuit files")
-    dataset = MatrixDataset(files)
-    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
-
-    if num_workers is None:
-        num_workers = max(1, cpu_count() - 1)
-    print(f"Starting training with {num_workers} worker processes")
-
-    # The parallel_context() block starts and owns the process pool.
-    # No manual executor injection needed — vqc_layer handles it internally.
-    with vqc_layer.parallel_context(num_workers=num_workers):
-        for epoch in range(epochs):
-            start = time.time()
-            total_loss = []
-
-            for batch_matrices, batch_labels in dataloader:
-                optimizer.zero_grad()
-
-                output = model(batch_matrices)
-                loss = f_loss(output, batch_labels)
-                loss.backward()
-
-                total_loss.append(loss.item())
-                optimizer.step()
-
-            epoch_loss = sum(total_loss) / len(total_loss)
-            loss_list.append(epoch_loss)
-            elapsed = time.time() - start
-            print(
-                f"Epoch {epoch + 1}/{epochs}  "
-                f"Loss: {epoch_loss:.4f}  "
-                f"Time: {elapsed:.2f}s"
-            )
-
-    return loss_list, model
-
-
-# ---------------------------------------------------------------------------
-# Data loading & circuit precomputation
-# ---------------------------------------------------------------------------
-
-def load_and_process_mnist_dataset(
-    path_to_mnist_dataset,
-    labels_to_include=[0, 1],
-    n_samples_per_label=100,
-    resize=(8, 8),
-):
-    mnist_dataset = load_dataset("parquet", data_files=path_to_mnist_dataset)
-
-    selected_images = {x: [] for x in labels_to_include}
-    for image_idx in range(len(mnist_dataset["train"])):
-        label = mnist_dataset["train"][image_idx]["label"]
-        if label in labels_to_include:
-            if len(selected_images[label]) < n_samples_per_label:
-                resized_image = mnist_dataset["train"][image_idx]["image"].resize(
-                    resize, resample=Image.BILINEAR
-                )
-                selected_images[label].append({
-                    "image": np.array(resized_image),
-                    "label": label
-                })
-
-    selected_images = [item for sublist in selected_images.values() for item in sublist]
-
-    X = np.array([item["image"] for item in selected_images])
-    y = np.array([item["label"] for item in selected_images])
-    return X, y
-
-
-_U_INIT_CACHE = {}
-
-
-def _compute_circuit(image, geqie_encoding=frqi):
-    global _sim
-    qc = geqie.encode(
-        geqie_encoding.init_function,
-        geqie_encoding.data_function,
-        geqie_encoding.map_function,
-        image,
-        perform_measurement=False,
-    )
-    qc_d = qc.decompose()
-    n_qubits = qc_d.num_qubits
-
-    rest_qc = QuantumCircuit(n_qubits)
-    state_prep_qc = QuantumCircuit(n_qubits)
-
-    for instr in qc_d.data:
-        if instr.operation.name == "state_preparation":
-            state_prep_qc.append(instr.operation, instr.qubits)
-        if instr.operation.name not in ["reset", "measure", "barrier", "state_preparation"]:
-            rest_qc.append(instr.operation, instr.qubits)
-
-    rest_qc.save_unitary()
-    U_rest = np.array(_sim.run(rest_qc).result().data()["unitary"])
-
-    if n_qubits not in _U_INIT_CACHE:
-        _U_INIT_CACHE[n_qubits] = Operator(state_prep_qc).data
-
-    return U_rest @ _U_INIT_CACHE[n_qubits]
-
-
-def _init_worker():
-    """Called once when each precompute worker process starts."""
-    os.environ["OMP_NUM_THREADS"] = "1"
-    os.environ["MKL_NUM_THREADS"] = "1"
-    os.environ["OPENBLAS_NUM_THREADS"] = "1"
-    os.environ["NUMEXPR_NUM_THREADS"] = "1"
-
-    global _sim
-    _sim = AerSimulator(
-        method="unitary",
-        max_parallel_threads=1,
-        max_parallel_shots=1,
-        max_parallel_experiments=1,
-    )
-
-
-def _compute_save_single(args):
-    """Single-sample worker — picklable at module level."""
-    image, label, sample_number, save_dir, file_prefix = args
-    filename = os.path.join(save_dir, f"{file_prefix}_{sample_number}")
-    unitary_matrix = _compute_circuit(image)
-    np.savez(filename, matrix=unitary_matrix, label=label, dtype=np.complex128)
-    print(f"{filename} saved")
-
-
-def compute_and_save_circuits(
-    data,
-    labels,
-    save_dir="new_pool_circuits",
-    file_prefix="matrix",
-    number_of_workers=None,
-):
-    if number_of_workers is None:
-        number_of_workers = max(1, cpu_count() - 1)
-
-    os.makedirs(save_dir, exist_ok=True)
-
-    args_list = [
-        (data[i], labels[i], i, save_dir, file_prefix)
-        for i in range(len(data))
-    ]
-
-    with futures.ProcessPoolExecutor(
-        max_workers=number_of_workers,
-        initializer=_init_worker,
-    ) as executor:
-        for _ in executor.map(_compute_save_single, args_list):
-            pass
-
-
-if __name__ == "__main__":
-    current_dir = os.getcwd()
-    mnist_dataset = os.path.join("train-00000-of-00001.parquet")
-    path_to_mnist_dataset = os.path.join(current_dir, mnist_dataset)
-    X, y = load_and_process_mnist_dataset(
-        path_to_mnist_dataset,
-        labels_to_include=[0, 1],
-        n_samples_per_label=10,
-        resize=(16, 16),
-    )
-
-    circuits_directory = "C:\\test_circuits"
-
-    print("Running")
-    # compute_and_save_circuits(X, y, save_dir=circuits_directory, number_of_workers=4)
-    print("Circuits computed")
-    train_QCNN(epochs=10, num_classes=2, circuits_directory=circuits_directory)

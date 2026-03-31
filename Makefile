@@ -37,7 +37,8 @@ regenerate-requirements:
 
 install-requirements-ci:
 	pip install -U uv
-	uv pip install -r requirements/requirements_dev.txt --system
+	uv pip install ./geqie[dev] --system
+# 	uv pip install ./geqie-qml --system
 
 test:
 	pytest tests -W ignore::DeprecationWarning
