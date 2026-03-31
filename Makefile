@@ -40,4 +40,5 @@ install-requirements-ci:
 	uv pip install -r requirements/requirements_dev.txt --system
 
 test:
+	.venv\Scripts\activate
 	pytest tests -W ignore::DeprecationWarning
