@@ -37,7 +37,7 @@ regenerate-requirements:
 
 install-requirements-ci:
 	pip install -U uv
-	uv pip install ./geqie --system
+	uv pip install ./geqie[dev] --system
 # 	uv pip install ./geqie-qml --system
 
 test:
