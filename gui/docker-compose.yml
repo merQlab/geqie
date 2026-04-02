@@ -32,7 +32,7 @@ services:
     container_name: web-dev
     build:
       context: ..
-      dockerfile: gui/Dockerfile_dev
+      dockerfile: gui/Dockerfile.dev
     image: geqie-app-dev:latest
     env_file: .env
     environment:
@@ -57,8 +57,9 @@ services:
     ports:
       - "8000:8000"
     restart: unless-stopped
-    # volumes:
-    #   - ./gui:/app
+    volumes:
+      - ../geqie:/geqie
+      - ../assets/test_images:/app/assets/test_images
     depends_on:
       - db
       - redis
