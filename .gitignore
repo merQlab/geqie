@@ -10,5 +10,6 @@ build
 
 !.env.worker
 !.env.server
+logs
 
 experiments/results

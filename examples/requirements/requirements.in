@@ -1,7 +1,7 @@
 -r ../../requirements/requirements.in
 
-ipykernel
 ipyform
+ipykernel
 kaleido
 nbformat
 pandas

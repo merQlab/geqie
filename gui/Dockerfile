@@ -1,5 +1,3 @@
-# syntax=docker/dockerfile:1.7
-
 FROM python:3.12.8-slim AS builder
 
 COPY --from=ghcr.io/astral-sh/uv:0.8.13 /uv /bin/uv
@@ -11,19 +9,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-COPY gui/requirements/requirements.txt /app/requirements.txt
-RUN uv pip install -r /app/requirements.txt --system
+# geqie source
+COPY geqie /geqie
+RUN uv pip install /geqie --system
 
 # app source
-COPY . .
+COPY gui /app
+RUN uv pip install -r /app/requirements/requirements.txt --system
 
-RUN uv pip install /app --system
+# default images
+COPY assets/test_images /app/assets/test_images
 
-RUN cp gui/entrypoint.sh /app/entrypoint.sh \
-    && sed -i 's/\r$//' /app/entrypoint.sh \
-    && chmod +x /app/entrypoint.sh
-
-RUN python gui/manage.py collectstatic --noinput
+RUN python manage.py collectstatic --noinput
 
 
 FROM python:3.12.8-slim AS runtime
@@ -39,4 +36,5 @@ COPY --from=builder /usr/local /usr/local
 COPY --from=builder /app /app
 
 EXPOSE 8000
+RUN chmod +x /app/entrypoint.sh
 CMD ["/app/entrypoint.sh"]
