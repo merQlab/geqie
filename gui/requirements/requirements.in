@@ -1,4 +1,4 @@
--r ../../requirements/requirements.in
+-r ../../geqie/requirements/requirements.in
 
 boto3
 celery
