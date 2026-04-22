@@ -1,14 +1,16 @@
+import importlib
 import os
 import numpy as np
 
 from concurrent import futures
 from multiprocessing import cpu_count
+from types import ModuleType
 from qiskit import QuantumCircuit
 from qiskit_aer import AerSimulator
 from qiskit.quantum_info import Operator
 
 import geqie
-from geqie.encodings import frqi
+from geqie.encodings import frqi, neqr
 
 
 # ---------------------------------------------------------------------------
@@ -17,6 +19,17 @@ from geqie.encodings import frqi
 
 _sim = None
 _U_INIT_CACHE = {}
+_ENCODING_MODULE_PATHS = {
+    "frqci": "geqie.encodings.frqci",
+    "frqi": "geqie.encodings.frqi",
+    "ifrqi": "geqie.encodings.ifrqi",
+    "mcqi": "geqie.encodings.mcqi",
+    "mfrqi": "geqie.encodings.mfrqi",
+    "ncqi": "geqie.encodings.ncqi",
+    "neqr": "geqie.encodings.neqr",
+    "qrci": "geqie.encodings.qrci",
+    "qualpi": "geqie.encodings.qualpi",
+}
 
 
 # ---------------------------------------------------------------------------
@@ -48,7 +61,34 @@ def _init_worker():
 # Circuit encoding helpers — module-level for picklability
 # ---------------------------------------------------------------------------
 
-def _compute_circuit(image, geqie_encoding=frqi):
+def _normalize_encoding_name(geqie_encoding: str | ModuleType) -> str:
+    """Convert a string-or-module selector into a stable encoding key."""
+    if isinstance(geqie_encoding, str):
+        encoding_name = geqie_encoding
+    elif isinstance(geqie_encoding, ModuleType):
+        encoding_name = geqie_encoding.__name__.split(".")[-1]
+    else:
+        raise TypeError(
+            "geqie_encoding must be a string or a GEQIE encoding module, "
+            f"got {type(geqie_encoding).__name__}."
+        )
+
+    encoding_name = encoding_name.lower()
+    if encoding_name not in _ENCODING_MODULE_PATHS:
+        available = ", ".join(sorted(_ENCODING_MODULE_PATHS))
+        raise ValueError(
+            f"Unknown GEQIE encoding '{encoding_name}'. "
+            f"Available encodings: {available}."
+        )
+    return encoding_name
+
+
+def _resolve_encoding_module(encoding_name: str):
+    """Resolve a stable encoding key to the corresponding GEQIE module."""
+    return importlib.import_module(_ENCODING_MODULE_PATHS[encoding_name])
+
+
+def _compute_circuit(image, geqie_encoding: str = "frqi"):
     """
     Encode a single image and return its full unitary matrix.
 
@@ -59,19 +99,19 @@ def _compute_circuit(image, geqie_encoding=frqi):
     ----------
     image : array-like
         Pixel data passed to ``geqie.encode``.
-    geqie_encoding : module
-        A geqie encoding module exposing ``init_function``, ``data_function``,
-        and ``map_function``.  Defaults to FRQI.
+    geqie_encoding : str
+        GEQIE encoding name, e.g. ``"frqi"``.  Defaults to ``"frqi"``.
 
     Returns
     -------
     np.ndarray, complex128, shape (2**n, 2**n)
     """
     global _sim
+    encoding_module = _resolve_encoding_module(_normalize_encoding_name(geqie_encoding))
     qc = geqie.encode(
-        geqie_encoding.init_function,
-        geqie_encoding.data_function,
-        geqie_encoding.map_function,
+        encoding_module.init_function,
+        encoding_module.data_function,
+        encoding_module.map_function,
         image,
         perform_measurement=False,
     )
@@ -98,9 +138,9 @@ def _compute_circuit(image, geqie_encoding=frqi):
 
 def _compute_save_single(args):
     """Single-sample worker — picklable at module level."""
-    image, label, sample_number, save_dir, file_prefix = args
+    image, label, sample_number, save_dir, file_prefix, geqie_encoding = args
     filename = os.path.join(save_dir, f"{file_prefix}_{sample_number}")
-    unitary_matrix = _compute_circuit(image)
+    unitary_matrix = _compute_circuit(image, geqie_encoding)
     np.savez(filename, matrix=unitary_matrix, label=label, dtype=np.complex128)
     print(f"{filename} saved")
 
@@ -115,6 +155,7 @@ def compute_and_save_circuits(
     save_dir: str = "circuits",
     file_prefix: str = "matrix",
     number_of_workers: int | None = None,
+    geqie_encoding: str | ModuleType = "frqi",
 ):
     """
     Encode a dataset of images into unitary matrices and save them as .npz files.
@@ -139,9 +180,10 @@ def compute_and_save_circuits(
         number_of_workers = max(1, cpu_count() - 1)
 
     os.makedirs(save_dir, exist_ok=True)
+    encoding_name = _normalize_encoding_name(geqie_encoding)
 
     args_list = [
-        (data[i], labels[i], i, save_dir, file_prefix)
+        (data[i], labels[i], i, save_dir, file_prefix, encoding_name)
         for i in range(len(data))
     ]
 
