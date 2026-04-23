@@ -73,6 +73,7 @@ def encoding_options(func) -> Callable:
     )
     @cloup.option("--image-path", required=True, help="Path to the image file")
     @cloup.option("--image-dimensionality", type=int, default=2, show_default=True, help="Number of image dimensions to consider")
+    @cloup.option("--bitrate", type=int, default=8, show_default=True, help="Number of color bits for encodings that support it")
     @cloup.option("--verbosity-level", default="ERROR", help=f"Set verbosity level, 0-6 (higher means more verbose) or use names {logging_levels.CLI_VERBOSITY_LEVELS.values()}")
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
@@ -158,7 +159,7 @@ def retrieve(**params):
     params["logging_level"] = logging_levels.cli_verbosity_to_logging_level(params.get("verbosity_level", 0))
 
     retrieve_function = _import_encoding(**params).retrieve_function
-    print(retrieve_function(params.get("result")))
+    print(retrieve_function(json.loads(params.get("result")), **params))
 
 
 if __name__ == '__main__':

@@ -13,6 +13,6 @@ def data_function(u: int, v: int, R: int, image: np.ndarray) -> Statevector:
     return _data_function(u, v, R, filtered_image)
 
 
-def map_function(u: int, v: int, R: int, image: np.ndarray) -> Operator:
+def map_function(u: int, v: int, R: int, image: np.ndarray, **_) -> Operator:
     filtered_image = ensure_2d(image)
-    return _map_function(u, v, R, filtered_image)
+    return _map_function(u, v, R, filtered_image, **_)

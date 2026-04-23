@@ -15,7 +15,7 @@ from geqie.logging_utils.tabulate import tabulate_complex
 
 
 def encode(
-    init_function: Callable[[int], Statevector],
+    init_function: Callable[..., Statevector],
     # arbitrary coordinate indices + R + image
     data_function: Callable[..., Statevector],
     map_function: Callable[..., Operator],
@@ -23,7 +23,7 @@ def encode(
     image_dimensionality: int = 2,
     perform_measurement: bool = True,
     logging_level: int | None = None,
-    **_: Dict[Any, Any],
+    **kwargs: Dict[Any, Any],
 ) -> QuantumCircuit:
     logger = setup_logger(logging_level, reset=True)
 
@@ -35,7 +35,7 @@ def encode(
 
     for coords in np.ndindex(*shape):
         data_vector = data_function(*coords, R=R, image=image)
-        map_operator = map_function(*coords, R=R, image=image)
+        map_operator = map_function(*coords, R=R, image=image, **kwargs)
         product = data_vector.to_operator() ^ map_operator
 
         products.append(product)
@@ -49,13 +49,13 @@ def encode(
         logger.state("===========")
 
     G = np.sum(products, axis=0)
-    U, _ = np.linalg.qr(G)
+    U, _r = np.linalg.qr(G)
     logger.math(f"G=\n{tabulate_complex(G)}")
     logger.math(f"U=\n{tabulate_complex(U)}")
 
     U_op = Operator(U)
     n_qubits = U_op.num_qubits
-    init_state = init_function(n_qubits)
+    init_state = init_function(n_qubits, **kwargs)
     logger.state(f"{init_state=}")
 
     circuit = QuantumCircuit(n_qubits)
