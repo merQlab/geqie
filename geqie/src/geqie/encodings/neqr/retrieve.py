@@ -1,20 +1,20 @@
 import numpy as np
-import json
+from typing import Any
 
-def retrieve(results: str) -> np.ndarray:
+def retrieve(results: dict[str, int], bitrate:int=8, **_: Any) -> np.ndarray:
     """
     Decodes an image from quantum state measurement results.
 
     Parameters:
     results (dict): A dictionary where keys are binary strings representing quantum states,
                          and values are their respective occurrence counts.
+    bitrate (int): The number of bits used to represent each pixel value.
 
     Returns:
     np.ndarray: A NumPy array representing the decoded image.
     """
     state_length = len(next(iter(results)))
-    color_qubits = 8
-    number_of_position_qubits = state_length - color_qubits
+    number_of_position_qubits = state_length - bitrate
     x_qubits = number_of_position_qubits // 2
     y_qubits = number_of_position_qubits // 2
 
@@ -26,7 +26,7 @@ def retrieve(results: str) -> np.ndarray:
             x = state[0:x_qubits]
             y = state[x_qubits:number_of_position_qubits]
 
-            c = state[number_of_position_qubits:number_of_position_qubits+color_qubits+1]
+            c = state[number_of_position_qubits:number_of_position_qubits+bitrate]
 
             x_dec = int(x, base=2)
             y_dec = int(y, base=2)
