@@ -17,7 +17,7 @@ def ry_gate(theta: float) -> np.ndarray:
     ]
 
 
-def map(u: int, v: int, R: int, image: np.ndarray) -> Operator:
+def map(u: int, v: int, R: int, image: np.ndarray, **_) -> Operator:
     p = image[u, v]
     pixel_value_as_binary = [int(bit) for bit in bin(p)[2:].zfill(8)][::-1]
 
