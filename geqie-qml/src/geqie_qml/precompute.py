@@ -1,4 +1,5 @@
 import importlib
+from typing import Any
 import os
 import numpy as np
 
@@ -88,7 +89,7 @@ def _resolve_encoding_module(encoding_name: str):
     return importlib.import_module(_ENCODING_MODULE_PATHS[encoding_name])
 
 
-def _compute_circuit(image, geqie_encoding: str = "frqi"):
+def _compute_circuit(image, geqie_encoding: str = "frqi", **kwargs: Any):
     """
     Encode a single image and return its full unitary matrix.
 
@@ -101,6 +102,8 @@ def _compute_circuit(image, geqie_encoding: str = "frqi"):
         Pixel data passed to ``geqie.encode``.
     geqie_encoding : str
         GEQIE encoding name, e.g. ``"frqi"``.  Defaults to ``"frqi"``.
+    **kwargs : Any
+        Additional keyword arguments passed to the encoding function.
 
     Returns
     -------
@@ -114,6 +117,7 @@ def _compute_circuit(image, geqie_encoding: str = "frqi"):
         encoding_module.map_function,
         image,
         perform_measurement=False,
+        **kwargs
     )
     qc_d = qc.decompose()
     n_qubits = qc_d.num_qubits
@@ -138,9 +142,9 @@ def _compute_circuit(image, geqie_encoding: str = "frqi"):
 
 def _compute_save_single(args):
     """Single-sample worker — picklable at module level."""
-    image, label, sample_number, save_dir, file_prefix, geqie_encoding = args
+    image, label, sample_number, save_dir, file_prefix, geqie_encoding, kwargs = args
     filename = os.path.join(save_dir, f"{file_prefix}_{sample_number}")
-    unitary_matrix = _compute_circuit(image, geqie_encoding)
+    unitary_matrix = _compute_circuit(image, geqie_encoding, **kwargs)
     np.savez(filename, matrix=unitary_matrix, label=label, dtype=np.complex128)
     print(f"{filename} saved")
 
@@ -156,6 +160,7 @@ def compute_and_save_circuits(
     file_prefix: str = "matrix",
     number_of_workers: int | None = None,
     geqie_encoding: str | ModuleType = "frqi",
+    **kwargs,
 ):
     """
     Encode a dataset of images into unitary matrices and save them as .npz files.
@@ -183,13 +188,16 @@ def compute_and_save_circuits(
     encoding_name = _normalize_encoding_name(geqie_encoding)
 
     args_list = [
-        (data[i], labels[i], i, save_dir, file_prefix, encoding_name)
+        (data[i], labels[i], i, save_dir, file_prefix, encoding_name, kwargs)
         for i in range(len(data))
     ]
 
-    with futures.ProcessPoolExecutor(
-        max_workers=number_of_workers,
-        initializer=_init_worker,
-    ) as executor:
-        for _ in executor.map(_compute_save_single, args_list):
-            pass
+    # with futures.ProcessPoolExecutor(
+    #     max_workers=number_of_workers,
+    #     initializer=_init_worker,
+    # ) as executor:
+    #     for _ in executor.map(_compute_save_single, args_list):
+    #         pass
+
+    for _ in range(len(args_list)):
+        _compute_save_single(args_list[_])

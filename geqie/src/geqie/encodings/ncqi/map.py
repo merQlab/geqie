@@ -1,4 +1,5 @@
 import numpy as np
+from typing import Any
 
 from qiskit.quantum_info import Operator
 
@@ -10,7 +11,7 @@ X_GATE = np.array([
 ])
 
 
-def map(u: int, v: int, R: int, image: np.ndarray) -> Operator:
+def map(u: int, v: int, R: int, image: np.ndarray, **_: Any) -> Operator:
     map_operator = [None, None, None]
 
     for channel in range(3):
