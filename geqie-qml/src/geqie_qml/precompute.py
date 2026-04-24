@@ -49,13 +49,20 @@ def _init_worker():
     os.environ["OPENBLAS_NUM_THREADS"] = "1"
     os.environ["NUMEXPR_NUM_THREADS"] = "1"
 
+    _get_simulator()
+
+
+def _get_simulator():
+    """Create the module-level Aer simulator on first use."""
     global _sim
-    _sim = AerSimulator(
-        method="unitary",
-        max_parallel_threads=1,
-        max_parallel_shots=1,
-        max_parallel_experiments=1,
-    )
+    if _sim is None:
+        _sim = AerSimulator(
+            method="unitary",
+            max_parallel_threads=1,
+            max_parallel_shots=1,
+            max_parallel_experiments=1,
+        )
+    return _sim
 
 
 # ---------------------------------------------------------------------------
@@ -109,7 +116,6 @@ def _compute_circuit(image, geqie_encoding: str = "frqi", **kwargs: Any):
     -------
     np.ndarray, complex128, shape (2**n, 2**n)
     """
-    global _sim
     encoding_module = _resolve_encoding_module(_normalize_encoding_name(geqie_encoding))
     qc = geqie.encode(
         encoding_module.init_function,
@@ -132,7 +138,8 @@ def _compute_circuit(image, geqie_encoding: str = "frqi", **kwargs: Any):
             rest_qc.append(instr.operation, instr.qubits)
 
     rest_qc.save_unitary()
-    U_rest = np.array(_sim.run(rest_qc).result().data()["unitary"])
+    simulator = _get_simulator()
+    U_rest = np.array(simulator.run(rest_qc).result().data()["unitary"])
 
     if n_qubits not in _U_INIT_CACHE:
         _U_INIT_CACHE[n_qubits] = Operator(state_prep_qc).data
@@ -192,12 +199,9 @@ def compute_and_save_circuits(
         for i in range(len(data))
     ]
 
-    # with futures.ProcessPoolExecutor(
-    #     max_workers=number_of_workers,
-    #     initializer=_init_worker,
-    # ) as executor:
-    #     for _ in executor.map(_compute_save_single, args_list):
-    #         pass
-
-    for _ in range(len(args_list)):
-        _compute_save_single(args_list[_])
+    with futures.ProcessPoolExecutor(
+        max_workers=number_of_workers,
+        initializer=_init_worker,
+    ) as executor:
+        for _ in executor.map(_compute_save_single, args_list):
+            pass
