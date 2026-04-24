@@ -8,20 +8,26 @@ from typing import List, Optional
 class CLIParameters:
     image_path: str
     image_dimensionality: Optional[int] = None
+    encoding_params: Optional[List[str]] = None
 
     def to_list(self) -> List[str]:
         result = []
         for attr, value in self.__dict__.items():
             if value is not None:
-                result.append(f"--{attr.replace('_', '-')}")
-                result.append(str(value))
+                if isinstance(value, list):
+                    for item in value:
+                        result.append(f"--{attr.replace('_', '-')}")
+                        result.append(str(item))
+                else:
+                    result.append(f"--{attr.replace('_', '-')}")
+                    result.append(str(value))
         return result
 
 
 METHOD_CLI_MAPPING = {
     "frqi": CLIParameters(image_path="assets/test_images/grayscale/test_image.png"),
     "ifrqi": CLIParameters(image_path="assets/test_images/grayscale/test_image.png"),
-    "neqr": CLIParameters(image_path="assets/test_images/grayscale/test_image.png"),
+    "neqr": CLIParameters(image_path="assets/test_images/grayscale/test_image.png", encoding_params=["bitrate=4"]),
     "qualpi": CLIParameters(image_path="assets/test_images/grayscale/test_image.png"),
 
     "frqci": CLIParameters(image_path="assets/test_images/rgb/rgb.png"),

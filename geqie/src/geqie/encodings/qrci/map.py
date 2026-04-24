@@ -22,7 +22,7 @@ def get_channel_gate(bit_value: str) -> np.ndarray:
     """Returns the appropriate gate for the given bit value."""
     return X_GATE if bit_value == '1' else I_GATE
 
-def map(u: int, v: int, R: int, image: np.ndarray) -> Operator:
+def map(u: int, v: int, R: int, image: np.ndarray, **_) -> Operator:
     u_v_pixel_operator = np.zeros((2**6, 2**6))
 
     R_bits = bin(image[u, v, 0])[2:].zfill(8)
