@@ -14,6 +14,10 @@ from qiskit.primitives import StatevectorSampler as Sampler
 from qiskit_machine_learning.gradients import SPSASamplerGradient
 from qiskit_machine_learning.neural_networks import SamplerQNN
 
+from qiskit.qasm2 import dumps as qasm2_dumps, loads as qasm2_loads
+
+from geqie_qml.qec import QECCode
+
 
 # ---------------------------------------------------------------------------
 # Dataset
@@ -73,20 +77,54 @@ def _build_vqc_circuit(num_qubits: int, num_layers: int):
     return vqc
 
 
+def _build_qec_full_circuit(matrix_np, num_logical_qubits, num_layers,
+                            qec_encoding_qasm=None, num_physical_qubits=None):
+    """
+    Build the full quantum circuit for a single sample, optionally with QEC.
+
+    When *qec_encoding_qasm* is None the circuit is the standard
+    ``[ImageUnitary] → [VQC]`` on *num_logical_qubits*.
+
+    When provided, the circuit becomes::
+
+        |0⟩^N → [ImageUnitary on logical qubits] → [QEC encode] → [VQC on N qubits]
+
+    where N = *num_physical_qubits*.
+    """
+    if qec_encoding_qasm is not None:
+        n_total = num_physical_qubits
+        vqc = _build_vqc_circuit(n_total, num_layers)
+        qc = QuantumCircuit(n_total)
+        # Image unitary acts only on the first num_logical_qubits
+        qc.append(UnitaryGate(matrix_np), range(num_logical_qubits))
+        # QEC encoding circuit (reconstructed from QASM to stay picklable)
+        qec_qc = qasm2_loads(qec_encoding_qasm)
+        qc.compose(qec_qc, inplace=True)
+        # VQC on all physical qubits
+        qc.compose(vqc, inplace=True)
+    else:
+        n_total = num_logical_qubits
+        vqc = _build_vqc_circuit(n_total, num_layers)
+        qc = QuantumCircuit(n_total)
+        qc.append(UnitaryGate(matrix_np), range(n_total))
+        qc.compose(vqc, inplace=True)
+    return qc
+
+
 def _worker_forward_eval(args):
     """
     Forward pass for a single sample.  Called inside a worker process.
 
     Returns
     -------
-    np.ndarray, shape (2**num_qubits,)
+    np.ndarray, shape (2**num_total_qubits,)
         Probability distribution over basis states.
     """
-    matrix_np, weights_np, num_qubits, num_layers, shots = args
-    vqc = _build_vqc_circuit(num_qubits, num_layers)
-    qc = QuantumCircuit(num_qubits)
-    qc.append(UnitaryGate(matrix_np), range(num_qubits))
-    qc.compose(vqc, inplace=True)
+    matrix_np, weights_np, num_qubits, num_layers, shots, qec_encoding_qasm, num_physical_qubits = args
+    qc = _build_qec_full_circuit(
+        matrix_np, num_qubits, num_layers,
+        qec_encoding_qasm, num_physical_qubits,
+    )
 
     sampler = Sampler(default_shots=shots)
     qnn = SamplerQNN(
@@ -108,11 +146,11 @@ def _worker_grad_eval(args):
     np.ndarray, shape (output_size, num_weights)
         Jacobian of the output probabilities w.r.t. the quantum weights.
     """
-    matrix_np, weights_np, num_qubits, num_layers, shots = args
-    vqc = _build_vqc_circuit(num_qubits, num_layers)
-    qc = QuantumCircuit(num_qubits)
-    qc.append(UnitaryGate(matrix_np), range(num_qubits))
-    qc.compose(vqc, inplace=True)
+    matrix_np, weights_np, num_qubits, num_layers, shots, qec_encoding_qasm, num_physical_qubits = args
+    qc = _build_qec_full_circuit(
+        matrix_np, num_qubits, num_layers,
+        qec_encoding_qasm, num_physical_qubits,
+    )
 
     sampler = Sampler(default_shots=shots)
     grad_fn = SPSASamplerGradient(sampler=sampler)
@@ -183,23 +221,25 @@ class QNNBatchFunction(torch.autograd.Function):
 
     Parameters (positional, as required by torch.autograd.Function)
     ----------
-    weights           : (num_params,) tensor — the trainable quantum weights
-    executor          : ProcessPoolExecutor | None
-                        None  → sequential evaluation on the calling process
-                        Pool  → parallel evaluation across worker processes
-    matrices_np_list  : list of np.ndarray, each (2^n, 2^n) image unitary
-    num_qubits        : int
-    num_layers        : int
-    shots             : int
+    weights              : (num_params,) tensor — the trainable quantum weights
+    executor             : ProcessPoolExecutor | None
+    matrices_np_list     : list of np.ndarray, each (2^n, 2^n) image unitary
+    num_qubits           : int   — logical qubit count (image unitary size)
+    num_layers           : int
+    shots                : int
+    qec_encoding_qasm    : str | None — OpenQASM string of the QEC encoding circuit
+    num_physical_qubits  : int | None — total physical qubit count (with QEC)
     """
 
     @staticmethod
     def forward(ctx, weights, executor, matrices_np_list,
-                num_qubits, num_layers, shots):
+                num_qubits, num_layers, shots,
+                qec_encoding_qasm, num_physical_qubits):
         weights_np = weights.detach().numpy()
 
         args_list = [
-            (matrix, weights_np, num_qubits, num_layers, shots)
+            (matrix, weights_np, num_qubits, num_layers, shots,
+             qec_encoding_qasm, num_physical_qubits)
             for matrix in matrices_np_list
         ]
         probs_list = _work_dispatch(_worker_forward_eval, args_list, executor)
@@ -211,6 +251,8 @@ class QNNBatchFunction(torch.autograd.Function):
         ctx.num_qubits = num_qubits
         ctx.num_layers = num_layers
         ctx.shots = shots
+        ctx.qec_encoding_qasm = qec_encoding_qasm
+        ctx.num_physical_qubits = num_physical_qubits
 
         return torch.tensor(probs_np, dtype=weights.dtype)
 
@@ -226,7 +268,8 @@ class QNNBatchFunction(torch.autograd.Function):
         weights_np = weights.detach().numpy()
 
         args_list = [
-            (m, weights_np, ctx.num_qubits, ctx.num_layers, ctx.shots)
+            (m, weights_np, ctx.num_qubits, ctx.num_layers, ctx.shots,
+             ctx.qec_encoding_qasm, ctx.num_physical_qubits)
             for m in ctx.matrices_np_list
         ]
         jac_list = _work_dispatch(_worker_grad_eval, args_list, ctx.executor)
@@ -240,11 +283,13 @@ class QNNBatchFunction(torch.autograd.Function):
 
         return (
             torch.tensor(weight_grad_np, dtype=weights.dtype),  # weights
-            None,   # executor         — not differentiable
-            None,   # matrices_np_list — not differentiable
+            None,   # executor
+            None,   # matrices_np_list
             None,   # num_qubits
             None,   # num_layers
             None,   # shots
+            None,   # qec_encoding_qasm
+            None,   # num_physical_qubits
         )
 
 
@@ -307,18 +352,30 @@ class VQCLayer(nn.Module):
         num_layers: int = 3,
         shots: int = 1024,
         scale_output: bool = True,
+        qec_code: QECCode | None = None,
     ):
         super().__init__()
-        self.num_qubits = num_qubits
+        self.num_qubits = num_qubits  # logical qubits (image unitary size)
         self.num_layers = num_layers
         self.num_shots = shots
         self.scale_output = scale_output
+        self.qec_code = qec_code
+
+        # When QEC is active, the VQC operates on the expanded physical-qubit
+        # register.  The image unitary still acts only on num_qubits (logical).
+        if qec_code is not None:
+            self._num_total_qubits = qec_code.num_physical_qubits(num_qubits)
+            qec_qc = qec_code.encoding_circuit(num_qubits)
+            self._qec_encoding_qasm: str | None = qasm2_dumps(qec_qc)
+        else:
+            self._num_total_qubits = num_qubits
+            self._qec_encoding_qasm = None
 
         # Trainable quantum weights, registered as a proper nn.Parameter so
         # that optimisers, state_dict, and requires_grad all work out of the box.
         # Workers reconstruct the circuit independently via _build_vqc_circuit,
         # so the Qiskit QuantumCircuit object does not need to be stored here.
-        num_params = 3 * num_qubits * num_layers
+        num_params = 3 * self._num_total_qubits * num_layers
         self.quantum_weight = nn.Parameter(
             torch.empty(num_params).uniform_(-np.pi, np.pi)
         )
@@ -365,23 +422,30 @@ class VQCLayer(nn.Module):
                 # Always clear the reference, even if the training loop raises.
                 self._executor = None
 
+    @property
+    def output_dim(self) -> int:
+        """Dimension of the output probability vector (2**total_qubits)."""
+        return 2 ** self._num_total_qubits
+
     def forward(self, batched_matrices: torch.Tensor) -> torch.Tensor:
         """
         Parameters
         ----------
         batched_matrices : torch.Tensor, shape (batch_size, 2**n, 2**n), complex
-            Batch of pre-encoded image unitary matrices.
+            Batch of pre-encoded image unitary matrices.  Here *n* is
+            ``num_qubits`` (the logical qubit count).
 
         Returns
         -------
-        torch.Tensor, shape (batch_size, 2**num_qubits), float
+        torch.Tensor, shape (batch_size, 2**total_qubits), float
             Probability distribution over basis states for each sample.
-            If ``scale_output=True``, values are multiplied by 2**num_qubits.
+            When QEC is active, total_qubits > num_qubits.
+            If ``scale_output=True``, values are multiplied by 2**total_qubits.
         """
-        dim = 2 ** self.num_qubits
-        if batched_matrices.shape[1:] != torch.Size([dim, dim]):
+        logical_dim = 2 ** self.num_qubits
+        if batched_matrices.shape[1:] != torch.Size([logical_dim, logical_dim]):
             raise ValueError(
-                f"VQCLayer expects unitary matrices of shape {(dim, dim)}, "
+                f"VQCLayer expects unitary matrices of shape {(logical_dim, logical_dim)}, "
                 f"but got input with shape {tuple(batched_matrices.shape[1:])}. "
                 f"Check that num_qubits={self.num_qubits} matches your encoded data."
             )
@@ -397,17 +461,25 @@ class VQCLayer(nn.Module):
             self.num_qubits,
             self.num_layers,
             self.num_shots,
+            self._qec_encoding_qasm,
+            self._num_total_qubits if self.qec_code is not None else None,
         )
 
         if self.scale_output:
-            probs = probs * dim
+            probs = probs * self.output_dim
 
         return probs
 
     def extra_repr(self) -> str:
         """Adds layer details to the standard nn.Module string representation."""
-        return (
-            f"num_qubits={self.num_qubits}, num_layers={self.num_layers}, "
-            f"shots={self.num_shots}, scale_output={self.scale_output}, "
-            f"num_params={self.quantum_weight.numel()}"
-        )
+        parts = [
+            f"num_qubits={self.num_qubits}",
+            f"num_layers={self.num_layers}",
+            f"shots={self.num_shots}",
+            f"scale_output={self.scale_output}",
+            f"num_params={self.quantum_weight.numel()}",
+        ]
+        if self.qec_code is not None:
+            parts.append(f"qec={self.qec_code.name}")
+            parts.append(f"total_qubits={self._num_total_qubits}")
+        return ", ".join(parts)
