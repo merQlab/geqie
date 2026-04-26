@@ -7,7 +7,7 @@ from contextlib import contextmanager
 from concurrent import futures
 from multiprocessing import cpu_count
 from torch.utils.data import Dataset
-from qiskit import QuantumCircuit
+from qiskit import QuantumCircuit, ClassicalRegister
 from qiskit.circuit import ParameterVector
 from qiskit.circuit.library import UnitaryGate
 from qiskit.primitives import StatevectorSampler as Sampler
@@ -77,8 +77,20 @@ def _build_vqc_circuit(num_qubits: int, num_layers: int):
     return vqc
 
 
+def _identity_interpret(x):
+    """
+    Identity interpret function for SamplerQNN.
+
+    SamplerQNN requires both ``interpret`` and ``output_shape`` to be set
+    together when overriding the default ``2**num_qubits`` output size.
+    Defined at module level so ProcessPoolExecutor workers can pickle it.
+    """
+    return x
+
+
 def _build_qec_full_circuit(matrix_np, num_logical_qubits, num_layers,
-                            qec_encoding_qasm=None, num_physical_qubits=None):
+                            qec_encoding_qasm=None, num_physical_qubits=None,
+                            measure_logical_only=False):
     """
     Build the full quantum circuit for a single sample, optionally with QEC.
 
@@ -90,6 +102,17 @@ def _build_qec_full_circuit(matrix_np, num_logical_qubits, num_layers,
         |0⟩^N → [ImageUnitary on logical qubits] → [QEC encode] → [VQC on N qubits]
 
     where N = *num_physical_qubits*.
+
+    Measurement
+    -----------
+    If *measure_logical_only* is True (only meaningful when QEC is active),
+    a ``ClassicalRegister`` of width ``num_logical_qubits`` is added and
+    only the first ``num_logical_qubits`` qubits are measured.  The
+    resulting ``SamplerQNN`` will then produce a probability vector of
+    length ``2 ** num_logical_qubits``.
+
+    Otherwise no explicit measurement is added and ``SamplerQNN`` will
+    measure all qubits, producing a vector of length ``2 ** n_total``.
     """
     if qec_encoding_qasm is not None:
         n_total = num_physical_qubits
@@ -102,6 +125,12 @@ def _build_qec_full_circuit(matrix_np, num_logical_qubits, num_layers,
         qc.compose(qec_qc, inplace=True)
         # VQC on all physical qubits
         qc.compose(vqc, inplace=True)
+
+        if measure_logical_only:
+            creg = ClassicalRegister(num_logical_qubits, name="c_logical")
+            qc.add_register(creg)
+            for i in range(num_logical_qubits):
+                qc.measure(i, creg[i])
     else:
         n_total = num_logical_qubits
         vqc = _build_vqc_circuit(n_total, num_layers)
@@ -117,23 +146,35 @@ def _worker_forward_eval(args):
 
     Returns
     -------
-    np.ndarray, shape (2**num_total_qubits,)
-        Probability distribution over basis states.
+    np.ndarray, shape (output_size,)
+        Probability distribution over basis states.  ``output_size`` is
+        ``2 ** num_logical_qubits`` when *measure_logical_only* is True,
+        otherwise ``2 ** num_total_qubits``.
     """
-    matrix_np, weights_np, num_qubits, num_layers, shots, qec_encoding_qasm, num_physical_qubits = args
+    (matrix_np, weights_np, num_qubits, num_layers, shots,
+     qec_encoding_qasm, num_physical_qubits, measure_logical_only) = args
     qc = _build_qec_full_circuit(
         matrix_np, num_qubits, num_layers,
         qec_encoding_qasm, num_physical_qubits,
+        measure_logical_only=measure_logical_only,
     )
 
     sampler = Sampler(default_shots=shots)
-    qnn = SamplerQNN(
+    qnn_kwargs = dict(
         circuit=qc,
         input_params=None,
         weight_params=list(qc.parameters),
         sampler=sampler,
         gradient=SPSASamplerGradient(sampler=sampler),
     )
+    if measure_logical_only:
+        # Force SamplerQNN to size the output by the *measured* (logical)
+        # qubits rather than the full physical register.  Without this it
+        # would default to 2**num_qubits_in_circuit (= physical) regardless
+        # of the actual classical register width.
+        qnn_kwargs["output_shape"] = 2 ** num_qubits
+        qnn_kwargs["interpret"] = _identity_interpret
+    qnn = SamplerQNN(**qnn_kwargs)
     return qnn.forward(input_data=None, weights=weights_np).flatten()
 
 
@@ -146,21 +187,27 @@ def _worker_grad_eval(args):
     np.ndarray, shape (output_size, num_weights)
         Jacobian of the output probabilities w.r.t. the quantum weights.
     """
-    matrix_np, weights_np, num_qubits, num_layers, shots, qec_encoding_qasm, num_physical_qubits = args
+    (matrix_np, weights_np, num_qubits, num_layers, shots,
+     qec_encoding_qasm, num_physical_qubits, measure_logical_only) = args
     qc = _build_qec_full_circuit(
         matrix_np, num_qubits, num_layers,
         qec_encoding_qasm, num_physical_qubits,
+        measure_logical_only=measure_logical_only,
     )
 
     sampler = Sampler(default_shots=shots)
     grad_fn = SPSASamplerGradient(sampler=sampler)
-    qnn = SamplerQNN(
+    qnn_kwargs = dict(
         circuit=qc,
         input_params=None,
         weight_params=list(qc.parameters),
         sampler=sampler,
         gradient=grad_fn,
     )
+    if measure_logical_only:
+        qnn_kwargs["output_shape"] = 2 ** num_qubits
+        qnn_kwargs["interpret"] = _identity_interpret
+    qnn = SamplerQNN(**qnn_kwargs)
     # SamplerQNN.backward → (input_grad, weight_grad)
     # weight_grad shape: (1, output_size, num_weights) for a single sample
     _, weight_grad = qnn.backward(input_data=None, weights=weights_np)
@@ -229,17 +276,21 @@ class QNNBatchFunction(torch.autograd.Function):
     shots                : int
     qec_encoding_qasm    : str | None — OpenQASM string of the QEC encoding circuit
     num_physical_qubits  : int | None — total physical qubit count (with QEC)
+    measure_logical_only : bool — when True, measure only the first
+                           ``num_qubits`` (logical) qubits, yielding a
+                           ``2**num_qubits``-dim probability vector.
     """
 
     @staticmethod
     def forward(ctx, weights, executor, matrices_np_list,
                 num_qubits, num_layers, shots,
-                qec_encoding_qasm, num_physical_qubits):
+                qec_encoding_qasm, num_physical_qubits,
+                measure_logical_only):
         weights_np = weights.detach().numpy()
 
         args_list = [
             (matrix, weights_np, num_qubits, num_layers, shots,
-             qec_encoding_qasm, num_physical_qubits)
+             qec_encoding_qasm, num_physical_qubits, measure_logical_only)
             for matrix in matrices_np_list
         ]
         probs_list = _work_dispatch(_worker_forward_eval, args_list, executor)
@@ -253,6 +304,7 @@ class QNNBatchFunction(torch.autograd.Function):
         ctx.shots = shots
         ctx.qec_encoding_qasm = qec_encoding_qasm
         ctx.num_physical_qubits = num_physical_qubits
+        ctx.measure_logical_only = measure_logical_only
 
         return torch.tensor(probs_np, dtype=weights.dtype)
 
@@ -269,7 +321,8 @@ class QNNBatchFunction(torch.autograd.Function):
 
         args_list = [
             (m, weights_np, ctx.num_qubits, ctx.num_layers, ctx.shots,
-             ctx.qec_encoding_qasm, ctx.num_physical_qubits)
+             ctx.qec_encoding_qasm, ctx.num_physical_qubits,
+             ctx.measure_logical_only)
             for m in ctx.matrices_np_list
         ]
         jac_list = _work_dispatch(_worker_grad_eval, args_list, ctx.executor)
@@ -290,6 +343,7 @@ class QNNBatchFunction(torch.autograd.Function):
             None,   # shots
             None,   # qec_encoding_qasm
             None,   # num_physical_qubits
+            None,   # measure_logical_only
         )
 
 
@@ -324,6 +378,16 @@ class VQCLayer(nn.Module):
         When True (default), multiply output probabilities by 2**num_qubits.
         This rescales the near-zero probability values into a more numerically
         convenient range before they are passed to a classical head.
+    qec_code : QECCode | None
+        Optional QEC encoding to apply between the image unitary and the
+        VQC ansatz.  When provided, the VQC operates on the expanded
+        physical-qubit register.
+    measure_logical_only : bool
+        Only meaningful when ``qec_code`` is provided.  When True (default),
+        measure only the first ``num_qubits`` (logical) qubits, so the
+        output dimension stays ``2 ** num_qubits`` regardless of the QEC
+        ancilla overhead.  When False, all physical qubits are measured
+        and the output dimension grows to ``2 ** num_physical_qubits``.
 
     Usage
     -----
@@ -353,6 +417,7 @@ class VQCLayer(nn.Module):
         shots: int = 1024,
         scale_output: bool = True,
         qec_code: QECCode | None = None,
+        measure_logical_only: bool = True,
     ):
         super().__init__()
         self.num_qubits = num_qubits  # logical qubits (image unitary size)
@@ -360,6 +425,9 @@ class VQCLayer(nn.Module):
         self.num_shots = shots
         self.scale_output = scale_output
         self.qec_code = qec_code
+        # measure_logical_only is only meaningful when QEC is active; without
+        # QEC there are no ancillas, so logical == total and the flag is a no-op.
+        self.measure_logical_only = measure_logical_only and (qec_code is not None)
 
         # When QEC is active, the VQC operates on the expanded physical-qubit
         # register.  The image unitary still acts only on num_qubits (logical).
@@ -424,7 +492,17 @@ class VQCLayer(nn.Module):
 
     @property
     def output_dim(self) -> int:
-        """Dimension of the output probability vector (2**total_qubits)."""
+        """
+        Dimension of the output probability vector.
+
+        - Without QEC: ``2 ** num_qubits``
+        - With QEC and ``measure_logical_only=True``: ``2 ** num_qubits``
+          (only the logical qubits are measured, ancillas are traced out)
+        - With QEC and ``measure_logical_only=False``: ``2 ** num_total_qubits``
+          (full physical-register measurement)
+        """
+        if self.measure_logical_only:
+            return 2 ** self.num_qubits
         return 2 ** self._num_total_qubits
 
     def forward(self, batched_matrices: torch.Tensor) -> torch.Tensor:
@@ -437,10 +515,10 @@ class VQCLayer(nn.Module):
 
         Returns
         -------
-        torch.Tensor, shape (batch_size, 2**total_qubits), float
-            Probability distribution over basis states for each sample.
-            When QEC is active, total_qubits > num_qubits.
-            If ``scale_output=True``, values are multiplied by 2**total_qubits.
+        torch.Tensor, shape (batch_size, output_dim), float
+            Probability distribution over the measured basis states for
+            each sample.  See ``output_dim`` for the exact size.
+            If ``scale_output=True``, values are multiplied by ``output_dim``.
         """
         logical_dim = 2 ** self.num_qubits
         if batched_matrices.shape[1:] != torch.Size([logical_dim, logical_dim]):
@@ -463,6 +541,7 @@ class VQCLayer(nn.Module):
             self.num_shots,
             self._qec_encoding_qasm,
             self._num_total_qubits if self.qec_code is not None else None,
+            self.measure_logical_only,
         )
 
         if self.scale_output:
@@ -482,4 +561,6 @@ class VQCLayer(nn.Module):
         if self.qec_code is not None:
             parts.append(f"qec={self.qec_code.name}")
             parts.append(f"total_qubits={self._num_total_qubits}")
+            parts.append(f"measure_logical_only={self.measure_logical_only}")
+            parts.append(f"output_dim={self.output_dim}")
         return ", ".join(parts)
