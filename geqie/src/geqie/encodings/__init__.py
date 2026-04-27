@@ -3,16 +3,16 @@
 import numpy as np
 
 
-def ensure_2d(image: np.ndarray, strategy: str = "luminance") -> np.ndarray:
+def ensure_grayscale(image: np.ndarray, strategy: str | None = None) -> np.ndarray:
     """
-    Convert 3D image to 2D for encodings that expect grayscale images.
+    Convert image to 2D for encodings that expect grayscale images.
     
     Args:
         image: Input image array (2D or 3D)
-        strategy: Conversion strategy for 3D images:
-            - "first_channel": Take first channel (default)
+        strategy: Grayscale conversion strategy
+            - "luminance" (default): Use RGB luminance formula `(0.299*R + 0.587*G + 0.114*B)`
+            - "first_channel": Take first channel
             - "average": Average all channels
-            - "luminance": Use RGB luminance formula (0.299*R + 0.587*G + 0.114*B)
     
     Returns:
         2D image array
@@ -20,6 +20,8 @@ def ensure_2d(image: np.ndarray, strategy: str = "luminance") -> np.ndarray:
     Raises:
         ValueError: If image is not 2D or 3D, or strategy is unknown
     """
+    strategy = strategy or "luminance"
+
     if image.ndim == 2:
         return image
 

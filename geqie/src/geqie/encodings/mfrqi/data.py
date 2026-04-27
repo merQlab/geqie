@@ -3,7 +3,7 @@ import numpy as np
 from qiskit.quantum_info import Statevector
 
 
-def data(*coords: int, R: int, image: np.ndarray) -> Statevector:
+def data(*coords: int, R: int, image: np.ndarray, **_) -> Statevector:
     n_dims = len(coords)
     m = np.ravel_multi_index(coords, image.shape)
     data_vector = np.zeros(2**(n_dims * R))

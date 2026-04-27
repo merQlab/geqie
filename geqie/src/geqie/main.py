@@ -24,7 +24,8 @@ def encode(
     image_dimensionality: int = 2,
     perform_measurement: bool = True,
     logging_level: int | None = None,
-    **kwargs: Dict[Any, Any],
+    encoding_params: Dict[str, str] = {},
+    **_: Dict[Any, Any],
 ) -> QuantumCircuit:
     logger = setup_logger(logging_level, reset=True)
 
@@ -35,8 +36,8 @@ def encode(
     products, data_vectors, map_operators = [], [], []
 
     for coords in np.ndindex(*shape):
-        data_vector = data_function(*coords, R=R, image=image)
-        map_operator = map_function(*coords, R=R, image=image, **kwargs)
+        data_vector = data_function(*coords, R=R, image=image, **encoding_params)
+        map_operator = map_function(*coords, R=R, image=image, **encoding_params)
         product = data_vector.to_operator() ^ map_operator
 
         products.append(product)
@@ -56,7 +57,7 @@ def encode(
 
     U_op = Operator(U)
     n_qubits = U_op.num_qubits
-    init_state = init_function(n_qubits, **kwargs)
+    init_state = init_function(n_qubits, **encoding_params)
     logger.state(f"{init_state=}")
 
     circuit = QuantumCircuit(n_qubits)

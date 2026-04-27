@@ -9,7 +9,7 @@ X_GATE = np.array([
 ])
 
 
-def map(rho: int, theta: int, R: int, image: np.ndarray) -> Operator:
+def map(rho: int, theta: int, R: int, image: np.ndarray, **_) -> Operator:
     p = image[rho, theta]
     # Convert value to binary string, without '0b' and padded with 0s, e.g.: '0001 1101':
     pixel_value_as_binary_string = bin(p)[2:].zfill(8)

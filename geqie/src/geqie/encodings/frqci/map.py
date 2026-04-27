@@ -7,7 +7,7 @@ GREEN_SHIFT = 8
 BLUE_SHIFT  = 0
 NORMALIZATION_FACTOR = 2**24 - 1
 
-def map(u: int, v: int, R: int, image: np.ndarray) -> Operator:
+def map(u: int, v: int, R: int, image: np.ndarray, **_) -> Operator:
     """FRQCI mapping function"""
     red   = image[u, v, 0].astype(np.uint32)
     green = image[u, v, 1].astype(np.uint32)

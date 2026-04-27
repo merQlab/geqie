@@ -6,7 +6,7 @@ from .map import BLUE_SHIFT, NORMALIZATION_FACTOR, GREEN_SHIFT, RED_SHIFT
 RETRIEVE_MASK_8BIT = np.uint32(0xFF)
 
 
-def retrieve(results: str) -> np.ndarray:
+def retrieve(results: str, **_) -> np.ndarray:
     """
     Decodes an image from quantum state measurement results.
 

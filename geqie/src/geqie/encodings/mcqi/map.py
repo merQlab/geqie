@@ -22,7 +22,7 @@ def ry_gate(theta: float) -> np.ndarray:
     ]
 
 
-def map(u: int, v: int, R: int, image: np.ndarray) -> Operator:
+def map(u: int, v: int, R: int, image: np.ndarray, **_) -> Operator:
     operators = []
     for channel in range(3):
         p = image[u, v, channel] / 255.0 * (np.pi / 2)
