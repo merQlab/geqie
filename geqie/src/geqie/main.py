@@ -60,7 +60,7 @@ def encode(
     logger.state(f"{init_state=}")
 
     circuit = QuantumCircuit(n_qubits)
-    circuit.initialize(init_state, range(n_qubits), normalize=True)
+    circuit.prepare_state(init_state, range(n_qubits), normalize=True)
     circuit.append(U_op, range(n_qubits))
     if perform_measurement:
         circuit.measure_all()
