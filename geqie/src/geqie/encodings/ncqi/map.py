@@ -17,7 +17,7 @@ def map(u: int, v: int, R: int, image: np.ndarray, **_) -> Operator:
     for channel in range(3):
         # Red channel:
         p = image[u, v, channel]
-        # Convert value to string to the binary form, cut '0b', and padd with 0 example: '0001 1101':
+        # Convert value to string to the binary form, cut '0b', and pad with 0 example: '0001 1101':
         pixel_value_as_binary_string = bin(p)[2:].zfill(8)
         # Convert to logic array:
         pixel_value_as_binary_array = [int(bit) for bit in pixel_value_as_binary_string][::-1]
