@@ -4,9 +4,9 @@ import numpy as np
 
 from qiskit_aer import AerSimulator
 from qiskit_aer.noise import NoiseModel
+from qiskit import transpile
 from qiskit.circuit import QuantumCircuit
 from qiskit.result import Result
-from qiskit.transpiler import generate_preset_pass_manager
 from qiskit.quantum_info import Operator, Statevector
 
 import geqie.backends.ibm_qp as ibm_qp
@@ -84,14 +84,15 @@ def simulate(
     logger = setup_logger(logging_level, reset=True)
 
     simulator = AerSimulator(device=device, method=method)
+    transpiled_circuit = transpile(circuit, simulator, optimization_level=0)
     
     logger.debug("Simulating circuit...")
-    result = simulator.run(circuit, shots=n_shots, memory=True, noise_model=noise_model).result()
+    result = simulator.run(transpiled_circuit, shots=n_shots, memory=True, noise_model=noise_model).result()
     logger.debug("Simulation completed.")
     if return_qiskit_result:
         return result
 
-    counts = result.get_counts(circuit)
+    counts = result.get_counts(transpiled_circuit)
 
     if return_padded_counts:
         logger.debug("Padding counts...")
@@ -131,13 +132,13 @@ def execute(
         min_num_qubits=circuit.num_qubits,
     )
 
-    pass_manager = generate_preset_pass_manager(
-        backend=ibm_qp_backend, 
+    logger.info("Circuit transpilation...")
+    transpiled_circuit = transpile(
+        circuit=circuit,
+        backend=ibm_qp_backend,
         translation_method="translator",
         **transpiler_args,
     )
-    logger.info("Circuit transpilation...")
-    transpiled_circuit = pass_manager.run(circuit)
     logger.info("Circuit transpilation. Done.")
     logger.trace(transpiled_circuit.draw())
 
