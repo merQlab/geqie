@@ -1,7 +1,7 @@
 import numpy as np
 from typing import Any
 
-def retrieve(results: dict[str, int], bitrate:int=8, **_: Any) -> np.ndarray:
+def retrieve(results: dict[str, int], bitrate: int = 8, **_: Any) -> np.ndarray:
     """
     Decodes an image from quantum state measurement results.
 

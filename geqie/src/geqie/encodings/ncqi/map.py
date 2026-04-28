@@ -11,7 +11,7 @@ X_GATE = np.array([
 ])
 
 
-def map(u: int, v: int, R: int, image: np.ndarray, **_: Any) -> Operator:
+def map(u: int, v: int, R: int, image: np.ndarray, **_) -> Operator:
     map_operator = [None, None, None]
 
     for channel in range(3):

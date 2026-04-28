@@ -1,7 +1,7 @@
 import numpy as np
 import json
 
-def retrieve(results: str, image_dimensionality: int = 2) -> np.ndarray:
+def retrieve(results: str, image_dimensionality: int = 2, **_) -> np.ndarray:
     state_length = len(next(iter(results)))
     color_qubits = 1
     number_of_position_qubits = state_length - color_qubits
