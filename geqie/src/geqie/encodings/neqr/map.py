@@ -10,7 +10,8 @@ X_GATE = np.array([
 ])
 
 
-def map(u: int, v: int, R: int, image: np.ndarray, bitrate:int=8, **_: Any) -> Operator:
+def map(u: int, v: int, R: int, image: np.ndarray, bitrate: int = 8, **_: Any) -> Operator:
+	bitrate = int(bitrate)
 	if bitrate <= 0 or bitrate > 8:
 		raise ValueError("bitrate must be between 1 and 8")
 	p = int(image[u, v])
