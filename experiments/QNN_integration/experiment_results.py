@@ -143,6 +143,23 @@ def _csv_value(value: Any) -> Any:
 	return value
 
 
+def _model_metadata(model: Any) -> dict[str, Any]:
+	model_class = model.__class__
+	return {
+		"class_name": model_class.__name__,
+		"module": model_class.__module__,
+		"repr": repr(model),
+	}
+
+
+def _state_dict_to_cpu(model: Any) -> dict[str, Any]:
+	state_dict = model.state_dict()
+	return {
+		name: value.detach().cpu() if hasattr(value, "detach") else value
+		for name, value in state_dict.items()
+	}
+
+
 def _history_length(history: Mapping[str, Sequence[Any]]) -> int:
 	lengths = [len(values) for values in history.values() if hasattr(values, "__len__")]
 	return max(lengths, default=0)
@@ -396,6 +413,7 @@ class ExperimentResultWriter:
 		history: Mapping[str, Sequence[Any]],
 		test_metrics: Mapping[str, Any],
 		confusion_matrix: Any,
+		model: Any | None = None,
 	) -> dict[str, str]:
 		prefix = f"subset_{subset_index:02d}"
 		total_epochs = _to_builtin_scalar(report_context.get("training_setup", {}).get("epochs"))
@@ -417,6 +435,8 @@ class ExperimentResultWriter:
 		test_metrics_path = self.run_dir / f"{prefix}_test_metrics.csv"
 		confusion_matrix_path = self.run_dir / f"{prefix}_confusion_matrix.csv"
 		confusion_matrix_txt_path = self.run_dir / f"{prefix}_confusion_matrix.txt"
+		model_path = self.run_dir / f"{prefix}_best_model.pt"
+		model_metadata_path = self.run_dir / f"{prefix}_best_model_meta.json"
 
 		report_path.write_text(report_text + "\n", encoding="utf-8")
 		self._write_history_csv(epochs_path, history)
@@ -435,16 +455,72 @@ class ExperimentResultWriter:
 			"confusion_matrix_txt": str(confusion_matrix_txt_path),
 		}
 
+		model_metadata = None
+		if model is not None:
+			created_files.update(
+				self._write_best_model(
+					path=model_path,
+					metadata_path=model_metadata_path,
+					model=model,
+					subset_index=subset_index,
+					subset_count=subset_count,
+					report_context=report_context,
+				)
+			)
+			model_metadata = _model_metadata(model)
+
 		self.subsets.append(
 			{
 				"subset_index": subset_index,
 				"subset_count": subset_count,
 				"report_context": dict(report_context),
+				"model": model_metadata,
 				"files": created_files,
 			}
 		)
 		self._write_manifest()
 		return created_files
+
+	def _write_best_model(
+		self,
+		path: Path,
+		metadata_path: Path,
+		model: Any,
+		subset_index: int,
+		subset_count: int,
+		report_context: Mapping[str, Any],
+	) -> dict[str, str]:
+		try:
+			import torch
+		except ImportError as error:
+			raise RuntimeError("PyTorch is required to export best model checkpoints.") from error
+
+		model_metadata = _model_metadata(model)
+		payload = {
+			"pipeline_name": self.pipeline_name,
+			"pipeline_slug": self.pipeline_slug,
+			"subset_index": subset_index,
+			"subset_count": subset_count,
+			"saved_at": datetime.now().isoformat(timespec="seconds"),
+			"model": model_metadata,
+			"report_context": dict(report_context),
+			"state_dict": _state_dict_to_cpu(model),
+		}
+		torch.save(payload, path)
+
+		self._write_json(
+			metadata_path,
+			{
+				key: value
+				for key, value in payload.items()
+				if key != "state_dict"
+			},
+		)
+
+		return {
+			"best_model": str(path),
+			"best_model_metadata": str(metadata_path),
+		}
 
 	def _write_history_csv(self, path: Path, history: Mapping[str, Sequence[Any]]) -> None:
 		rows = []
