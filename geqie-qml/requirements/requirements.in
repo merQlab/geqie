@@ -1,0 +1,4 @@
+# geqie>=1.0
+
+qiskit-machine-learning[torch]
+torchvision
