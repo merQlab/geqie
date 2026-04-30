@@ -1,0 +1,8 @@
+{
+  "pipeline_name": "Baseline_A_Dense",
+  "pipeline_slug": "Baseline_A_Dense",
+  "run_dir": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/.results/Baseline_A_Dense/29-04-2026-14:20",
+  "started_at": "2026-04-29T14:20:31",
+  "completed_at": null,
+  "subsets": []
+}

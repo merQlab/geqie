@@ -357,7 +357,7 @@ class ExperimentResultWriter:
 		self.pipeline_name = pipeline_name
 		self.pipeline_slug = sanitize_path_segment(pipeline_name)
 		self.started_at = timestamp or datetime.now()
-		self.base_dir = Path(base_dir) if base_dir is not None else Path(__file__).resolve().parent / ".results"
+		self.base_dir = Path(base_dir) if base_dir is not None else Path(__file__).resolve().parent / "results"
 		self.run_dir = self._make_run_dir()
 		self.subsets: list[dict[str, Any]] = []
 		self._write_manifest()
