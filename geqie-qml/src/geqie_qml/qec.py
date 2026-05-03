@@ -245,3 +245,182 @@ class SurfaceCode(QECCode):
             qc.cx(q0, q1)
             qc.cx(q2, q3)
         return qc
+
+
+# ---------------------------------------------------------------------------
+# Two-qubit decoherence-free subspace  DFS_2
+# ---------------------------------------------------------------------------
+
+class DFS2Code(QECCode):
+    """
+    Two-qubit decoherence-free subspace (DFS_2).
+
+    Reference: Ezzell, Pokharel, Tewala, Quiroz, Lidar,
+    arXiv:2402.07278 (2024).
+
+    Encodes 1 logical qubit into 2 physical qubits with codewords
+        |0_L> = |01>,
+        |1_L> = |10>.
+    The codespace is the singlet/triplet-zero sector of total Z, so any
+    collective dephasing exp(-i * phi * sum_i Z_i) acts as a global phase
+    on encoded states — i.e. trivially.
+
+    Layout (contiguous, matches the QECCode base-class convention used by
+    VQCLayer when it places the image unitary on qubits 0..num_logical-1):
+        - Qubits 0..num_logical-1                : data qubits, one per logical.
+        - Qubits num_logical..2*num_logical-1    : matching ancillas, |0> on entry.
+    Logical qubit *k* therefore lives on the pair (k, num_logical + k).
+
+    Encoding derivation (per logical qubit, data on q_data, ancilla on q_anc):
+        Start:                   (a|0> + b|1>)_data ⊗ |0>_anc
+        After X on ancilla:      (a|0> + b|1>)_data ⊗ |1>_anc
+                               = a|01> + b|11>      (|q_data q_anc>)
+        After CX(data -> anc):   a|01> + b|10>      ∈ DFS_2.
+    """
+
+    @property
+    def name(self) -> str:
+        return "DFS2Code [[2,1]] (collective-dephasing DFS)"
+
+    def num_physical_qubits(self, num_logical: int) -> int:
+        return 2 * num_logical
+
+    def encoding_circuit(self, num_logical: int) -> QuantumCircuit:
+        n_phys = self.num_physical_qubits(num_logical)
+        qc = QuantumCircuit(n_phys)
+        for k in range(num_logical):
+            q_data = k
+            q_anc = num_logical + k
+            qc.x(q_anc)
+            qc.cx(q_data, q_anc)
+        return qc
+
+
+# ---------------------------------------------------------------------------
+# Leung [[4,1]] approximate amplitude-damping code
+# ---------------------------------------------------------------------------
+
+class LeungCode(QECCode):
+    """
+    [[4,1]] approximate amplitude-damping code (Leung-Nielsen-Chuang-Yamamoto).
+
+    Reference: Leung, Nielsen, Chuang, Yamamoto,
+    Phys. Rev. A 56, 2567 (1997); arXiv:quant-ph/9704002.
+
+    Encodes 1 logical qubit into 4 physical qubits with codewords
+        |0_L> = (|0000> + |1111>) / sqrt(2),
+        |1_L> = (|0011> + |1100>) / sqrt(2).
+    The Knill-Laflamme conditions are satisfied to first order in the
+    amplitude-damping rate gamma, so single-qubit damping is corrected
+    to O(gamma).
+
+    Asymmetric usage for FRQI/NEQR
+    ------------------------------
+    Image encodings like FRQI/NEQR populate the |1> level of only the
+    intensity qubit (conventionally logical qubit 0); the position qubits
+    sit in computational-basis superpositions and are far less affected
+    by amplitude damping.  This code therefore protects only the
+    intensity qubit and leaves the position qubits bare:
+
+        num_physical_qubits(num_logical) = 4 + (num_logical - 1)
+
+    Physical layout (contiguous, matches the QECCode base-class convention
+    used by VQCLayer when it places the image unitary on qubits
+    0..num_logical-1):
+        - Qubit 0                                : intensity qubit (logical
+                                                   qubit 0), carries the data.
+        - Qubits 1..num_logical-1                : the unprotected position
+                                                   qubits (logical qubits
+                                                   1..num_logical-1), passed
+                                                   through.
+        - Qubits num_logical, num_logical+1,
+          num_logical+2                          : the 3 Leung ancillas, |0>
+                                                   on entry, used by the
+                                                   [[4,1]] block encoder.
+
+    Total physical qubits: ``num_logical + 3`` = ``4 + (num_logical - 1)``.
+
+    The encoding circuit acts non-trivially only on the intensity qubit
+    (q0) and the three ancillas; the position qubits are left untouched
+    (identities).
+    """
+
+    @property
+    def name(self) -> str:
+        return "LeungCode [[4,1]] (approx. amplitude-damping)"
+
+    def num_physical_qubits(self, num_logical: int) -> int:
+        return 4 + (num_logical - 1)
+
+    def encoding_circuit(self, num_logical: int) -> QuantumCircuit:
+        n_phys = self.num_physical_qubits(num_logical)
+        qc = QuantumCircuit(n_phys)
+        # Leung [[4,1]] encoder, mapped from the canonical (0,1,2,3) qubit
+        # layout to (data=0, anc1=num_logical, anc2=num_logical+1, anc3=num_logical+2).
+        # Position qubits 1..num_logical-1 are left untouched.
+        data = 0
+        anc1 = num_logical
+        anc2 = num_logical + 1
+        anc3 = num_logical + 2
+        qc.h(data)
+        qc.cx(data, anc2)
+        qc.h(data)
+        qc.cx(data, anc1)
+        qc.h(anc2)
+        qc.cx(anc2, anc3)
+        return qc
+
+
+# ---------------------------------------------------------------------------
+# Self-test
+# ---------------------------------------------------------------------------
+
+if __name__ == "__main__":
+    import numpy as np
+    from qiskit.quantum_info import Statevector
+
+    # ---- DFS2Code: encoded state lives in the |01>/|10> subspace per pair ----
+    num_logical = 3
+    n_phys = DFS2Code().num_physical_qubits(num_logical)
+    init_qc = QuantumCircuit(n_phys)
+    for k in range(num_logical):
+        init_qc.h(k)  # data qubits 0..num_logical-1 in |+>, ancillas left in |0>
+    sv_in = Statevector.from_label("0" * n_phys).evolve(init_qc)
+    sv_out = sv_in.evolve(DFS2Code().encoding_circuit(num_logical))
+
+    # In qiskit, statevector index bit i is the value of qubit i.
+    # Logical qubit k now lives on the pair (k, num_logical + k); only the
+    # |01>/|10> sector of each pair should survive after encoding.
+    for idx in range(2 ** n_phys):
+        for k in range(num_logical):
+            bit_data = (idx >> k) & 1
+            bit_anc = (idx >> (num_logical + k)) & 1
+            if bit_data == bit_anc and abs(sv_out.data[idx]) > 1e-10:
+                raise AssertionError(
+                    f"DFS2Code: non-zero amplitude {sv_out.data[idx]} at "
+                    f"index {idx} violates the |01>/|10> structure on pair {k}."
+                )
+    print("DFS2Code: encoded state lives in DFS_2 on every pair. OK")
+
+    # ---- LeungCode: encoder maps cos(t)|0>+sin(t)|1> to cos(t)|0_L>+sin(t)|1_L> ----
+    theta = 0.3
+    init_qc = QuantumCircuit(4)
+    init_qc.ry(2 * theta, 0)  # cos(theta)|0> + sin(theta)|1> on qubit 0
+    sv_in = Statevector.from_label("0000").evolve(init_qc)
+    sv_out = sv_in.evolve(LeungCode().encoding_circuit(num_logical=1))
+
+    # Build the expected state.  The spec writes |abcd> with a=q0, b=q1, c=q2, d=q3,
+    # whereas qiskit's Statevector.from_label puts q0 at the rightmost position,
+    # so spec |0011> (q0=0, q1=0, q2=1, q3=1) corresponds to qiskit label "1100",
+    # and spec |1100> corresponds to qiskit label "0011".
+    zero_L = (Statevector.from_label("0000") + Statevector.from_label("1111")) / np.sqrt(2)
+    one_L = (Statevector.from_label("1100") + Statevector.from_label("0011")) / np.sqrt(2)
+    target = np.cos(theta) * zero_L + np.sin(theta) * one_L
+
+    if not np.allclose(sv_out.data, target.data, atol=1e-10):
+        raise AssertionError(
+            f"LeungCode: encoded state differs from expected.\n"
+            f"  got:      {sv_out.data}\n"
+            f"  expected: {target.data}"
+        )
+    print("LeungCode: encoder produces cos(t)|0_L> + sin(t)|1_L>. OK")

@@ -17,6 +17,11 @@ from qiskit_machine_learning.neural_networks import SamplerQNN
 from qiskit.qasm2 import dumps as qasm2_dumps, loads as qasm2_loads
 
 from geqie_qml.qec import QECCode
+from geqie_qml.noise_suppression.twirling import twirl_circuit
+from geqie_qml.noise_suppression.dynamical_decoupling import (
+    DD_SEQUENCES,
+    apply_dd,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -90,7 +95,8 @@ def _identity_interpret(x):
 
 def _build_qec_full_circuit(matrix_np, num_logical_qubits, num_layers,
                             qec_encoding_qasm=None, num_physical_qubits=None,
-                            measure_logical_only=False):
+                            measure_logical_only=False, twirl_seed=None,
+                            dd_sequence_name=None, backend_target=None):
     """
     Build the full quantum circuit for a single sample, optionally with QEC.
 
@@ -113,10 +119,28 @@ def _build_qec_full_circuit(matrix_np, num_logical_qubits, num_layers,
 
     Otherwise no explicit measurement is added and ``SamplerQNN`` will
     measure all qubits, producing a vector of length ``2 ** n_total``.
+
+    Pauli twirling
+    --------------
+    When *twirl_seed* is not None the VQC ansatz is rewritten with random
+    Pauli twirls applied around every two-qubit entangling gate, using
+    ``numpy.random.default_rng(twirl_seed)`` so the rewrite is deterministic
+    given the seed.  Only the VQC is twirled; the image unitary and the
+    QEC encoder are composed in untouched.
+
+    Dynamical decoupling
+    --------------------
+    When *dd_sequence_name* is not None the FULL composed circuit
+    (image unitary + QEC encoder + VQC, possibly already twirled) is
+    ALAP-scheduled against *backend_target* and its idle windows are
+    padded with the named DD pulse train.  DD runs last so the inserted
+    pulses see the final, ready-to-execute circuit.
     """
     if qec_encoding_qasm is not None:
         n_total = num_physical_qubits
         vqc = _build_vqc_circuit(n_total, num_layers)
+        if twirl_seed is not None:
+            vqc = twirl_circuit(vqc, np.random.default_rng(twirl_seed))
         qc = QuantumCircuit(n_total)
         # Image unitary acts only on the first num_logical_qubits
         qc.append(UnitaryGate(matrix_np), range(num_logical_qubits))
@@ -134,9 +158,14 @@ def _build_qec_full_circuit(matrix_np, num_logical_qubits, num_layers,
     else:
         n_total = num_logical_qubits
         vqc = _build_vqc_circuit(n_total, num_layers)
+        if twirl_seed is not None:
+            vqc = twirl_circuit(vqc, np.random.default_rng(twirl_seed))
         qc = QuantumCircuit(n_total)
         qc.append(UnitaryGate(matrix_np), range(n_total))
         qc.compose(vqc, inplace=True)
+
+    if dd_sequence_name is not None:
+        qc = apply_dd(qc, backend_target, sequence_name=dd_sequence_name)
     return qc
 
 
@@ -152,11 +181,15 @@ def _worker_forward_eval(args):
         otherwise ``2 ** num_total_qubits``.
     """
     (matrix_np, weights_np, num_qubits, num_layers, shots,
-     qec_encoding_qasm, num_physical_qubits, measure_logical_only) = args
+     qec_encoding_qasm, num_physical_qubits, measure_logical_only,
+     twirl_seed, dd_sequence_name, backend_target) = args
     qc = _build_qec_full_circuit(
         matrix_np, num_qubits, num_layers,
         qec_encoding_qasm, num_physical_qubits,
         measure_logical_only=measure_logical_only,
+        twirl_seed=twirl_seed,
+        dd_sequence_name=dd_sequence_name,
+        backend_target=backend_target,
     )
 
     sampler = Sampler(default_shots=shots)
@@ -188,11 +221,15 @@ def _worker_grad_eval(args):
         Jacobian of the output probabilities w.r.t. the quantum weights.
     """
     (matrix_np, weights_np, num_qubits, num_layers, shots,
-     qec_encoding_qasm, num_physical_qubits, measure_logical_only) = args
+     qec_encoding_qasm, num_physical_qubits, measure_logical_only,
+     twirl_seed, dd_sequence_name, backend_target) = args
     qc = _build_qec_full_circuit(
         matrix_np, num_qubits, num_layers,
         qec_encoding_qasm, num_physical_qubits,
         measure_logical_only=measure_logical_only,
+        twirl_seed=twirl_seed,
+        dd_sequence_name=dd_sequence_name,
+        backend_target=backend_target,
     )
 
     sampler = Sampler(default_shots=shots)
@@ -285,13 +322,19 @@ class QNNBatchFunction(torch.autograd.Function):
     def forward(ctx, weights, executor, matrices_np_list,
                 num_qubits, num_layers, shots,
                 qec_encoding_qasm, num_physical_qubits,
-                measure_logical_only):
+                measure_logical_only, twirl_seeds,
+                dd_sequence_name, backend_target):
         weights_np = weights.detach().numpy()
 
+        # twirl_seeds is a list of length len(matrices_np_list); each entry
+        # is either an int (twirl with that seed) or None (no twirling).
+        # Backward must use the SAME seeds so SPSA evaluates the same
+        # twirled circuit at the perturbed parameter points.
         args_list = [
             (matrix, weights_np, num_qubits, num_layers, shots,
-             qec_encoding_qasm, num_physical_qubits, measure_logical_only)
-            for matrix in matrices_np_list
+             qec_encoding_qasm, num_physical_qubits, measure_logical_only,
+             twirl_seed, dd_sequence_name, backend_target)
+            for matrix, twirl_seed in zip(matrices_np_list, twirl_seeds)
         ]
         probs_list = _work_dispatch(_worker_forward_eval, args_list, executor)
         probs_np = np.stack(probs_list)  # (batch_size, output_size)
@@ -305,6 +348,9 @@ class QNNBatchFunction(torch.autograd.Function):
         ctx.qec_encoding_qasm = qec_encoding_qasm
         ctx.num_physical_qubits = num_physical_qubits
         ctx.measure_logical_only = measure_logical_only
+        ctx.twirl_seeds = twirl_seeds
+        ctx.dd_sequence_name = dd_sequence_name
+        ctx.backend_target = backend_target
 
         return torch.tensor(probs_np, dtype=weights.dtype)
 
@@ -322,8 +368,9 @@ class QNNBatchFunction(torch.autograd.Function):
         args_list = [
             (m, weights_np, ctx.num_qubits, ctx.num_layers, ctx.shots,
              ctx.qec_encoding_qasm, ctx.num_physical_qubits,
-             ctx.measure_logical_only)
-            for m in ctx.matrices_np_list
+             ctx.measure_logical_only, twirl_seed,
+             ctx.dd_sequence_name, ctx.backend_target)
+            for m, twirl_seed in zip(ctx.matrices_np_list, ctx.twirl_seeds)
         ]
         jac_list = _work_dispatch(_worker_grad_eval, args_list, ctx.executor)
 
@@ -344,6 +391,9 @@ class QNNBatchFunction(torch.autograd.Function):
             None,   # qec_encoding_qasm
             None,   # num_physical_qubits
             None,   # measure_logical_only
+            None,   # twirl_seeds
+            None,   # dd_sequence_name
+            None,   # backend_target
         )
 
 
@@ -388,6 +438,32 @@ class VQCLayer(nn.Module):
         output dimension stays ``2 ** num_qubits`` regardless of the QEC
         ancilla overhead.  When False, all physical qubits are measured
         and the output dimension grows to ``2 ** num_physical_qubits``.
+    pauli_twirling : bool
+        When True, every two-qubit entangling gate in the VQC ansatz is
+        wrapped in a random Pauli sandwich on every forward pass.  In the
+        noiseless limit this leaves the circuit invariant; under coherent
+        two-qubit gate noise, averaging over training shots projects the
+        noise onto a stochastic Pauli channel.  Trainable parameters and
+        gradient computation are unaffected — twirling is purely a
+        circuit rewrite at execution time.
+    twirl_seed : int | None
+        Seed for the twirling rewrite.  Combined with an internal per-call
+        counter so consecutive forward passes get fresh random twirls
+        while the run remains reproducible given ``twirl_seed``.  Pass
+        ``None`` to draw OS entropy on every call.
+    dynamical_decoupling : str | None
+        Name of a DD pulse train (one of ``"XX"``, ``"XY4"``, ``"KDD"``)
+        to apply just before execution.  ``None`` (default) disables DD.
+        DD runs after Pauli twirling and before the circuit reaches the
+        sampler, so the inserted pulses see the final, ready-to-execute
+        circuit (image unitary + QEC + ansatz, possibly twirled).
+    backend_target : qiskit.transpiler.Target | None
+        Required when ``dynamical_decoupling`` is set: provides the gate
+        durations the ALAP scheduler and DD padder need to compute idle
+        windows.  Use ``backend.target`` of a fake or real IBM backend.
+        Note that ``StatevectorSampler`` is duration-less, so DD inserts
+        pulses but the simulator will treat them as plain gates — DD only
+        produces meaningful behaviour against a noise-aware backend.
 
     Usage
     -----
@@ -418,6 +494,10 @@ class VQCLayer(nn.Module):
         scale_output: bool = True,
         qec_code: QECCode | None = None,
         measure_logical_only: bool = True,
+        pauli_twirling: bool = False,
+        twirl_seed: int | None = None,
+        dynamical_decoupling: str | None = None,
+        backend_target=None,
     ):
         super().__init__()
         self.num_qubits = num_qubits  # logical qubits (image unitary size)
@@ -428,6 +508,36 @@ class VQCLayer(nn.Module):
         # measure_logical_only is only meaningful when QEC is active; without
         # QEC there are no ancillas, so logical == total and the flag is a no-op.
         self.measure_logical_only = measure_logical_only and (qec_code is not None)
+
+        # Pauli-twirling rewrites every two-qubit gate in the VQC ansatz with
+        # random Pauli sandwiches per forward pass.  The trainable parameter
+        # tensors are unchanged — twirling is a circuit rewrite at execution
+        # time only.  twirl_seed seeds the rewrite; the per-call counter
+        # advances every forward pass so consecutive passes get fresh random
+        # twirls while the whole run remains reproducible given twirl_seed.
+        self.pauli_twirling = pauli_twirling
+        self.twirl_seed = twirl_seed
+        self._twirl_call_counter = 0
+
+        # Dynamical decoupling — purely an execution-time circuit rewrite.
+        # Validated up front so misconfiguration surfaces at construction
+        # rather than deep inside a worker process during forward().
+        if dynamical_decoupling is not None:
+            if dynamical_decoupling not in DD_SEQUENCES:
+                raise ValueError(
+                    f"Unknown dynamical_decoupling sequence "
+                    f"{dynamical_decoupling!r}; supported: {sorted(DD_SEQUENCES)}."
+                )
+            if backend_target is None:
+                raise ValueError(
+                    "dynamical_decoupling requires per-gate duration information. "
+                    "Pass `backend.target` from a fake or real IBM backend "
+                    "(e.g. FakeKyoto, FakeBrisbane, ibm_brisbane). Duration-less "
+                    "simulators such as StatevectorSampler cannot supply gate "
+                    "lengths, so the scheduler has no idle windows to fill."
+                )
+        self.dynamical_decoupling = dynamical_decoupling
+        self.backend_target = backend_target
 
         # When QEC is active, the VQC operates on the expanded physical-qubit
         # register.  The image unitary still acts only on num_qubits (logical).
@@ -490,6 +600,31 @@ class VQCLayer(nn.Module):
                 # Always clear the reference, even if the training loop raises.
                 self._executor = None
 
+    def _draw_twirl_seeds(self, batch_size: int) -> list[int | None]:
+        """
+        Generate one twirl seed per sample for the current forward pass.
+
+        Returns a list of ``None`` when ``pauli_twirling`` is disabled, so
+        the worker path skips the rewrite altogether.  Otherwise mixes
+        ``twirl_seed`` with the per-instance call counter via
+        ``numpy.random.SeedSequence`` to derive a deterministic but
+        forward-pass-specific seed sequence, then spawns one child seed
+        per sample.  The counter advances even when the run is unseeded
+        (``twirl_seed is None``), in which case ``SeedSequence`` pulls
+        fresh OS entropy on every call.
+        """
+        if not self.pauli_twirling:
+            return [None] * batch_size
+
+        if self.twirl_seed is None:
+            ss = np.random.SeedSequence()
+        else:
+            ss = np.random.SeedSequence([int(self.twirl_seed), self._twirl_call_counter])
+        self._twirl_call_counter += 1
+
+        sample_ss = ss.spawn(batch_size)
+        return [int(s.generate_state(1, dtype=np.uint32)[0]) for s in sample_ss]
+
     @property
     def output_dim(self) -> int:
         """
@@ -529,6 +664,7 @@ class VQCLayer(nn.Module):
             )
 
         matrices_np_list = [m.detach().cpu().numpy() for m in batched_matrices]
+        twirl_seeds = self._draw_twirl_seeds(len(matrices_np_list))
 
         # QNNBatchFunction runs sequentially when self._executor is None,
         # or fans out to the process pool when parallel_context() is active.
@@ -542,6 +678,9 @@ class VQCLayer(nn.Module):
             self._qec_encoding_qasm,
             self._num_total_qubits if self.qec_code is not None else None,
             self.measure_logical_only,
+            twirl_seeds,
+            self.dynamical_decoupling,
+            self.backend_target,
         )
 
         if self.scale_output:
@@ -563,4 +702,9 @@ class VQCLayer(nn.Module):
             parts.append(f"total_qubits={self._num_total_qubits}")
             parts.append(f"measure_logical_only={self.measure_logical_only}")
             parts.append(f"output_dim={self.output_dim}")
+        if self.pauli_twirling:
+            parts.append(f"pauli_twirling=True")
+            parts.append(f"twirl_seed={self.twirl_seed}")
+        if self.dynamical_decoupling is not None:
+            parts.append(f"dynamical_decoupling={self.dynamical_decoupling!r}")
         return ", ".join(parts)
