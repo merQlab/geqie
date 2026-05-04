@@ -1,0 +1,36 @@
+{
+  "pipeline_name": "Experiment_A_FRQI",
+  "pipeline_slug": "Experiment_A_FRQI",
+  "subset_index": 1,
+  "subset_count": 5,
+  "saved_at": "2026-04-30T09:58:31",
+  "model": {
+    "class_name": "Sequential",
+    "module": "torch.nn.modules.container",
+    "repr": "Sequential(\n  (0): VQCLayer(num_qubits=9, num_layers=1, shots=1024, scale_output=True, num_params=27)\n  (1): Linear(in_features=512, out_features=10, bias=True)\n  (2): LogSoftmax(dim=-1)\n)"
+  },
+  "report_context": {
+    "title": "EXPERIMENTAL PROTOCOL REPORT",
+    "dataset_name": "MNIST digits stratified",
+    "classifier_name": "FRQI + QNN + Dense",
+    "model_architecture": "GEQIE/FRQI-encoded circuits -> VQCLayer(num_qubits, num_layers) -> Linear(2**num_qubits, num_classes) -> LogSoftmax",
+    "subset_name": "1/5",
+    "split_sizes": {
+      "train": 921,
+      "val": 231,
+      "test": 288
+    },
+    "training_setup": {
+      "epochs": 10,
+      "batch_size": 16,
+      "device": "cpu",
+      "qnn_lr": 0.001,
+      "head_lr": 0.01
+    },
+    "model_setup": {
+      "num_classes": 10,
+      "num_qubits": 9,
+      "num_layers": 1
+    }
+  }
+}

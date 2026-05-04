@@ -1,0 +1,33 @@
+{
+  "pipeline_name": "Baseline_A_Dense",
+  "pipeline_slug": "Baseline_A_Dense",
+  "subset_index": 1,
+  "subset_count": 5,
+  "saved_at": "2026-04-29T14:21:11",
+  "model": {
+    "class_name": "DenseBaseline",
+    "module": "__main__",
+    "repr": "DenseBaseline(\n  (flatten): Flatten(start_dim=1, end_dim=-1)\n  (classical_head_dense): Linear(in_features=256, out_features=10, bias=True)\n)"
+  },
+  "report_context": {
+    "title": "EXPERIMENTAL PROTOCOL REPORT",
+    "dataset_name": "MNIST digits stratified",
+    "classifier_name": "DenseBaseline",
+    "model_architecture": "16x16 grayscale -> Flatten(256) -> Linear(256, num_classes)",
+    "subset_name": "1/5",
+    "split_sizes": {
+      "train": 921,
+      "val": 231,
+      "test": 288
+    },
+    "training_setup": {
+      "epochs": 10,
+      "batch_size": 16,
+      "lr": 0.001,
+      "device": "cpu"
+    },
+    "model_setup": {
+      "num_classes": 10
+    }
+  }
+}

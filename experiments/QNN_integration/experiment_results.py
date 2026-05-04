@@ -204,7 +204,7 @@ def render_experiment_report(
 	now = now or datetime.now()
 	rows = [
 		("DATE", now.strftime("%d-%m-%Y")),
-		("TIME", now.strftime("%H:%M")),
+		("TIME", now.strftime("%H-%M")),
 		("DATASET", dataset_name),
 		("CLASSIFIER", classifier_name),
 		("SUBSET", subset_name),
@@ -340,7 +340,7 @@ def sanitize_path_segment(value: str) -> str:
 
 
 def format_run_timestamp(value: datetime) -> str:
-	label = value.strftime("%d-%m-%Y-%H:%M")
+	label = value.strftime("%d-%m-%Y-%H-%M")
 	if os.name == "nt":
 		# Windows cannot create path segments containing ":".
 		label = label.replace(":", "-")
@@ -357,7 +357,7 @@ class ExperimentResultWriter:
 		self.pipeline_name = pipeline_name
 		self.pipeline_slug = sanitize_path_segment(pipeline_name)
 		self.started_at = timestamp or datetime.now()
-		self.base_dir = Path(base_dir) if base_dir is not None else Path(__file__).resolve().parent / ".results"
+		self.base_dir = Path(base_dir) if base_dir is not None else Path(__file__).resolve().parent / "results"
 		self.run_dir = self._make_run_dir()
 		self.subsets: list[dict[str, Any]] = []
 		self._write_manifest()
