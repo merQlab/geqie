@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from concurrent import futures
 from multiprocessing import cpu_count
+import pickle
 from typing import Any, Callable, Mapping
 
 import cloudpickle
@@ -10,6 +11,7 @@ from tqdm import tqdm
 
 from experiments.QNN_integration.experiment_results import (
 	ExperimentResultWriter,
+	make_model_checkpoint_artifacts,
 	print_summary_report,
 )
 
@@ -93,7 +95,36 @@ def _run_subset_task(
 		**dict(train_kwargs),
 		report_context=report_context,
 	)
-	return subset_idx, report_context, result
+	return subset_idx, report_context, _prepare_result_for_ipc(result)
+
+
+def _prepare_result_for_ipc(result: dict[str, Any]) -> dict[str, Any]:
+	try:
+		pickle.dumps(result)
+		return result
+	except Exception as error:
+		model = result.get("model")
+		if model is None:
+			raise RuntimeError("Subset result is not picklable and does not contain a model to convert.") from error
+
+		report_context = result.get("report_context")
+		torchinfo_summary = None
+		if isinstance(report_context, Mapping):
+			torchinfo_summary = report_context.get("torchinfo_summary")
+
+		safe_result = dict(result)
+		safe_result["model_artifacts"] = make_model_checkpoint_artifacts(
+			model,
+			torchinfo_summary=torchinfo_summary,
+		)
+		safe_result["model"] = None
+
+		try:
+			pickle.dumps(safe_result)
+		except Exception as safe_error:
+			raise RuntimeError("Subset result is still not picklable after converting the model to checkpoint artifacts.") from safe_error
+
+		return safe_result
 
 
 def _summarize_subset_results(subset_results: list[dict[str, Any]]) -> dict[str, float]:
@@ -180,8 +211,11 @@ def train_subsets_with_process_pool(
 					history=result["history"],
 					test_metrics=result["test_metrics"],
 					confusion_matrix=result["confusion_matrix"],
-					model=result["model"],
+					model=result.get("model"),
+					model_artifacts=result.get("model_artifacts"),
 				)
+			result = dict(result)
+			result.pop("model_artifacts", None)
 			all_results_by_subset[subset_idx] = result
 
 	subset_results = [

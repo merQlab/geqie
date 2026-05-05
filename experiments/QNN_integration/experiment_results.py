@@ -160,6 +160,17 @@ def _state_dict_to_cpu(model: Any) -> dict[str, Any]:
 	}
 
 
+def make_model_checkpoint_artifacts(
+	model: Any,
+	torchinfo_summary: str | None = None,
+) -> dict[str, Any]:
+	return {
+		"model": _model_metadata(model),
+		"torchinfo_summary": torchinfo_summary,
+		"state_dict": _state_dict_to_cpu(model),
+	}
+
+
 def render_torchinfo_summary(model: Any) -> str:
 	try:
 		from torchinfo import summary
@@ -442,6 +453,7 @@ class ExperimentResultWriter:
 		test_metrics: Mapping[str, Any],
 		confusion_matrix: Any,
 		model: Any | None = None,
+		model_artifacts: Mapping[str, Any] | None = None,
 	) -> dict[str, str]:
 		prefix = f"subset_{subset_index:02d}"
 		total_epochs = _to_builtin_scalar(report_context.get("training_setup", {}).get("epochs"))
@@ -499,19 +511,23 @@ class ExperimentResultWriter:
 
 		model_metadata = None
 		subset_saved_at = datetime.now().isoformat(timespec="seconds")
-		if model is not None:
+		if model is not None or model_artifacts is not None:
 			created_files.update(
 				self._write_best_model(
 					path=model_path,
 					metadata_path=model_metadata_path,
 					model=model,
+					model_artifacts=model_artifacts,
 					subset_index=subset_index,
 					subset_count=subset_count,
 					report_context=report_context_with_summary,
 					torchinfo_summary=torchinfo_summary,
 				)
 			)
-			model_metadata = _model_metadata(model)
+			if model is not None:
+				model_metadata = _model_metadata(model)
+			elif model_artifacts is not None:
+				model_metadata = dict(model_artifacts["model"])
 
 		self.subsets.append(
 			{
@@ -531,7 +547,8 @@ class ExperimentResultWriter:
 		self,
 		path: Path,
 		metadata_path: Path,
-		model: Any,
+		model: Any | None,
+		model_artifacts: Mapping[str, Any] | None,
 		subset_index: int,
 		subset_count: int,
 		report_context: Mapping[str, Any],
@@ -542,7 +559,15 @@ class ExperimentResultWriter:
 		except ImportError as error:
 			raise RuntimeError("PyTorch is required to export best model checkpoints.") from error
 
-		model_metadata = _model_metadata(model)
+		if model_artifacts is None:
+			if model is None:
+				raise ValueError("Either model or model_artifacts must be provided.")
+			model_artifacts = make_model_checkpoint_artifacts(
+				model,
+				torchinfo_summary=torchinfo_summary,
+			)
+
+		model_metadata = dict(model_artifacts["model"])
 		payload = {
 			"pipeline_name": self.pipeline_name,
 			"pipeline_slug": self.pipeline_slug,
@@ -550,9 +575,9 @@ class ExperimentResultWriter:
 			"subset_count": subset_count,
 			"saved_at": datetime.now().isoformat(timespec="seconds"),
 			"model": model_metadata,
-			"torchinfo_summary": torchinfo_summary,
+			"torchinfo_summary": model_artifacts.get("torchinfo_summary", torchinfo_summary),
 			"report_context": dict(report_context),
-			"state_dict": _state_dict_to_cpu(model),
+			"state_dict": dict(model_artifacts["state_dict"]),
 		}
 		torch.save(payload, path)
 
