@@ -1,0 +1,224 @@
+{
+  "pipeline_name": "Baseline_B_CNN",
+  "pipeline_slug": "Baseline_B_CNN",
+  "run_dir": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_B_CNN/05-05-2026-10-36",
+  "started_at": "2026-05-05T10:36:04",
+  "completed_at": "2026-05-05T10:36:36",
+  "subsets": [
+    {
+      "subset_index": 1,
+      "subset_count": 5,
+      "saved_at": "2026-05-05T10:36:09",
+      "report_context": {
+        "title": "EXPERIMENTAL PROTOCOL REPORT",
+        "dataset_name": "MNIST digits stratified",
+        "classifier_name": "SimpleCNNBaseline",
+        "model_architecture": "16x16 grayscale -> Conv2d(1,16,3,pad=1) -> ReLU -> MaxPool2d(2) -> Conv2d(16,32,3,pad=1) -> ReLU -> MaxPool2d(2) -> Flatten -> Linear(512,64) -> ReLU -> Linear(64, num_classes)",
+        "subset_name": "1/5",
+        "split_sizes": {
+          "train": 921,
+          "val": 231,
+          "test": 288
+        },
+        "training_setup": {
+          "epochs": 50,
+          "batch_size": 64,
+          "lr": 0.001,
+          "device": "cpu"
+        },
+        "model_setup": {
+          "num_classes": 10
+        },
+        "torchinfo_summary": "torchinfo.summary unavailable: No module named 'torchinfo'"
+      },
+      "torchinfo_summary": "torchinfo.summary unavailable: No module named 'torchinfo'",
+      "model": {
+        "class_name": "SimpleCNNBaseline",
+        "module": "__main__",
+        "repr": "SimpleCNNBaseline(\n  (features): Sequential(\n    (0): Conv2d(1, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))\n    (1): ReLU()\n    (2): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)\n    (3): Conv2d(16, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))\n    (4): ReLU()\n    (5): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)\n  )\n  (classifier): Sequential(\n    (0): Flatten(start_dim=1, end_dim=-1)\n    (1): Linear(in_features=512, out_features=64, bias=True)\n    (2): ReLU()\n    (3): Linear(in_features=64, out_features=10, bias=True)\n  )\n)"
+      },
+      "files": {
+        "report": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_B_CNN/05-05-2026-10-36/subset_01_report.log",
+        "epochs": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_B_CNN/05-05-2026-10-36/subset_01_epochs.csv",
+        "test_metrics": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_B_CNN/05-05-2026-10-36/subset_01_test_metrics.csv",
+        "confusion_matrix_csv": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_B_CNN/05-05-2026-10-36/subset_01_confusion_matrix.csv",
+        "confusion_matrix_txt": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_B_CNN/05-05-2026-10-36/subset_01_confusion_matrix.txt",
+        "torchinfo_summary": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_B_CNN/05-05-2026-10-36/subset_01_torchinfo_summary.log",
+        "best_model": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_B_CNN/05-05-2026-10-36/subset_01_best_model.pt",
+        "best_model_metadata": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_B_CNN/05-05-2026-10-36/subset_01_best_model_meta.json"
+      }
+    },
+    {
+      "subset_index": 2,
+      "subset_count": 5,
+      "saved_at": "2026-05-05T10:36:16",
+      "report_context": {
+        "title": "EXPERIMENTAL PROTOCOL REPORT",
+        "dataset_name": "MNIST digits stratified",
+        "classifier_name": "SimpleCNNBaseline",
+        "model_architecture": null,
+        "subset_name": "2/5",
+        "split_sizes": {
+          "train": 921,
+          "val": 231,
+          "test": 288
+        },
+        "training_setup": {
+          "epochs": 50,
+          "batch_size": 64,
+          "lr": 0.001,
+          "device": "cpu"
+        },
+        "model_setup": {
+          "num_classes": 10
+        },
+        "torchinfo_summary": "torchinfo.summary unavailable: No module named 'torchinfo'"
+      },
+      "torchinfo_summary": "torchinfo.summary unavailable: No module named 'torchinfo'",
+      "model": {
+        "class_name": "SimpleCNNBaseline",
+        "module": "__main__",
+        "repr": "SimpleCNNBaseline(\n  (features): Sequential(\n    (0): Conv2d(1, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))\n    (1): ReLU()\n    (2): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)\n    (3): Conv2d(16, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))\n    (4): ReLU()\n    (5): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)\n  )\n  (classifier): Sequential(\n    (0): Flatten(start_dim=1, end_dim=-1)\n    (1): Linear(in_features=512, out_features=64, bias=True)\n    (2): ReLU()\n    (3): Linear(in_features=64, out_features=10, bias=True)\n  )\n)"
+      },
+      "files": {
+        "report": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_B_CNN/05-05-2026-10-36/subset_02_report.log",
+        "epochs": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_B_CNN/05-05-2026-10-36/subset_02_epochs.csv",
+        "test_metrics": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_B_CNN/05-05-2026-10-36/subset_02_test_metrics.csv",
+        "confusion_matrix_csv": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_B_CNN/05-05-2026-10-36/subset_02_confusion_matrix.csv",
+        "confusion_matrix_txt": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_B_CNN/05-05-2026-10-36/subset_02_confusion_matrix.txt",
+        "torchinfo_summary": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_B_CNN/05-05-2026-10-36/subset_02_torchinfo_summary.log",
+        "best_model": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_B_CNN/05-05-2026-10-36/subset_02_best_model.pt",
+        "best_model_metadata": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_B_CNN/05-05-2026-10-36/subset_02_best_model_meta.json"
+      }
+    },
+    {
+      "subset_index": 3,
+      "subset_count": 5,
+      "saved_at": "2026-05-05T10:36:23",
+      "report_context": {
+        "title": "EXPERIMENTAL PROTOCOL REPORT",
+        "dataset_name": "MNIST digits stratified",
+        "classifier_name": "SimpleCNNBaseline",
+        "model_architecture": null,
+        "subset_name": "3/5",
+        "split_sizes": {
+          "train": 921,
+          "val": 231,
+          "test": 288
+        },
+        "training_setup": {
+          "epochs": 50,
+          "batch_size": 64,
+          "lr": 0.001,
+          "device": "cpu"
+        },
+        "model_setup": {
+          "num_classes": 10
+        },
+        "torchinfo_summary": "torchinfo.summary unavailable: No module named 'torchinfo'"
+      },
+      "torchinfo_summary": "torchinfo.summary unavailable: No module named 'torchinfo'",
+      "model": {
+        "class_name": "SimpleCNNBaseline",
+        "module": "__main__",
+        "repr": "SimpleCNNBaseline(\n  (features): Sequential(\n    (0): Conv2d(1, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))\n    (1): ReLU()\n    (2): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)\n    (3): Conv2d(16, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))\n    (4): ReLU()\n    (5): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)\n  )\n  (classifier): Sequential(\n    (0): Flatten(start_dim=1, end_dim=-1)\n    (1): Linear(in_features=512, out_features=64, bias=True)\n    (2): ReLU()\n    (3): Linear(in_features=64, out_features=10, bias=True)\n  )\n)"
+      },
+      "files": {
+        "report": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_B_CNN/05-05-2026-10-36/subset_03_report.log",
+        "epochs": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_B_CNN/05-05-2026-10-36/subset_03_epochs.csv",
+        "test_metrics": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_B_CNN/05-05-2026-10-36/subset_03_test_metrics.csv",
+        "confusion_matrix_csv": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_B_CNN/05-05-2026-10-36/subset_03_confusion_matrix.csv",
+        "confusion_matrix_txt": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_B_CNN/05-05-2026-10-36/subset_03_confusion_matrix.txt",
+        "torchinfo_summary": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_B_CNN/05-05-2026-10-36/subset_03_torchinfo_summary.log",
+        "best_model": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_B_CNN/05-05-2026-10-36/subset_03_best_model.pt",
+        "best_model_metadata": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_B_CNN/05-05-2026-10-36/subset_03_best_model_meta.json"
+      }
+    },
+    {
+      "subset_index": 4,
+      "subset_count": 5,
+      "saved_at": "2026-05-05T10:36:29",
+      "report_context": {
+        "title": "EXPERIMENTAL PROTOCOL REPORT",
+        "dataset_name": "MNIST digits stratified",
+        "classifier_name": "SimpleCNNBaseline",
+        "model_architecture": null,
+        "subset_name": "4/5",
+        "split_sizes": {
+          "train": 921,
+          "val": 231,
+          "test": 288
+        },
+        "training_setup": {
+          "epochs": 50,
+          "batch_size": 64,
+          "lr": 0.001,
+          "device": "cpu"
+        },
+        "model_setup": {
+          "num_classes": 10
+        },
+        "torchinfo_summary": "torchinfo.summary unavailable: No module named 'torchinfo'"
+      },
+      "torchinfo_summary": "torchinfo.summary unavailable: No module named 'torchinfo'",
+      "model": {
+        "class_name": "SimpleCNNBaseline",
+        "module": "__main__",
+        "repr": "SimpleCNNBaseline(\n  (features): Sequential(\n    (0): Conv2d(1, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))\n    (1): ReLU()\n    (2): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)\n    (3): Conv2d(16, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))\n    (4): ReLU()\n    (5): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)\n  )\n  (classifier): Sequential(\n    (0): Flatten(start_dim=1, end_dim=-1)\n    (1): Linear(in_features=512, out_features=64, bias=True)\n    (2): ReLU()\n    (3): Linear(in_features=64, out_features=10, bias=True)\n  )\n)"
+      },
+      "files": {
+        "report": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_B_CNN/05-05-2026-10-36/subset_04_report.log",
+        "epochs": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_B_CNN/05-05-2026-10-36/subset_04_epochs.csv",
+        "test_metrics": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_B_CNN/05-05-2026-10-36/subset_04_test_metrics.csv",
+        "confusion_matrix_csv": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_B_CNN/05-05-2026-10-36/subset_04_confusion_matrix.csv",
+        "confusion_matrix_txt": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_B_CNN/05-05-2026-10-36/subset_04_confusion_matrix.txt",
+        "torchinfo_summary": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_B_CNN/05-05-2026-10-36/subset_04_torchinfo_summary.log",
+        "best_model": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_B_CNN/05-05-2026-10-36/subset_04_best_model.pt",
+        "best_model_metadata": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_B_CNN/05-05-2026-10-36/subset_04_best_model_meta.json"
+      }
+    },
+    {
+      "subset_index": 5,
+      "subset_count": 5,
+      "saved_at": "2026-05-05T10:36:36",
+      "report_context": {
+        "title": "EXPERIMENTAL PROTOCOL REPORT",
+        "dataset_name": "MNIST digits stratified",
+        "classifier_name": "SimpleCNNBaseline",
+        "model_architecture": null,
+        "subset_name": "5/5",
+        "split_sizes": {
+          "train": 921,
+          "val": 231,
+          "test": 288
+        },
+        "training_setup": {
+          "epochs": 50,
+          "batch_size": 64,
+          "lr": 0.001,
+          "device": "cpu"
+        },
+        "model_setup": {
+          "num_classes": 10
+        },
+        "torchinfo_summary": "torchinfo.summary unavailable: No module named 'torchinfo'"
+      },
+      "torchinfo_summary": "torchinfo.summary unavailable: No module named 'torchinfo'",
+      "model": {
+        "class_name": "SimpleCNNBaseline",
+        "module": "__main__",
+        "repr": "SimpleCNNBaseline(\n  (features): Sequential(\n    (0): Conv2d(1, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))\n    (1): ReLU()\n    (2): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)\n    (3): Conv2d(16, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))\n    (4): ReLU()\n    (5): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)\n  )\n  (classifier): Sequential(\n    (0): Flatten(start_dim=1, end_dim=-1)\n    (1): Linear(in_features=512, out_features=64, bias=True)\n    (2): ReLU()\n    (3): Linear(in_features=64, out_features=10, bias=True)\n  )\n)"
+      },
+      "files": {
+        "report": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_B_CNN/05-05-2026-10-36/subset_05_report.log",
+        "epochs": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_B_CNN/05-05-2026-10-36/subset_05_epochs.csv",
+        "test_metrics": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_B_CNN/05-05-2026-10-36/subset_05_test_metrics.csv",
+        "confusion_matrix_csv": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_B_CNN/05-05-2026-10-36/subset_05_confusion_matrix.csv",
+        "confusion_matrix_txt": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_B_CNN/05-05-2026-10-36/subset_05_confusion_matrix.txt",
+        "torchinfo_summary": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_B_CNN/05-05-2026-10-36/subset_05_torchinfo_summary.log",
+        "best_model": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_B_CNN/05-05-2026-10-36/subset_05_best_model.pt",
+        "best_model_metadata": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_B_CNN/05-05-2026-10-36/subset_05_best_model_meta.json"
+      }
+    }
+  ]
+}
