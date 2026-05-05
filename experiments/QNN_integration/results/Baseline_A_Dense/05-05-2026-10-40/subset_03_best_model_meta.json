@@ -1,0 +1,35 @@
+{
+  "pipeline_name": "Baseline_A_Dense",
+  "pipeline_slug": "Baseline_A_Dense",
+  "subset_index": 3,
+  "subset_count": 5,
+  "saved_at": "2026-05-05T10:40:51",
+  "model": {
+    "class_name": "DenseBaseline",
+    "module": "__main__",
+    "repr": "DenseBaseline(\n  (flatten): Flatten(start_dim=1, end_dim=-1)\n  (classical_head_dense): Linear(in_features=256, out_features=10, bias=True)\n)"
+  },
+  "torchinfo_summary": "=================================================================\nLayer (type:depth-idx)                   Param #\n=================================================================\nDenseBaseline                            --\n├─Flatten: 1-1                           --\n├─Linear: 1-2                            2,570\n=================================================================\nTotal params: 2,570\nTrainable params: 2,570\nNon-trainable params: 0\n=================================================================",
+  "report_context": {
+    "title": "EXPERIMENTAL PROTOCOL REPORT",
+    "dataset_name": "MNIST digits stratified",
+    "classifier_name": "DenseBaseline",
+    "model_architecture": null,
+    "subset_name": "3/5",
+    "split_sizes": {
+      "train": 921,
+      "val": 231,
+      "test": 288
+    },
+    "training_setup": {
+      "epochs": 50,
+      "batch_size": 16,
+      "lr": 0.001,
+      "device": "cpu"
+    },
+    "model_setup": {
+      "num_classes": 10
+    },
+    "torchinfo_summary": "=================================================================\nLayer (type:depth-idx)                   Param #\n=================================================================\nDenseBaseline                            --\n├─Flatten: 1-1                           --\n├─Linear: 1-2                            2,570\n=================================================================\nTotal params: 2,570\nTrainable params: 2,570\nNon-trainable params: 0\n================================================================="
+  }
+}
