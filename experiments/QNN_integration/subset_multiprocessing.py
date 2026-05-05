@@ -88,6 +88,8 @@ def _run_subset_task(
 	)
 	result = trainer(
 		data_block=data_block,
+		subset_idx=subset_idx,
+		subset_count=subset_count,
 		**dict(train_kwargs),
 		report_context=report_context,
 	)
