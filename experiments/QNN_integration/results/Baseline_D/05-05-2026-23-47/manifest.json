@@ -1,0 +1,239 @@
+{
+  "pipeline_name": "Baseline_D",
+  "pipeline_slug": "Baseline_D",
+  "run_dir": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_D/05-05-2026-23-47",
+  "started_at": "2026-05-05T23:47:12",
+  "completed_at": "2026-05-06T01:18:47",
+  "subsets": [
+    {
+      "subset_index": 2,
+      "subset_count": 5,
+      "saved_at": "2026-05-06T00:56:02",
+      "report_context": {
+        "title": "EXPERIMENTAL PROTOCOL REPORT",
+        "dataset_name": "MNIST digits stratified",
+        "classifier_name": "CNN + ZZFeatureMap + QNN",
+        "model_architecture": null,
+        "subset_name": "2/5",
+        "split_sizes": {
+          "train": 921,
+          "val": 231,
+          "test": 288
+        },
+        "training_setup": {
+          "epochs": 50,
+          "batch_size": 16,
+          "device": "cpu",
+          "qnn_lr": 0.001,
+          "head_lr": 0.01
+        },
+        "model_setup": {
+          "num_classes": 10,
+          "num_qubits": 12,
+          "num_layers": 1
+        },
+        "torchinfo_summary": "=================================================================\nLayer (type:depth-idx)                   Param #\n=================================================================\nQNN_Baseline_CNN                         36\n├─Sequential: 1-1                        --\n│    └─Conv2d: 2-1                       160\n│    └─ReLU: 2-2                         --\n│    └─MaxPool2d: 2-3                    --\n│    └─Conv2d: 2-4                       4,640\n│    └─ReLU: 2-5                         --\n│    └─MaxPool2d: 2-6                    --\n│    └─Flatten: 2-7                      --\n│    └─Linear: 2-8                       6,156\n├─TorchConnector: 1-2                    36\n├─Linear: 1-3                            40,970\n├─LogSoftmax: 1-4                        --\n=================================================================\nTotal params: 51,998\nTrainable params: 51,998\nNon-trainable params: 0\n================================================================="
+      },
+      "torchinfo_summary": "=================================================================\nLayer (type:depth-idx)                   Param #\n=================================================================\nQNN_Baseline_CNN                         36\n├─Sequential: 1-1                        --\n│    └─Conv2d: 2-1                       160\n│    └─ReLU: 2-2                         --\n│    └─MaxPool2d: 2-3                    --\n│    └─Conv2d: 2-4                       4,640\n│    └─ReLU: 2-5                         --\n│    └─MaxPool2d: 2-6                    --\n│    └─Flatten: 2-7                      --\n│    └─Linear: 2-8                       6,156\n├─TorchConnector: 1-2                    36\n├─Linear: 1-3                            40,970\n├─LogSoftmax: 1-4                        --\n=================================================================\nTotal params: 51,998\nTrainable params: 51,998\nNon-trainable params: 0\n=================================================================",
+      "model": {
+        "class_name": "QNN_Baseline_CNN",
+        "module": "__main__",
+        "repr": "QNN_Baseline_CNN(\n  (cnn): Sequential(\n    (0): Conv2d(1, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))\n    (1): ReLU()\n    (2): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)\n    (3): Conv2d(16, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))\n    (4): ReLU()\n    (5): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)\n    (6): Flatten(start_dim=1, end_dim=-1)\n    (7): Linear(in_features=512, out_features=12, bias=True)\n  )\n  (qnn_pytorch_layer): TorchConnector()\n  (classical_head): Linear(in_features=4096, out_features=10, bias=True)\n  (softmax): LogSoftmax(dim=-1)\n)"
+      },
+      "files": {
+        "report": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_D/05-05-2026-23-47/subset_02_report.log",
+        "epochs": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_D/05-05-2026-23-47/subset_02_epochs.csv",
+        "test_metrics": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_D/05-05-2026-23-47/subset_02_test_metrics.csv",
+        "confusion_matrix_csv": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_D/05-05-2026-23-47/subset_02_confusion_matrix.csv",
+        "confusion_matrix_txt": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_D/05-05-2026-23-47/subset_02_confusion_matrix.txt",
+        "torchinfo_summary": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_D/05-05-2026-23-47/subset_02_torchinfo_summary.log",
+        "best_model": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_D/05-05-2026-23-47/subset_02_best_model.pt",
+        "best_model_metadata": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_D/05-05-2026-23-47/subset_02_best_model_meta.json"
+      }
+    },
+    {
+      "subset_index": 4,
+      "subset_count": 5,
+      "saved_at": "2026-05-06T00:56:03",
+      "report_context": {
+        "title": "EXPERIMENTAL PROTOCOL REPORT",
+        "dataset_name": "MNIST digits stratified",
+        "classifier_name": "CNN + ZZFeatureMap + QNN",
+        "model_architecture": null,
+        "subset_name": "4/5",
+        "split_sizes": {
+          "train": 921,
+          "val": 231,
+          "test": 288
+        },
+        "training_setup": {
+          "epochs": 50,
+          "batch_size": 16,
+          "device": "cpu",
+          "qnn_lr": 0.001,
+          "head_lr": 0.01
+        },
+        "model_setup": {
+          "num_classes": 10,
+          "num_qubits": 12,
+          "num_layers": 1
+        },
+        "torchinfo_summary": "=================================================================\nLayer (type:depth-idx)                   Param #\n=================================================================\nQNN_Baseline_CNN                         36\n├─Sequential: 1-1                        --\n│    └─Conv2d: 2-1                       160\n│    └─ReLU: 2-2                         --\n│    └─MaxPool2d: 2-3                    --\n│    └─Conv2d: 2-4                       4,640\n│    └─ReLU: 2-5                         --\n│    └─MaxPool2d: 2-6                    --\n│    └─Flatten: 2-7                      --\n│    └─Linear: 2-8                       6,156\n├─TorchConnector: 1-2                    36\n├─Linear: 1-3                            40,970\n├─LogSoftmax: 1-4                        --\n=================================================================\nTotal params: 51,998\nTrainable params: 51,998\nNon-trainable params: 0\n================================================================="
+      },
+      "torchinfo_summary": "=================================================================\nLayer (type:depth-idx)                   Param #\n=================================================================\nQNN_Baseline_CNN                         36\n├─Sequential: 1-1                        --\n│    └─Conv2d: 2-1                       160\n│    └─ReLU: 2-2                         --\n│    └─MaxPool2d: 2-3                    --\n│    └─Conv2d: 2-4                       4,640\n│    └─ReLU: 2-5                         --\n│    └─MaxPool2d: 2-6                    --\n│    └─Flatten: 2-7                      --\n│    └─Linear: 2-8                       6,156\n├─TorchConnector: 1-2                    36\n├─Linear: 1-3                            40,970\n├─LogSoftmax: 1-4                        --\n=================================================================\nTotal params: 51,998\nTrainable params: 51,998\nNon-trainable params: 0\n=================================================================",
+      "model": {
+        "class_name": "QNN_Baseline_CNN",
+        "module": "__main__",
+        "repr": "QNN_Baseline_CNN(\n  (cnn): Sequential(\n    (0): Conv2d(1, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))\n    (1): ReLU()\n    (2): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)\n    (3): Conv2d(16, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))\n    (4): ReLU()\n    (5): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)\n    (6): Flatten(start_dim=1, end_dim=-1)\n    (7): Linear(in_features=512, out_features=12, bias=True)\n  )\n  (qnn_pytorch_layer): TorchConnector()\n  (classical_head): Linear(in_features=4096, out_features=10, bias=True)\n  (softmax): LogSoftmax(dim=-1)\n)"
+      },
+      "files": {
+        "report": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_D/05-05-2026-23-47/subset_04_report.log",
+        "epochs": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_D/05-05-2026-23-47/subset_04_epochs.csv",
+        "test_metrics": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_D/05-05-2026-23-47/subset_04_test_metrics.csv",
+        "confusion_matrix_csv": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_D/05-05-2026-23-47/subset_04_confusion_matrix.csv",
+        "confusion_matrix_txt": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_D/05-05-2026-23-47/subset_04_confusion_matrix.txt",
+        "torchinfo_summary": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_D/05-05-2026-23-47/subset_04_torchinfo_summary.log",
+        "best_model": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_D/05-05-2026-23-47/subset_04_best_model.pt",
+        "best_model_metadata": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_D/05-05-2026-23-47/subset_04_best_model_meta.json"
+      }
+    },
+    {
+      "subset_index": 1,
+      "subset_count": 5,
+      "saved_at": "2026-05-06T00:56:11",
+      "report_context": {
+        "title": "EXPERIMENTAL PROTOCOL REPORT",
+        "dataset_name": "MNIST digits stratified",
+        "classifier_name": "CNN + ZZFeatureMap + QNN",
+        "model_architecture": "16x16 grayscale -> Conv2d(1,16,3,pad=1) -> ReLU -> MaxPool2d(2) -> Conv2d(16,32,3,pad=1) -> ReLU -> MaxPool2d(2) -> Flatten -> Linear(512, num_qubits) -> ZZFeatureMap(reps=1) -> VQC[RX-RY-RZ x num_layers + brickwork CX] -> SamplerQNN -> Linear(2**num_qubits, num_classes) -> LogSoftmax",
+        "subset_name": "1/5",
+        "split_sizes": {
+          "train": 921,
+          "val": 231,
+          "test": 288
+        },
+        "training_setup": {
+          "epochs": 50,
+          "batch_size": 16,
+          "device": "cpu",
+          "qnn_lr": 0.001,
+          "head_lr": 0.01
+        },
+        "model_setup": {
+          "num_classes": 10,
+          "num_qubits": 12,
+          "num_layers": 1
+        },
+        "torchinfo_summary": "=================================================================\nLayer (type:depth-idx)                   Param #\n=================================================================\nQNN_Baseline_CNN                         36\n├─Sequential: 1-1                        --\n│    └─Conv2d: 2-1                       160\n│    └─ReLU: 2-2                         --\n│    └─MaxPool2d: 2-3                    --\n│    └─Conv2d: 2-4                       4,640\n│    └─ReLU: 2-5                         --\n│    └─MaxPool2d: 2-6                    --\n│    └─Flatten: 2-7                      --\n│    └─Linear: 2-8                       6,156\n├─TorchConnector: 1-2                    36\n├─Linear: 1-3                            40,970\n├─LogSoftmax: 1-4                        --\n=================================================================\nTotal params: 51,998\nTrainable params: 51,998\nNon-trainable params: 0\n================================================================="
+      },
+      "torchinfo_summary": "=================================================================\nLayer (type:depth-idx)                   Param #\n=================================================================\nQNN_Baseline_CNN                         36\n├─Sequential: 1-1                        --\n│    └─Conv2d: 2-1                       160\n│    └─ReLU: 2-2                         --\n│    └─MaxPool2d: 2-3                    --\n│    └─Conv2d: 2-4                       4,640\n│    └─ReLU: 2-5                         --\n│    └─MaxPool2d: 2-6                    --\n│    └─Flatten: 2-7                      --\n│    └─Linear: 2-8                       6,156\n├─TorchConnector: 1-2                    36\n├─Linear: 1-3                            40,970\n├─LogSoftmax: 1-4                        --\n=================================================================\nTotal params: 51,998\nTrainable params: 51,998\nNon-trainable params: 0\n=================================================================",
+      "model": {
+        "class_name": "QNN_Baseline_CNN",
+        "module": "__main__",
+        "repr": "QNN_Baseline_CNN(\n  (cnn): Sequential(\n    (0): Conv2d(1, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))\n    (1): ReLU()\n    (2): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)\n    (3): Conv2d(16, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))\n    (4): ReLU()\n    (5): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)\n    (6): Flatten(start_dim=1, end_dim=-1)\n    (7): Linear(in_features=512, out_features=12, bias=True)\n  )\n  (qnn_pytorch_layer): TorchConnector()\n  (classical_head): Linear(in_features=4096, out_features=10, bias=True)\n  (softmax): LogSoftmax(dim=-1)\n)"
+      },
+      "files": {
+        "report": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_D/05-05-2026-23-47/subset_01_report.log",
+        "epochs": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_D/05-05-2026-23-47/subset_01_epochs.csv",
+        "test_metrics": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_D/05-05-2026-23-47/subset_01_test_metrics.csv",
+        "confusion_matrix_csv": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_D/05-05-2026-23-47/subset_01_confusion_matrix.csv",
+        "confusion_matrix_txt": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_D/05-05-2026-23-47/subset_01_confusion_matrix.txt",
+        "torchinfo_summary": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_D/05-05-2026-23-47/subset_01_torchinfo_summary.log",
+        "best_model": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_D/05-05-2026-23-47/subset_01_best_model.pt",
+        "best_model_metadata": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_D/05-05-2026-23-47/subset_01_best_model_meta.json"
+      }
+    },
+    {
+      "subset_index": 3,
+      "subset_count": 5,
+      "saved_at": "2026-05-06T01:07:31",
+      "report_context": {
+        "title": "EXPERIMENTAL PROTOCOL REPORT",
+        "dataset_name": "MNIST digits stratified",
+        "classifier_name": "CNN + ZZFeatureMap + QNN",
+        "model_architecture": null,
+        "subset_name": "3/5",
+        "split_sizes": {
+          "train": 921,
+          "val": 231,
+          "test": 288
+        },
+        "training_setup": {
+          "epochs": 50,
+          "batch_size": 16,
+          "device": "cpu",
+          "qnn_lr": 0.001,
+          "head_lr": 0.01
+        },
+        "model_setup": {
+          "num_classes": 10,
+          "num_qubits": 12,
+          "num_layers": 1
+        },
+        "torchinfo_summary": "=================================================================\nLayer (type:depth-idx)                   Param #\n=================================================================\nQNN_Baseline_CNN                         36\n├─Sequential: 1-1                        --\n│    └─Conv2d: 2-1                       160\n│    └─ReLU: 2-2                         --\n│    └─MaxPool2d: 2-3                    --\n│    └─Conv2d: 2-4                       4,640\n│    └─ReLU: 2-5                         --\n│    └─MaxPool2d: 2-6                    --\n│    └─Flatten: 2-7                      --\n│    └─Linear: 2-8                       6,156\n├─TorchConnector: 1-2                    36\n├─Linear: 1-3                            40,970\n├─LogSoftmax: 1-4                        --\n=================================================================\nTotal params: 51,998\nTrainable params: 51,998\nNon-trainable params: 0\n================================================================="
+      },
+      "torchinfo_summary": "=================================================================\nLayer (type:depth-idx)                   Param #\n=================================================================\nQNN_Baseline_CNN                         36\n├─Sequential: 1-1                        --\n│    └─Conv2d: 2-1                       160\n│    └─ReLU: 2-2                         --\n│    └─MaxPool2d: 2-3                    --\n│    └─Conv2d: 2-4                       4,640\n│    └─ReLU: 2-5                         --\n│    └─MaxPool2d: 2-6                    --\n│    └─Flatten: 2-7                      --\n│    └─Linear: 2-8                       6,156\n├─TorchConnector: 1-2                    36\n├─Linear: 1-3                            40,970\n├─LogSoftmax: 1-4                        --\n=================================================================\nTotal params: 51,998\nTrainable params: 51,998\nNon-trainable params: 0\n=================================================================",
+      "model": {
+        "class_name": "QNN_Baseline_CNN",
+        "module": "__main__",
+        "repr": "QNN_Baseline_CNN(\n  (cnn): Sequential(\n    (0): Conv2d(1, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))\n    (1): ReLU()\n    (2): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)\n    (3): Conv2d(16, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))\n    (4): ReLU()\n    (5): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)\n    (6): Flatten(start_dim=1, end_dim=-1)\n    (7): Linear(in_features=512, out_features=12, bias=True)\n  )\n  (qnn_pytorch_layer): TorchConnector()\n  (classical_head): Linear(in_features=4096, out_features=10, bias=True)\n  (softmax): LogSoftmax(dim=-1)\n)"
+      },
+      "files": {
+        "report": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_D/05-05-2026-23-47/subset_03_report.log",
+        "epochs": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_D/05-05-2026-23-47/subset_03_epochs.csv",
+        "test_metrics": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_D/05-05-2026-23-47/subset_03_test_metrics.csv",
+        "confusion_matrix_csv": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_D/05-05-2026-23-47/subset_03_confusion_matrix.csv",
+        "confusion_matrix_txt": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_D/05-05-2026-23-47/subset_03_confusion_matrix.txt",
+        "torchinfo_summary": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_D/05-05-2026-23-47/subset_03_torchinfo_summary.log",
+        "best_model": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_D/05-05-2026-23-47/subset_03_best_model.pt",
+        "best_model_metadata": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_D/05-05-2026-23-47/subset_03_best_model_meta.json"
+      }
+    },
+    {
+      "subset_index": 5,
+      "subset_count": 5,
+      "saved_at": "2026-05-06T01:18:47",
+      "report_context": {
+        "title": "EXPERIMENTAL PROTOCOL REPORT",
+        "dataset_name": "MNIST digits stratified",
+        "classifier_name": "CNN + ZZFeatureMap + QNN",
+        "model_architecture": null,
+        "subset_name": "5/5",
+        "split_sizes": {
+          "train": 921,
+          "val": 231,
+          "test": 288
+        },
+        "training_setup": {
+          "epochs": 50,
+          "batch_size": 16,
+          "device": "cpu",
+          "qnn_lr": 0.001,
+          "head_lr": 0.01
+        },
+        "model_setup": {
+          "num_classes": 10,
+          "num_qubits": 12,
+          "num_layers": 1
+        },
+        "torchinfo_summary": "=================================================================\nLayer (type:depth-idx)                   Param #\n=================================================================\nQNN_Baseline_CNN                         36\n├─Sequential: 1-1                        --\n│    └─Conv2d: 2-1                       160\n│    └─ReLU: 2-2                         --\n│    └─MaxPool2d: 2-3                    --\n│    └─Conv2d: 2-4                       4,640\n│    └─ReLU: 2-5                         --\n│    └─MaxPool2d: 2-6                    --\n│    └─Flatten: 2-7                      --\n│    └─Linear: 2-8                       6,156\n├─TorchConnector: 1-2                    36\n├─Linear: 1-3                            40,970\n├─LogSoftmax: 1-4                        --\n=================================================================\nTotal params: 51,998\nTrainable params: 51,998\nNon-trainable params: 0\n================================================================="
+      },
+      "torchinfo_summary": "=================================================================\nLayer (type:depth-idx)                   Param #\n=================================================================\nQNN_Baseline_CNN                         36\n├─Sequential: 1-1                        --\n│    └─Conv2d: 2-1                       160\n│    └─ReLU: 2-2                         --\n│    └─MaxPool2d: 2-3                    --\n│    └─Conv2d: 2-4                       4,640\n│    └─ReLU: 2-5                         --\n│    └─MaxPool2d: 2-6                    --\n│    └─Flatten: 2-7                      --\n│    └─Linear: 2-8                       6,156\n├─TorchConnector: 1-2                    36\n├─Linear: 1-3                            40,970\n├─LogSoftmax: 1-4                        --\n=================================================================\nTotal params: 51,998\nTrainable params: 51,998\nNon-trainable params: 0\n=================================================================",
+      "model": {
+        "class_name": "QNN_Baseline_CNN",
+        "module": "__main__",
+        "repr": "QNN_Baseline_CNN(\n  (cnn): Sequential(\n    (0): Conv2d(1, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))\n    (1): ReLU()\n    (2): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)\n    (3): Conv2d(16, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))\n    (4): ReLU()\n    (5): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)\n    (6): Flatten(start_dim=1, end_dim=-1)\n    (7): Linear(in_features=512, out_features=12, bias=True)\n  )\n  (qnn_pytorch_layer): TorchConnector()\n  (classical_head): Linear(in_features=4096, out_features=10, bias=True)\n  (softmax): LogSoftmax(dim=-1)\n)"
+      },
+      "files": {
+        "report": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_D/05-05-2026-23-47/subset_05_report.log",
+        "epochs": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_D/05-05-2026-23-47/subset_05_epochs.csv",
+        "test_metrics": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_D/05-05-2026-23-47/subset_05_test_metrics.csv",
+        "confusion_matrix_csv": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_D/05-05-2026-23-47/subset_05_confusion_matrix.csv",
+        "confusion_matrix_txt": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_D/05-05-2026-23-47/subset_05_confusion_matrix.txt",
+        "torchinfo_summary": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_D/05-05-2026-23-47/subset_05_torchinfo_summary.log",
+        "best_model": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_D/05-05-2026-23-47/subset_05_best_model.pt",
+        "best_model_metadata": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_D/05-05-2026-23-47/subset_05_best_model_meta.json"
+      }
+    }
+  ]
+}
