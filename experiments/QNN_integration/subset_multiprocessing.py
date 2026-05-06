@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from concurrent import futures
+import inspect
 from multiprocessing import cpu_count
 import pickle
 from typing import Any, Callable, Mapping
@@ -63,6 +64,7 @@ def _make_report_context(
 
 def _run_subset_task(
 	trainer_payload: bytes,
+	subset_kwargs_factory_payload: bytes | None,
 	subset_idx: int,
 	subset_count: int,
 	data_block: Any,
@@ -70,6 +72,11 @@ def _run_subset_task(
 	report_kwargs: Mapping[str, Any],
 ) -> tuple[int, dict[str, Any], dict[str, Any]]:
 	trainer = cloudpickle.loads(trainer_payload)
+	subset_kwargs_factory = (
+		cloudpickle.loads(subset_kwargs_factory_payload)
+		if subset_kwargs_factory_payload is not None
+		else None
+	)
 	report_train_kwargs = {
 		key: train_kwargs[key]
 		for key in (
@@ -88,13 +95,24 @@ def _run_subset_task(
 		**report_train_kwargs,
 		**dict(report_kwargs),
 	)
-	result = trainer(
-		data_block=data_block,
-		subset_idx=subset_idx,
-		subset_count=subset_count,
-		**dict(train_kwargs),
-		report_context=report_context,
+	trainer_kwargs = dict(train_kwargs)
+	if subset_kwargs_factory is not None:
+		trainer_kwargs.update(dict(subset_kwargs_factory(subset_idx, data_block)))
+	trainer_kwargs["report_context"] = report_context
+
+	trainer_parameters = inspect.signature(trainer).parameters
+	accepts_var_kwargs = any(
+		parameter.kind == inspect.Parameter.VAR_KEYWORD
+		for parameter in trainer_parameters.values()
 	)
+	if accepts_var_kwargs or "data_block" in trainer_parameters:
+		trainer_kwargs["data_block"] = data_block
+	if accepts_var_kwargs or "subset_idx" in trainer_parameters:
+		trainer_kwargs["subset_idx"] = subset_idx
+	if accepts_var_kwargs or "subset_count" in trainer_parameters:
+		trainer_kwargs["subset_count"] = subset_count
+
+	result = trainer(**trainer_kwargs)
 	return subset_idx, report_context, _prepare_result_for_ipc(result)
 
 
@@ -161,6 +179,7 @@ def train_subsets_with_process_pool(
 	model_architecture: str,
 	save_results: bool = True,
 	training_setup_extra: Mapping[str, Any] | None = None,
+	subset_trainer_kwargs_factory: Callable[[int, Any], Mapping[str, Any]] | None = None,
 	max_workers: int | None = None,
 ) -> dict[str, Any]:
 	subset_count = len(dataset.subsets)
@@ -168,6 +187,11 @@ def train_subsets_with_process_pool(
 	results_writer = ExperimentResultWriter(pipeline_name=pipeline_name) if save_results else None
 	worker_count = max_workers or min(subset_count, max(1, cpu_count() - 1))
 	trainer_payload = cloudpickle.dumps(trainer)
+	subset_kwargs_factory_payload = (
+		cloudpickle.dumps(subset_trainer_kwargs_factory)
+		if subset_trainer_kwargs_factory is not None
+		else None
+	)
 	train_kwargs = {
 		"num_classes": num_classes,
 		"num_qubits": num_qubits,
@@ -188,6 +212,7 @@ def train_subsets_with_process_pool(
 			executor.submit(
 				_run_subset_task,
 				trainer_payload,
+				subset_kwargs_factory_payload,
 				subset_idx,
 				subset_count,
 				data_block,
