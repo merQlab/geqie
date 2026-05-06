@@ -12,4 +12,6 @@ build
 !.env.server
 logs
 
+*.npy
+circuits/
 experiments/results

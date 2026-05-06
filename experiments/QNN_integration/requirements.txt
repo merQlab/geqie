@@ -1,5 +1,9 @@
 scikit-learn
+pandas
+scipy
+plotly
 torch
+torchinfo
 matplotlib
 datasets
 pylatexenc

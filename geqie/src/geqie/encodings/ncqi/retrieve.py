@@ -1,7 +1,7 @@
 import numpy as np
 import json
 
-def retrieve(results: str) -> np.ndarray:
+def retrieve(results: str, **_) -> np.ndarray:
     """
     Decodes an image from quantum state measurement results.
 

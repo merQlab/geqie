@@ -1,0 +1,16 @@
+% TABLE 1: Basic statistics:
+\begin{table}[h]
+\caption{Classification results across cross-validation subsets.}\label{tab:qnn_integration_results}%
+\begin{tabular}{@{}lllllll@{}}
+\toprule
+Model name & Encoding / preprocessing & Accuracy & Precision & Recall & F1 & Loss \\
+\midrule
+Baseline A: &  & 0.845 $\pm$ 0.018 & 0.849 $\pm$ 0.018 & 0.845 $\pm$ 0.018 & 0.844 $\pm$ 0.018 & 0.792 $\pm$ 0.048 \\
+Baseline B: &  & 0.852 $\pm$ 0.018 & 0.862 $\pm$ 0.014 & 0.852 $\pm$ 0.018 & 0.851 $\pm$ 0.018 & 0.487 $\pm$ 0.080 \\
+Baseline C: &  & 0.121 $\pm$ 0.034 & 0.131 $\pm$ 0.024 & 0.121 $\pm$ 0.034 & 0.099 $\pm$ 0.031 & 17.352 $\pm$ 0.905 \\
+Baseline D: &  & 0.503 $\pm$ 0.053 & 0.560 $\pm$ 0.033 & 0.503 $\pm$ 0.053 & 0.485 $\pm$ 0.059 & 10.141 $\pm$ 1.828 \\
+GEQIE-FRQI: &  & 0.763 $\pm$ 0.038 & 0.787 $\pm$ 0.032 & 0.763 $\pm$ 0.038 & 0.757 $\pm$ 0.040 & 0.796 $\pm$ 0.115 \\
+GEQIE-NEQR: &  & 0.766 $\pm$ 0.025 & 0.785 $\pm$ 0.017 & 0.766 $\pm$ 0.025 & 0.762 $\pm$ 0.025 & 0.818 $\pm$ 0.081 \\
+\botrule
+\end{tabular}
+\end{table}

@@ -1,12 +1,13 @@
+import inspect
 from typing import Any, Callable, Dict
 
 import numpy as np
 
 from qiskit_aer import AerSimulator
 from qiskit_aer.noise import NoiseModel
+from qiskit import transpile
 from qiskit.circuit import QuantumCircuit
 from qiskit.result import Result
-from qiskit.transpiler import generate_preset_pass_manager
 from qiskit.quantum_info import Operator, Statevector
 
 import geqie.backends.ibm_qp as ibm_qp
@@ -15,7 +16,7 @@ from geqie.logging_utils.tabulate import tabulate_complex
 
 
 def encode(
-    init_function: Callable[[int], Statevector],
+    init_function: Callable[..., Statevector],
     # arbitrary coordinate indices + R + image
     data_function: Callable[..., Statevector],
     map_function: Callable[..., Operator],
@@ -23,6 +24,7 @@ def encode(
     image_dimensionality: int = 2,
     perform_measurement: bool = True,
     logging_level: int | None = None,
+    encoding_params: Dict[str, str] = {},
     **_: Dict[Any, Any],
 ) -> QuantumCircuit:
     logger = setup_logger(logging_level, reset=True)
@@ -34,8 +36,8 @@ def encode(
     products, data_vectors, map_operators = [], [], []
 
     for coords in np.ndindex(*shape):
-        data_vector = data_function(*coords, R=R, image=image)
-        map_operator = map_function(*coords, R=R, image=image)
+        data_vector = data_function(*coords, R=R, image=image, **encoding_params)
+        map_operator = map_function(*coords, R=R, image=image, **encoding_params)
         product = data_vector.to_operator() ^ map_operator
 
         products.append(product)
@@ -49,17 +51,17 @@ def encode(
         logger.state("===========")
 
     G = np.sum(products, axis=0)
-    U, _ = np.linalg.qr(G)
+    U, _r = np.linalg.qr(G)
     logger.math(f"G=\n{tabulate_complex(G)}")
     logger.math(f"U=\n{tabulate_complex(U)}")
 
     U_op = Operator(U)
     n_qubits = U_op.num_qubits
-    init_state = init_function(n_qubits)
+    init_state = init_function(n_qubits, **encoding_params)
     logger.state(f"{init_state=}")
 
     circuit = QuantumCircuit(n_qubits)
-    circuit.initialize(init_state, range(n_qubits), normalize=True)
+    circuit.prepare_state(init_state, range(n_qubits), normalize=True)
     circuit.append(U_op, range(n_qubits))
     if perform_measurement:
         circuit.measure_all()
@@ -83,14 +85,15 @@ def simulate(
     logger = setup_logger(logging_level, reset=True)
 
     simulator = AerSimulator(device=device, method=method)
+    transpiled_circuit = transpile(circuit, simulator, optimization_level=0)
     
     logger.debug("Simulating circuit...")
-    result = simulator.run(circuit, shots=n_shots, memory=True, noise_model=noise_model).result()
+    result = simulator.run(transpiled_circuit, shots=n_shots, memory=True, noise_model=noise_model).result()
     logger.debug("Simulation completed.")
     if return_qiskit_result:
         return result
 
-    counts = result.get_counts(circuit)
+    counts = result.get_counts(transpiled_circuit)
 
     if return_padded_counts:
         logger.debug("Padding counts...")
@@ -130,13 +133,13 @@ def execute(
         min_num_qubits=circuit.num_qubits,
     )
 
-    pass_manager = generate_preset_pass_manager(
-        backend=ibm_qp_backend, 
+    logger.info("Circuit transpilation...")
+    transpiled_circuit = transpile(
+        circuit=circuit,
+        backend=ibm_qp_backend,
         translation_method="translator",
         **transpiler_args,
     )
-    logger.info("Circuit transpilation...")
-    transpiled_circuit = pass_manager.run(circuit)
     logger.info("Circuit transpilation. Done.")
     logger.trace(transpiled_circuit.draw())
 

@@ -1,9 +1,11 @@
 import numpy as np
+from typing import Any
 
 from qiskit.quantum_info import Statevector
 
-def init(n_qubits: int) -> Statevector:
-    base_state = np.zeros(2**8, dtype=int)
+
+def init(n_qubits: int, bitrate: int = 8, **_) -> Statevector:
+    base_state = np.zeros(2**bitrate, dtype=int)
     base_state[0] = 1
-    state = np.tile(base_state, 2**(n_qubits - 8))
+    state = np.tile(base_state, 2**(n_qubits - bitrate))
     return Statevector(state)

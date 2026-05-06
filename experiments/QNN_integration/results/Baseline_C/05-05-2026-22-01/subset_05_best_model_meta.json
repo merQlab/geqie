@@ -1,0 +1,38 @@
+{
+  "pipeline_name": "Baseline_C",
+  "pipeline_slug": "Baseline_C",
+  "subset_index": 5,
+  "subset_count": 5,
+  "saved_at": "2026-05-05T23:34:00",
+  "model": {
+    "class_name": "QNN_Baseline_PCA",
+    "module": "__main__",
+    "repr": "QNN_Baseline_PCA(\n  (qnn_pytorch_layer): TorchConnector()\n  (classical_head): Linear(in_features=4096, out_features=10, bias=True)\n  (softmax): LogSoftmax(dim=-1)\n)"
+  },
+  "torchinfo_summary": "=================================================================\nLayer (type:depth-idx)                   Param #\n=================================================================\nQNN_Baseline_PCA                         36\n├─TorchConnector: 1-1                    36\n├─Linear: 1-2                            40,970\n├─LogSoftmax: 1-3                        --\n=================================================================\nTotal params: 41,042\nTrainable params: 41,042\nNon-trainable params: 0\n=================================================================",
+  "report_context": {
+    "title": "EXPERIMENTAL PROTOCOL REPORT",
+    "dataset_name": "MNIST digits stratified",
+    "classifier_name": "PCA + ZZFeatureMap + QNN",
+    "model_architecture": null,
+    "subset_name": "5/5",
+    "split_sizes": {
+      "train": 921,
+      "val": 231,
+      "test": 288
+    },
+    "training_setup": {
+      "epochs": 50,
+      "batch_size": 16,
+      "device": "cpu",
+      "qnn_lr": 0.001,
+      "head_lr": 0.01
+    },
+    "model_setup": {
+      "num_classes": 10,
+      "num_qubits": 12,
+      "num_layers": 1
+    },
+    "torchinfo_summary": "=================================================================\nLayer (type:depth-idx)                   Param #\n=================================================================\nQNN_Baseline_PCA                         36\n├─TorchConnector: 1-1                    36\n├─Linear: 1-2                            40,970\n├─LogSoftmax: 1-3                        --\n=================================================================\nTotal params: 41,042\nTrainable params: 41,042\nNon-trainable params: 0\n================================================================="
+  }
+}
