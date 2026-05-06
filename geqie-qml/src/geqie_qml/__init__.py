@@ -2,6 +2,7 @@ import logging
 import os
 
 from .layer import VQCLayer, MatrixDataset
+from .layer_v2 import GEQIELayer
 from .precompute import compute_and_save_circuits
 
 LOGGER_FORMAT = "%(levelname)s %(asctime)s --- %(message)s (%(filename)s:%(lineno)d)"
