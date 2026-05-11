@@ -1,0 +1,16 @@
+% TABLE 2: Models comparison and their trainable parameters.
+\begin{table}[h]
+\caption{Comparison of model trainable parameters}\label{tab2}%
+\begin{tabular}{@{}lll@{}}
+\toprule
+Model name  & Total trainable parameters & Quantum layer trainable parameters \\
+\midrule
+Baseline A: DenseBaseline & 2,570 & 0 \\
+Baseline B: SimpleCNNBaseline & 38,282 & 0 \\
+Baseline C: PCA + ZZFeatureMap + QNN & 41,042 & 36 \\
+Baseline D: CNN + ZZFeatureMap + QNN & 51,998 & 36 \\
+Experiment A: FRQI + QNN + Dense & 5,265 & 135 \\
+Experiment B: NEQR + QNN + Dense & 5,265 & 135 \\
+\botrule
+\end{tabular}
+\end{table}

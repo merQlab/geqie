@@ -160,6 +160,42 @@ def _state_dict_to_cpu(model: Any) -> dict[str, Any]:
 	}
 
 
+def make_model_checkpoint_artifacts(
+	model: Any,
+	torchinfo_summary: str | None = None,
+) -> dict[str, Any]:
+	return {
+		"model": _model_metadata(model),
+		"torchinfo_summary": torchinfo_summary,
+		"state_dict": _state_dict_to_cpu(model),
+	}
+
+
+def render_torchinfo_summary(model: Any) -> str:
+	try:
+		from torchinfo import summary
+	except ImportError as error:
+		return f"torchinfo.summary unavailable: {error}"
+
+	try:
+		return str(summary(model, verbose=0))
+	except Exception as error:
+		return f"torchinfo.summary failed: {error.__class__.__name__}: {error}"
+
+
+def with_torchinfo_summary(report_context: Mapping[str, Any] | None, model: Any) -> dict[str, Any] | None:
+	if report_context is None:
+		return None
+
+	if "torchinfo_summary" in report_context:
+		return dict(report_context)
+
+	return {
+		**report_context,
+		"torchinfo_summary": render_torchinfo_summary(model),
+	}
+
+
 def _history_length(history: Mapping[str, Sequence[Any]]) -> int:
 	lengths = [len(values) for values in history.values() if hasattr(values, "__len__")]
 	return max(lengths, default=0)
@@ -199,11 +235,12 @@ def render_experiment_report(
 	model_setup: Mapping[str, Any] | None = None,
 	model_architecture: str | None = None,
 	trainable_parameters: int | None = None,
+	torchinfo_summary: str | None = None,
 	now: datetime | None = None,
 ) -> str:
 	now = now or datetime.now()
 	rows = [
-		("DATE", now.strftime("%d-%m-%Y")),
+		("DATE", now.strftime("%Y-%m-%d")),
 		("TIME", now.strftime("%H-%M")),
 		("DATASET", dataset_name),
 		("CLASSIFIER", classifier_name),
@@ -215,13 +252,15 @@ def render_experiment_report(
 	if model_architecture:
 		rows.append(("ARCHITECT.", model_architecture))
 
-	if trainable_parameters is not None:
-		rows.append(("PARAMS", trainable_parameters))
-
 	if model_setup:
 		rows.append(("MODEL", _format_mapping(model_setup)))
 
-	return _render_report_box(title, rows)
+	extra_lines = []
+	if torchinfo_summary:
+		extra_lines.append("TORCHINFO SUMMARY:")
+		extra_lines.extend(str(torchinfo_summary).splitlines())
+
+	return _render_report_box(title, rows, extra_lines=extra_lines)
 
 
 def print_experiment_report(**kwargs: Any) -> None:
@@ -340,7 +379,7 @@ def sanitize_path_segment(value: str) -> str:
 
 
 def format_run_timestamp(value: datetime) -> str:
-	label = value.strftime("%d-%m-%Y-%H-%M")
+	label = value.strftime("%Y-%m-%d-%H-%M")
 	if os.name == "nt":
 		# Windows cannot create path segments containing ":".
 		label = label.replace(":", "-")
@@ -414,12 +453,24 @@ class ExperimentResultWriter:
 		test_metrics: Mapping[str, Any],
 		confusion_matrix: Any,
 		model: Any | None = None,
+		model_artifacts: Mapping[str, Any] | None = None,
 	) -> dict[str, str]:
 		prefix = f"subset_{subset_index:02d}"
 		total_epochs = _to_builtin_scalar(report_context.get("training_setup", {}).get("epochs"))
+		existing_torchinfo_summary = report_context.get("torchinfo_summary")
+		if existing_torchinfo_summary:
+			torchinfo_summary = existing_torchinfo_summary
+		elif model is not None:
+			torchinfo_summary = render_torchinfo_summary(model)
+		else:
+			torchinfo_summary = None
+		report_context_with_summary = {
+			**dict(report_context),
+			"torchinfo_summary": torchinfo_summary,
+		}
 
 		protocol = render_experiment_report(
-			**dict(report_context),
+			**report_context_with_summary,
 			now=self.started_at,
 		)
 		report_text = "\n\n".join(
@@ -435,6 +486,7 @@ class ExperimentResultWriter:
 		test_metrics_path = self.run_dir / f"{prefix}_test_metrics.csv"
 		confusion_matrix_path = self.run_dir / f"{prefix}_confusion_matrix.csv"
 		confusion_matrix_txt_path = self.run_dir / f"{prefix}_confusion_matrix.txt"
+		torchinfo_summary_path = self.run_dir / f"{prefix}_torchinfo_summary.log"
 		model_path = self.run_dir / f"{prefix}_best_model.pt"
 		model_metadata_path = self.run_dir / f"{prefix}_best_model_meta.json"
 
@@ -446,6 +498,7 @@ class ExperimentResultWriter:
 			np.array2string(np.asarray(confusion_matrix)) + "\n",
 			encoding="utf-8",
 		)
+		torchinfo_summary_path.write_text(str(torchinfo_summary or "") + "\n", encoding="utf-8")
 
 		created_files = {
 			"report": str(report_path),
@@ -453,27 +506,36 @@ class ExperimentResultWriter:
 			"test_metrics": str(test_metrics_path),
 			"confusion_matrix_csv": str(confusion_matrix_path),
 			"confusion_matrix_txt": str(confusion_matrix_txt_path),
+			"torchinfo_summary": str(torchinfo_summary_path),
 		}
 
 		model_metadata = None
-		if model is not None:
+		subset_saved_at = datetime.now().isoformat(timespec="seconds")
+		if model is not None or model_artifacts is not None:
 			created_files.update(
 				self._write_best_model(
 					path=model_path,
 					metadata_path=model_metadata_path,
 					model=model,
+					model_artifacts=model_artifacts,
 					subset_index=subset_index,
 					subset_count=subset_count,
-					report_context=report_context,
+					report_context=report_context_with_summary,
+					torchinfo_summary=torchinfo_summary,
 				)
 			)
-			model_metadata = _model_metadata(model)
+			if model is not None:
+				model_metadata = _model_metadata(model)
+			elif model_artifacts is not None:
+				model_metadata = dict(model_artifacts["model"])
 
 		self.subsets.append(
 			{
 				"subset_index": subset_index,
 				"subset_count": subset_count,
-				"report_context": dict(report_context),
+				"saved_at": subset_saved_at,
+				"report_context": report_context_with_summary,
+				"torchinfo_summary": torchinfo_summary,
 				"model": model_metadata,
 				"files": created_files,
 			}
@@ -485,17 +547,27 @@ class ExperimentResultWriter:
 		self,
 		path: Path,
 		metadata_path: Path,
-		model: Any,
+		model: Any | None,
+		model_artifacts: Mapping[str, Any] | None,
 		subset_index: int,
 		subset_count: int,
 		report_context: Mapping[str, Any],
+		torchinfo_summary: str | None = None,
 	) -> dict[str, str]:
 		try:
 			import torch
 		except ImportError as error:
 			raise RuntimeError("PyTorch is required to export best model checkpoints.") from error
 
-		model_metadata = _model_metadata(model)
+		if model_artifacts is None:
+			if model is None:
+				raise ValueError("Either model or model_artifacts must be provided.")
+			model_artifacts = make_model_checkpoint_artifacts(
+				model,
+				torchinfo_summary=torchinfo_summary,
+			)
+
+		model_metadata = dict(model_artifacts["model"])
 		payload = {
 			"pipeline_name": self.pipeline_name,
 			"pipeline_slug": self.pipeline_slug,
@@ -503,8 +575,9 @@ class ExperimentResultWriter:
 			"subset_count": subset_count,
 			"saved_at": datetime.now().isoformat(timespec="seconds"),
 			"model": model_metadata,
+			"torchinfo_summary": model_artifacts.get("torchinfo_summary", torchinfo_summary),
 			"report_context": dict(report_context),
-			"state_dict": _state_dict_to_cpu(model),
+			"state_dict": dict(model_artifacts["state_dict"]),
 		}
 		torch.save(payload, path)
 
