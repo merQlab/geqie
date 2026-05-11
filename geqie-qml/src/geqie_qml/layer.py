@@ -14,6 +14,7 @@ from qiskit.primitives import StatevectorSampler as Sampler
 from qiskit_machine_learning.gradients import SPSASamplerGradient
 from qiskit_machine_learning.neural_networks import SamplerQNN
 
+from .ansatze import default_vqc_ansatz
 
 # ---------------------------------------------------------------------------
 # Dataset
@@ -82,8 +83,8 @@ def _worker_forward_eval(args):
     np.ndarray, shape (2**num_qubits,)
         Probability distribution over basis states.
     """
-    matrix_np, weights_np, num_qubits, num_layers, shots = args
-    vqc = _build_vqc_circuit(num_qubits, num_layers)
+    matrix_np, weights_np, num_qubits, num_layers, shots, ansatz_factory = args
+    vqc = ansatz_factory(num_qubits, num_layers)
     qc = QuantumCircuit(num_qubits)
     qc.append(UnitaryGate(matrix_np), range(num_qubits))
     qc.compose(vqc, inplace=True)
@@ -108,8 +109,8 @@ def _worker_grad_eval(args):
     np.ndarray, shape (output_size, num_weights)
         Jacobian of the output probabilities w.r.t. the quantum weights.
     """
-    matrix_np, weights_np, num_qubits, num_layers, shots = args
-    vqc = _build_vqc_circuit(num_qubits, num_layers)
+    matrix_np, weights_np, num_qubits, num_layers, shots, ansatz_factory = args
+    vqc = ansatz_factory(num_qubits, num_layers)
     qc = QuantumCircuit(num_qubits)
     qc.append(UnitaryGate(matrix_np), range(num_qubits))
     qc.compose(vqc, inplace=True)
@@ -195,11 +196,11 @@ class QNNBatchFunction(torch.autograd.Function):
 
     @staticmethod
     def forward(ctx, weights, executor, matrices_np_list,
-                num_qubits, num_layers, shots):
+                num_qubits, num_layers, shots, ansatz_factory):
         weights_np = weights.detach().numpy()
 
         args_list = [
-            (matrix, weights_np, num_qubits, num_layers, shots)
+            (matrix, weights_np, num_qubits, num_layers, shots, ansatz_factory)
             for matrix in matrices_np_list
         ]
         probs_list = _work_dispatch(_worker_forward_eval, args_list, executor)
@@ -211,7 +212,7 @@ class QNNBatchFunction(torch.autograd.Function):
         ctx.num_qubits = num_qubits
         ctx.num_layers = num_layers
         ctx.shots = shots
-
+        ctx.ansatz_factory = ansatz_factory
         return torch.tensor(probs_np, dtype=weights.dtype)
 
     @staticmethod
@@ -226,7 +227,7 @@ class QNNBatchFunction(torch.autograd.Function):
         weights_np = weights.detach().numpy()
 
         args_list = [
-            (m, weights_np, ctx.num_qubits, ctx.num_layers, ctx.shots)
+            (m, weights_np, ctx.num_qubits, ctx.num_layers, ctx.shots, ctx.ansatz_factory)
             for m in ctx.matrices_np_list
         ]
         jac_list = _work_dispatch(_worker_grad_eval, args_list, ctx.executor)
@@ -245,6 +246,7 @@ class QNNBatchFunction(torch.autograd.Function):
             None,   # num_qubits
             None,   # num_layers
             None,   # shots
+            None,   # ansatz_factory
         )
 
 
@@ -307,18 +309,21 @@ class VQCLayer(nn.Module):
         num_layers: int = 3,
         shots: int = 1024,
         scale_output: bool = True,
+        ansatz_factory=None,
     ):
         super().__init__()
         self.num_qubits = num_qubits
         self.num_layers = num_layers
         self.num_shots = shots
         self.scale_output = scale_output
+        self.ansatz_factory = ansatz_factory or default_vqc_ansatz
 
         # Trainable quantum weights, registered as a proper nn.Parameter so
         # that optimisers, state_dict, and requires_grad all work out of the box.
         # Workers reconstruct the circuit independently via _build_vqc_circuit,
         # so the Qiskit QuantumCircuit object does not need to be stored here.
-        num_params = 3 * num_qubits * num_layers
+        probe_circuit = self.ansatz_factory(num_qubits, num_layers)
+        num_params = len(probe_circuit.parameters)
         self.quantum_weight = nn.Parameter(
             torch.empty(num_params).uniform_(-np.pi, np.pi)
         )
@@ -397,6 +402,7 @@ class VQCLayer(nn.Module):
             self.num_qubits,
             self.num_layers,
             self.num_shots,
+            self.ansatz_factory,
         )
 
         if self.scale_output:
