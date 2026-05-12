@@ -2,6 +2,7 @@ import inspect
 from typing import Any, Callable, Dict
 
 import numpy as np
+import sympy as sp
 
 from qiskit_aer import AerSimulator
 from qiskit_aer.noise import NoiseModel
@@ -15,24 +16,33 @@ from geqie.logging_utils.logger import setup_logger
 from geqie.logging_utils.tabulate import tabulate_complex
 
 
-def encode(
-    init_function: Callable[..., Statevector],
-    # arbitrary coordinate indices + R + image
+def _to_matrix_array(operator_or_matrix: Operator | np.ndarray | list[Any]) -> np.ndarray:
+    if isinstance(operator_or_matrix, Operator):
+        return operator_or_matrix.data
+    return np.asarray(operator_or_matrix)
+
+
+def _build_symbolic_image(image: np.ndarray) -> tuple[np.ndarray, dict[sp.Symbol, Any]]:
+    symbolic_image = np.empty(image.shape, dtype=object)
+    substitutions: dict[sp.Symbol, Any] = {}
+
+    for coords in np.ndindex(image.shape):
+        symbol = sp.Symbol(f"px_{'_'.join(str(c) for c in coords)}", real=True)
+        symbolic_image[coords] = symbol
+        substitutions[symbol] = image[coords]
+
+    return symbolic_image, substitutions
+
+
+def _compute_numeric_G(
+    shape: tuple[int, ...],
+    R: int,
+    image: np.ndarray,
     data_function: Callable[..., Statevector],
     map_function: Callable[..., Operator],
-    image: np.ndarray,
-    image_dimensionality: int = 2,
-    perform_measurement: bool = True,
-    logging_level: int | None = None,
-    encoding_params: Dict[str, str] = {},
-    **_: Dict[Any, Any],
-) -> QuantumCircuit:
-    logger = setup_logger(logging_level, reset=True)
-
-    shape = image.shape[:image_dimensionality]
-
-    R = int(np.ceil(np.log2(max(shape))))
-
+    encoding_params: Dict[str, Any],
+    logger: Any,
+) -> np.ndarray:
     products, data_vectors, map_operators = [], [], []
 
     for coords in np.ndindex(*shape):
@@ -50,10 +60,68 @@ def encode(
         logger.state(f"{product=}")
         logger.state("===========")
 
-    G = np.sum(products, axis=0)
-    U, _r = np.linalg.qr(G)
-    logger.math(f"G=\n{tabulate_complex(G)}")
-    logger.math(f"U=\n{tabulate_complex(U)}")
+    return np.sum(products, axis=0)
+
+
+def _compute_symbolic_G(
+    shape: tuple[int, ...],
+    R: int,
+    image: np.ndarray,
+    data_function: Callable[..., Statevector],
+    map_function: Callable[..., Operator],
+    encoding_params: Dict[str, Any],
+    logger: Any,
+) -> tuple[sp.Matrix, dict[sp.Symbol, Any]]:
+    symbolic_image, substitutions = _build_symbolic_image(image)
+    symbolic_products: list[sp.Matrix] = []
+
+    for coords in np.ndindex(*shape):
+        data_vector = data_function(*coords, R=R, image=symbolic_image, **encoding_params)
+        map_operator = map_function(*coords, R=R, image=symbolic_image, **encoding_params)
+
+        data_matrix = sp.Matrix(data_vector.to_operator())
+        map_matrix = sp.Matrix(map_operator)
+        product = sp.kronecker_product(data_matrix, map_matrix)
+
+        symbolic_products.append(product)
+
+        logger.state(f"{coords=}")
+        logger.state(f"{data_vector=}")
+        logger.state(f"{map_operator=}")
+        logger.state("product=<symbolic>")
+        logger.state("===========")
+
+    G_symbolic = sp.Matrix(np.sum(symbolic_products, axis=0))
+    return G_symbolic, substitutions
+
+
+def encode(
+    init_function: Callable[..., Statevector],
+    # arbitrary coordinate indices + R + image
+    data_function: Callable[..., Statevector],
+    map_function: Callable[..., Operator],
+    image: np.ndarray,
+    image_dimensionality: int = 2,
+    perform_measurement: bool = True,
+    logging_level: int | None = None,
+    encoding_params: Dict[str, str] = {},
+    **_: Dict[Any, Any],
+) -> QuantumCircuit:
+    logger = setup_logger(logging_level, reset=True)
+
+    encoding_params = dict(encoding_params or {})
+    symbolic_unitary = bool(encoding_params.pop("symbolic_unitary", False))
+
+    shape = image.shape[:image_dimensionality]
+
+    R = int(np.ceil(np.log2(max(shape))))
+
+    G, subs = _compute_symbolic_G(shape, R, image, data_function, map_function, encoding_params, logger)
+
+    U, _r = G.QRdecomposition()
+    U = sp.simplify(U)
+    # logger.math(f"G=\n{tabulate_complex(G)}")
+    # logger.math(f"U=\n{tabulate_complex(U)}")
 
     U_op = Operator(U)
     n_qubits = U_op.num_qubits

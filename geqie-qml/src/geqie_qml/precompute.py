@@ -157,5 +157,5 @@ def _compute_save_single(image, label, sample_index, save_dir, file_prefix, geqi
     """Single-sample worker."""
     filename = os.path.join(save_dir, f"{file_prefix}_{sample_index}_label_{label}")
     unitary_matrix = _compute_circuit_unitary(image, geqie_encoding, encoding_params)
-    np.savez(file=filename, matrix=unitary_matrix, label=label, dtype=np.complex128)
+    np.savez(file=filename, data=unitary_matrix, target=label, dtype=np.complex128)
 
