@@ -1,0 +1,239 @@
+{
+  "pipeline_name": "Experiment_C_FRQI_QCNN",
+  "pipeline_slug": "Experiment_C_FRQI_QCNN",
+  "run_dir": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Experiment_C_FRQI_QCNN/2026-05-13-22-27",
+  "started_at": "2026-05-13T22:27:30",
+  "completed_at": "2026-05-14T02:07:11",
+  "subsets": [
+    {
+      "subset_index": 3,
+      "subset_count": 5,
+      "saved_at": "2026-05-14T00:52:49",
+      "report_context": {
+        "title": "EXPERIMENTAL PROTOCOL REPORT",
+        "dataset_name": "MNIST digits stratified",
+        "classifier_name": "FRQI + QCNN + Dense",
+        "model_architecture": null,
+        "subset_name": "3/5",
+        "split_sizes": {
+          "train": 921,
+          "val": 231,
+          "test": 288
+        },
+        "training_setup": {
+          "epochs": 50,
+          "batch_size": 16,
+          "device": "cpu",
+          "qnn_lr": 0.001,
+          "head_lr": 0.01
+        },
+        "model_setup": {
+          "num_classes": 10,
+          "num_qubits": 9,
+          "num_layers": 5
+        },
+        "torchinfo_summary": "=================================================================\nLayer (type:depth-idx)                   Param #\n=================================================================\nSequential                               --\n├─VQCLayer: 1-1                          110\n├─Linear: 1-2                            5,130\n├─LogSoftmax: 1-3                        --\n=================================================================\nTotal params: 5,240\nTrainable params: 5,240\nNon-trainable params: 0\n================================================================="
+      },
+      "torchinfo_summary": "=================================================================\nLayer (type:depth-idx)                   Param #\n=================================================================\nSequential                               --\n├─VQCLayer: 1-1                          110\n├─Linear: 1-2                            5,130\n├─LogSoftmax: 1-3                        --\n=================================================================\nTotal params: 5,240\nTrainable params: 5,240\nNon-trainable params: 0\n=================================================================",
+      "model": {
+        "class_name": "Sequential",
+        "module": "torch.nn.modules.container",
+        "repr": "Sequential(\n  (0): VQCLayer(num_qubits=9, num_layers=5, output_qubits=3, shots=1024, scale_output=True, num_params=110)\n  (1): Linear(in_features=512, out_features=10, bias=True)\n  (2): LogSoftmax(dim=-1)\n)"
+      },
+      "files": {
+        "report": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Experiment_C_FRQI_QCNN/2026-05-13-22-27/subset_03_report.log",
+        "epochs": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Experiment_C_FRQI_QCNN/2026-05-13-22-27/subset_03_epochs.csv",
+        "test_metrics": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Experiment_C_FRQI_QCNN/2026-05-13-22-27/subset_03_test_metrics.csv",
+        "confusion_matrix_csv": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Experiment_C_FRQI_QCNN/2026-05-13-22-27/subset_03_confusion_matrix.csv",
+        "confusion_matrix_txt": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Experiment_C_FRQI_QCNN/2026-05-13-22-27/subset_03_confusion_matrix.txt",
+        "torchinfo_summary": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Experiment_C_FRQI_QCNN/2026-05-13-22-27/subset_03_torchinfo_summary.log",
+        "best_model": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Experiment_C_FRQI_QCNN/2026-05-13-22-27/subset_03_best_model.pt",
+        "best_model_metadata": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Experiment_C_FRQI_QCNN/2026-05-13-22-27/subset_03_best_model_meta.json"
+      }
+    },
+    {
+      "subset_index": 1,
+      "subset_count": 5,
+      "saved_at": "2026-05-14T01:34:03",
+      "report_context": {
+        "title": "EXPERIMENTAL PROTOCOL REPORT",
+        "dataset_name": "MNIST digits stratified",
+        "classifier_name": "FRQI + QCNN + Dense",
+        "model_architecture": "GEQIE/FRQI-encoded circuits -> VQCLayer(num_qubits, num_layers=5) -> Linear(2**num_qubits, num_classes) -> LogSoftmax",
+        "subset_name": "1/5",
+        "split_sizes": {
+          "train": 921,
+          "val": 231,
+          "test": 288
+        },
+        "training_setup": {
+          "epochs": 50,
+          "batch_size": 16,
+          "device": "cpu",
+          "qnn_lr": 0.001,
+          "head_lr": 0.01
+        },
+        "model_setup": {
+          "num_classes": 10,
+          "num_qubits": 9,
+          "num_layers": 5
+        },
+        "torchinfo_summary": "=================================================================\nLayer (type:depth-idx)                   Param #\n=================================================================\nSequential                               --\n├─VQCLayer: 1-1                          110\n├─Linear: 1-2                            5,130\n├─LogSoftmax: 1-3                        --\n=================================================================\nTotal params: 5,240\nTrainable params: 5,240\nNon-trainable params: 0\n================================================================="
+      },
+      "torchinfo_summary": "=================================================================\nLayer (type:depth-idx)                   Param #\n=================================================================\nSequential                               --\n├─VQCLayer: 1-1                          110\n├─Linear: 1-2                            5,130\n├─LogSoftmax: 1-3                        --\n=================================================================\nTotal params: 5,240\nTrainable params: 5,240\nNon-trainable params: 0\n=================================================================",
+      "model": {
+        "class_name": "Sequential",
+        "module": "torch.nn.modules.container",
+        "repr": "Sequential(\n  (0): VQCLayer(num_qubits=9, num_layers=5, output_qubits=3, shots=1024, scale_output=True, num_params=110)\n  (1): Linear(in_features=512, out_features=10, bias=True)\n  (2): LogSoftmax(dim=-1)\n)"
+      },
+      "files": {
+        "report": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Experiment_C_FRQI_QCNN/2026-05-13-22-27/subset_01_report.log",
+        "epochs": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Experiment_C_FRQI_QCNN/2026-05-13-22-27/subset_01_epochs.csv",
+        "test_metrics": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Experiment_C_FRQI_QCNN/2026-05-13-22-27/subset_01_test_metrics.csv",
+        "confusion_matrix_csv": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Experiment_C_FRQI_QCNN/2026-05-13-22-27/subset_01_confusion_matrix.csv",
+        "confusion_matrix_txt": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Experiment_C_FRQI_QCNN/2026-05-13-22-27/subset_01_confusion_matrix.txt",
+        "torchinfo_summary": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Experiment_C_FRQI_QCNN/2026-05-13-22-27/subset_01_torchinfo_summary.log",
+        "best_model": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Experiment_C_FRQI_QCNN/2026-05-13-22-27/subset_01_best_model.pt",
+        "best_model_metadata": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Experiment_C_FRQI_QCNN/2026-05-13-22-27/subset_01_best_model_meta.json"
+      }
+    },
+    {
+      "subset_index": 4,
+      "subset_count": 5,
+      "saved_at": "2026-05-14T02:05:37",
+      "report_context": {
+        "title": "EXPERIMENTAL PROTOCOL REPORT",
+        "dataset_name": "MNIST digits stratified",
+        "classifier_name": "FRQI + QNN + Dense",
+        "model_architecture": null,
+        "subset_name": "4/5",
+        "split_sizes": {
+          "train": 921,
+          "val": 231,
+          "test": 288
+        },
+        "training_setup": {
+          "epochs": 50,
+          "batch_size": 16,
+          "device": "cpu",
+          "qnn_lr": 0.001,
+          "head_lr": 0.01
+        },
+        "model_setup": {
+          "num_classes": 10,
+          "num_qubits": 9,
+          "num_layers": 5
+        },
+        "torchinfo_summary": "=================================================================\nLayer (type:depth-idx)                   Param #\n=================================================================\nSequential                               --\n├─VQCLayer: 1-1                          110\n├─Linear: 1-2                            5,130\n├─LogSoftmax: 1-3                        --\n=================================================================\nTotal params: 5,240\nTrainable params: 5,240\nNon-trainable params: 0\n================================================================="
+      },
+      "torchinfo_summary": "=================================================================\nLayer (type:depth-idx)                   Param #\n=================================================================\nSequential                               --\n├─VQCLayer: 1-1                          110\n├─Linear: 1-2                            5,130\n├─LogSoftmax: 1-3                        --\n=================================================================\nTotal params: 5,240\nTrainable params: 5,240\nNon-trainable params: 0\n=================================================================",
+      "model": {
+        "class_name": "Sequential",
+        "module": "torch.nn.modules.container",
+        "repr": "Sequential(\n  (0): VQCLayer(num_qubits=9, num_layers=5, output_qubits=3, shots=1024, scale_output=True, num_params=110)\n  (1): Linear(in_features=512, out_features=10, bias=True)\n  (2): LogSoftmax(dim=-1)\n)"
+      },
+      "files": {
+        "report": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Experiment_C_FRQI_QCNN/2026-05-13-22-27/subset_04_report.log",
+        "epochs": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Experiment_C_FRQI_QCNN/2026-05-13-22-27/subset_04_epochs.csv",
+        "test_metrics": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Experiment_C_FRQI_QCNN/2026-05-13-22-27/subset_04_test_metrics.csv",
+        "confusion_matrix_csv": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Experiment_C_FRQI_QCNN/2026-05-13-22-27/subset_04_confusion_matrix.csv",
+        "confusion_matrix_txt": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Experiment_C_FRQI_QCNN/2026-05-13-22-27/subset_04_confusion_matrix.txt",
+        "torchinfo_summary": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Experiment_C_FRQI_QCNN/2026-05-13-22-27/subset_04_torchinfo_summary.log",
+        "best_model": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Experiment_C_FRQI_QCNN/2026-05-13-22-27/subset_04_best_model.pt",
+        "best_model_metadata": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Experiment_C_FRQI_QCNN/2026-05-13-22-27/subset_04_best_model_meta.json"
+      }
+    },
+    {
+      "subset_index": 2,
+      "subset_count": 5,
+      "saved_at": "2026-05-14T02:06:11",
+      "report_context": {
+        "title": "EXPERIMENTAL PROTOCOL REPORT",
+        "dataset_name": "MNIST digits stratified",
+        "classifier_name": "FRQI + QCNN + Dense",
+        "model_architecture": null,
+        "subset_name": "2/5",
+        "split_sizes": {
+          "train": 921,
+          "val": 231,
+          "test": 288
+        },
+        "training_setup": {
+          "epochs": 50,
+          "batch_size": 16,
+          "device": "cpu",
+          "qnn_lr": 0.001,
+          "head_lr": 0.01
+        },
+        "model_setup": {
+          "num_classes": 10,
+          "num_qubits": 9,
+          "num_layers": 5
+        },
+        "torchinfo_summary": "=================================================================\nLayer (type:depth-idx)                   Param #\n=================================================================\nSequential                               --\n├─VQCLayer: 1-1                          110\n├─Linear: 1-2                            5,130\n├─LogSoftmax: 1-3                        --\n=================================================================\nTotal params: 5,240\nTrainable params: 5,240\nNon-trainable params: 0\n================================================================="
+      },
+      "torchinfo_summary": "=================================================================\nLayer (type:depth-idx)                   Param #\n=================================================================\nSequential                               --\n├─VQCLayer: 1-1                          110\n├─Linear: 1-2                            5,130\n├─LogSoftmax: 1-3                        --\n=================================================================\nTotal params: 5,240\nTrainable params: 5,240\nNon-trainable params: 0\n=================================================================",
+      "model": {
+        "class_name": "Sequential",
+        "module": "torch.nn.modules.container",
+        "repr": "Sequential(\n  (0): VQCLayer(num_qubits=9, num_layers=5, output_qubits=3, shots=1024, scale_output=True, num_params=110)\n  (1): Linear(in_features=512, out_features=10, bias=True)\n  (2): LogSoftmax(dim=-1)\n)"
+      },
+      "files": {
+        "report": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Experiment_C_FRQI_QCNN/2026-05-13-22-27/subset_02_report.log",
+        "epochs": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Experiment_C_FRQI_QCNN/2026-05-13-22-27/subset_02_epochs.csv",
+        "test_metrics": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Experiment_C_FRQI_QCNN/2026-05-13-22-27/subset_02_test_metrics.csv",
+        "confusion_matrix_csv": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Experiment_C_FRQI_QCNN/2026-05-13-22-27/subset_02_confusion_matrix.csv",
+        "confusion_matrix_txt": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Experiment_C_FRQI_QCNN/2026-05-13-22-27/subset_02_confusion_matrix.txt",
+        "torchinfo_summary": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Experiment_C_FRQI_QCNN/2026-05-13-22-27/subset_02_torchinfo_summary.log",
+        "best_model": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Experiment_C_FRQI_QCNN/2026-05-13-22-27/subset_02_best_model.pt",
+        "best_model_metadata": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Experiment_C_FRQI_QCNN/2026-05-13-22-27/subset_02_best_model_meta.json"
+      }
+    },
+    {
+      "subset_index": 5,
+      "subset_count": 5,
+      "saved_at": "2026-05-14T02:07:11",
+      "report_context": {
+        "title": "EXPERIMENTAL PROTOCOL REPORT",
+        "dataset_name": "MNIST digits stratified",
+        "classifier_name": "FRQI + QCNN + Dense",
+        "model_architecture": null,
+        "subset_name": "5/5",
+        "split_sizes": {
+          "train": 921,
+          "val": 231,
+          "test": 288
+        },
+        "training_setup": {
+          "epochs": 50,
+          "batch_size": 16,
+          "device": "cpu",
+          "qnn_lr": 0.001,
+          "head_lr": 0.01
+        },
+        "model_setup": {
+          "num_classes": 10,
+          "num_qubits": 9,
+          "num_layers": 5
+        },
+        "torchinfo_summary": "=================================================================\nLayer (type:depth-idx)                   Param #\n=================================================================\nSequential                               --\n├─VQCLayer: 1-1                          110\n├─Linear: 1-2                            5,130\n├─LogSoftmax: 1-3                        --\n=================================================================\nTotal params: 5,240\nTrainable params: 5,240\nNon-trainable params: 0\n================================================================="
+      },
+      "torchinfo_summary": "=================================================================\nLayer (type:depth-idx)                   Param #\n=================================================================\nSequential                               --\n├─VQCLayer: 1-1                          110\n├─Linear: 1-2                            5,130\n├─LogSoftmax: 1-3                        --\n=================================================================\nTotal params: 5,240\nTrainable params: 5,240\nNon-trainable params: 0\n=================================================================",
+      "model": {
+        "class_name": "Sequential",
+        "module": "torch.nn.modules.container",
+        "repr": "Sequential(\n  (0): VQCLayer(num_qubits=9, num_layers=5, output_qubits=3, shots=1024, scale_output=True, num_params=110)\n  (1): Linear(in_features=512, out_features=10, bias=True)\n  (2): LogSoftmax(dim=-1)\n)"
+      },
+      "files": {
+        "report": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Experiment_C_FRQI_QCNN/2026-05-13-22-27/subset_05_report.log",
+        "epochs": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Experiment_C_FRQI_QCNN/2026-05-13-22-27/subset_05_epochs.csv",
+        "test_metrics": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Experiment_C_FRQI_QCNN/2026-05-13-22-27/subset_05_test_metrics.csv",
+        "confusion_matrix_csv": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Experiment_C_FRQI_QCNN/2026-05-13-22-27/subset_05_confusion_matrix.csv",
+        "confusion_matrix_txt": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Experiment_C_FRQI_QCNN/2026-05-13-22-27/subset_05_confusion_matrix.txt",
+        "torchinfo_summary": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Experiment_C_FRQI_QCNN/2026-05-13-22-27/subset_05_torchinfo_summary.log",
+        "best_model": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Experiment_C_FRQI_QCNN/2026-05-13-22-27/subset_05_best_model.pt",
+        "best_model_metadata": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Experiment_C_FRQI_QCNN/2026-05-13-22-27/subset_05_best_model_meta.json"
+      }
+    }
+  ]
+}

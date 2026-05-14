@@ -240,7 +240,7 @@ def render_experiment_report(
 ) -> str:
 	now = now or datetime.now()
 	rows = [
-		("DATE", now.strftime("%d-%m-%Y")),
+		("DATE", now.strftime("%Y-%m-%d")),
 		("TIME", now.strftime("%H-%M")),
 		("DATASET", dataset_name),
 		("CLASSIFIER", classifier_name),
@@ -379,7 +379,7 @@ def sanitize_path_segment(value: str) -> str:
 
 
 def format_run_timestamp(value: datetime) -> str:
-	label = value.strftime("%d-%m-%Y-%H-%M")
+	label = value.strftime("%Y-%m-%d-%H-%M")
 	if os.name == "nt":
 		# Windows cannot create path segments containing ":".
 		label = label.replace(":", "-")

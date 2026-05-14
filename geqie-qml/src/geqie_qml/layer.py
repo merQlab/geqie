@@ -344,6 +344,7 @@ class QNNBatchFunction(torch.autograd.Function):
         ctx.matrices_np_list = matrices_np_list
         ctx.num_qubits = num_qubits
         ctx.num_layers = num_layers
+        ctx.output_qubits = output_qubits
         ctx.shots = shots
         ctx.qec_encoding_qasm = qec_encoding_qasm
         ctx.num_physical_qubits = num_physical_qubits
@@ -387,6 +388,7 @@ class QNNBatchFunction(torch.autograd.Function):
             None,   # matrices_np_list
             None,   # num_qubits
             None,   # num_layers
+            None,   # output_qubits
             None,   # shots
             None,   # qec_encoding_qasm
             None,   # num_physical_qubits
@@ -674,6 +676,7 @@ class VQCLayer(nn.Module):
             matrices_np_list,
             self.num_qubits,
             self.num_layers,
+            self.output_qubits,
             self.num_shots,
             self._qec_encoding_qasm,
             self._num_total_qubits if self.qec_code is not None else None,

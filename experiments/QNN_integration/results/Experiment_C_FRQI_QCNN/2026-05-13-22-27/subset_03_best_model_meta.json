@@ -1,0 +1,38 @@
+{
+  "pipeline_name": "Experiment_C_FRQI_QCNN",
+  "pipeline_slug": "Experiment_C_FRQI_QCNN",
+  "subset_index": 3,
+  "subset_count": 5,
+  "saved_at": "2026-05-14T00:52:49",
+  "model": {
+    "class_name": "Sequential",
+    "module": "torch.nn.modules.container",
+    "repr": "Sequential(\n  (0): VQCLayer(num_qubits=9, num_layers=5, output_qubits=3, shots=1024, scale_output=True, num_params=110)\n  (1): Linear(in_features=512, out_features=10, bias=True)\n  (2): LogSoftmax(dim=-1)\n)"
+  },
+  "torchinfo_summary": "=================================================================\nLayer (type:depth-idx)                   Param #\n=================================================================\nSequential                               --\n├─VQCLayer: 1-1                          110\n├─Linear: 1-2                            5,130\n├─LogSoftmax: 1-3                        --\n=================================================================\nTotal params: 5,240\nTrainable params: 5,240\nNon-trainable params: 0\n=================================================================",
+  "report_context": {
+    "title": "EXPERIMENTAL PROTOCOL REPORT",
+    "dataset_name": "MNIST digits stratified",
+    "classifier_name": "FRQI + QCNN + Dense",
+    "model_architecture": null,
+    "subset_name": "3/5",
+    "split_sizes": {
+      "train": 921,
+      "val": 231,
+      "test": 288
+    },
+    "training_setup": {
+      "epochs": 50,
+      "batch_size": 16,
+      "device": "cpu",
+      "qnn_lr": 0.001,
+      "head_lr": 0.01
+    },
+    "model_setup": {
+      "num_classes": 10,
+      "num_qubits": 9,
+      "num_layers": 5
+    },
+    "torchinfo_summary": "=================================================================\nLayer (type:depth-idx)                   Param #\n=================================================================\nSequential                               --\n├─VQCLayer: 1-1                          110\n├─Linear: 1-2                            5,130\n├─LogSoftmax: 1-3                        --\n=================================================================\nTotal params: 5,240\nTrainable params: 5,240\nNon-trainable params: 0\n================================================================="
+  }
+}
