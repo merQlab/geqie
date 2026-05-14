@@ -22,6 +22,7 @@ from geqie_qml.noise_suppression.dynamical_decoupling import (
     DD_SEQUENCES,
     apply_dd,
 )
+from geqie_qml.ansatze import default_vqc_ansatz
 
 
 # ---------------------------------------------------------------------------
@@ -96,7 +97,8 @@ def _identity_interpret(x):
 def _build_qec_full_circuit(matrix_np, num_logical_qubits, num_layers,
                             qec_encoding_qasm=None, num_physical_qubits=None,
                             measure_logical_only=False, twirl_seed=None,
-                            dd_sequence_name=None, backend_target=None):
+                            dd_sequence_name=None, backend_target=None,
+                            ansatz_factory=None, output_qubits=None):
     """
     Build the full quantum circuit for a single sample, optionally with QEC.
 
@@ -109,6 +111,11 @@ def _build_qec_full_circuit(matrix_np, num_logical_qubits, num_layers,
 
     where N = *num_physical_qubits*.
 
+    The ansatz itself is produced by *ansatz_factory* (default:
+    ``default_vqc_ansatz``).  The factory is invoked as
+    ``ansatz_factory(n_total, num_layers=num_layers, output_qubits=output_qubits)``;
+    factories that don't take one of the kwargs can absorb it with ``**_``.
+
     Measurement
     -----------
     If *measure_logical_only* is True (only meaningful when QEC is active),
@@ -118,7 +125,9 @@ def _build_qec_full_circuit(matrix_np, num_logical_qubits, num_layers,
     length ``2 ** num_logical_qubits``.
 
     Otherwise no explicit measurement is added and ``SamplerQNN`` will
-    measure all qubits, producing a vector of length ``2 ** n_total``.
+    measure all qubits, producing a vector of length ``2 ** n_total`` —
+    unless the ansatz itself adds measurements (e.g. ``QCNN_layer``), in
+    which case its classical register width determines the output.
 
     Pauli twirling
     --------------
@@ -136,9 +145,12 @@ def _build_qec_full_circuit(matrix_np, num_logical_qubits, num_layers,
     padded with the named DD pulse train.  DD runs last so the inserted
     pulses see the final, ready-to-execute circuit.
     """
+    if ansatz_factory is None:
+        ansatz_factory = default_vqc_ansatz
+
     if qec_encoding_qasm is not None:
         n_total = num_physical_qubits
-        vqc = _build_vqc_circuit(n_total, num_layers)
+        vqc = ansatz_factory(n_total, num_layers=num_layers, output_qubits=output_qubits)
         if twirl_seed is not None:
             vqc = twirl_circuit(vqc, np.random.default_rng(twirl_seed))
         qc = QuantumCircuit(n_total)
@@ -157,7 +169,7 @@ def _build_qec_full_circuit(matrix_np, num_logical_qubits, num_layers,
                 qc.measure(i, creg[i])
     else:
         n_total = num_logical_qubits
-        vqc = _build_vqc_circuit(n_total, num_layers)
+        vqc = ansatz_factory(n_total, num_layers=num_layers, output_qubits=output_qubits)
         if twirl_seed is not None:
             vqc = twirl_circuit(vqc, np.random.default_rng(twirl_seed))
         qc = QuantumCircuit(n_total)
@@ -182,7 +194,8 @@ def _worker_forward_eval(args):
     """
     (matrix_np, weights_np, num_qubits, num_layers, shots,
      qec_encoding_qasm, num_physical_qubits, measure_logical_only,
-     twirl_seed, dd_sequence_name, backend_target) = args
+     twirl_seed, dd_sequence_name, backend_target,
+     ansatz_factory, output_qubits) = args
     qc = _build_qec_full_circuit(
         matrix_np, num_qubits, num_layers,
         qec_encoding_qasm, num_physical_qubits,
@@ -190,6 +203,8 @@ def _worker_forward_eval(args):
         twirl_seed=twirl_seed,
         dd_sequence_name=dd_sequence_name,
         backend_target=backend_target,
+        ansatz_factory=ansatz_factory,
+        output_qubits=output_qubits,
     )
 
     sampler = Sampler(default_shots=shots)
@@ -222,7 +237,8 @@ def _worker_grad_eval(args):
     """
     (matrix_np, weights_np, num_qubits, num_layers, shots,
      qec_encoding_qasm, num_physical_qubits, measure_logical_only,
-     twirl_seed, dd_sequence_name, backend_target) = args
+     twirl_seed, dd_sequence_name, backend_target,
+     ansatz_factory, output_qubits) = args
     qc = _build_qec_full_circuit(
         matrix_np, num_qubits, num_layers,
         qec_encoding_qasm, num_physical_qubits,
@@ -230,6 +246,8 @@ def _worker_grad_eval(args):
         twirl_seed=twirl_seed,
         dd_sequence_name=dd_sequence_name,
         backend_target=backend_target,
+        ansatz_factory=ansatz_factory,
+        output_qubits=output_qubits,
     )
 
     sampler = Sampler(default_shots=shots)
@@ -316,6 +334,9 @@ class QNNBatchFunction(torch.autograd.Function):
     measure_logical_only : bool — when True, measure only the first
                            ``num_qubits`` (logical) qubits, yielding a
                            ``2**num_qubits``-dim probability vector.
+    ansatz_factory       : callable — builds the VQC ansatz; signature
+                           ``(n_qubits, num_layers=..., output_qubits=...)``.
+    output_qubits        : int | None — forwarded to the ansatz factory.
     """
 
     @staticmethod
@@ -323,7 +344,8 @@ class QNNBatchFunction(torch.autograd.Function):
                 num_qubits, num_layers, shots,
                 qec_encoding_qasm, num_physical_qubits,
                 measure_logical_only, twirl_seeds,
-                dd_sequence_name, backend_target):
+                dd_sequence_name, backend_target,
+                ansatz_factory, output_qubits):
         weights_np = weights.detach().numpy()
 
         # twirl_seeds is a list of length len(matrices_np_list); each entry
@@ -333,7 +355,8 @@ class QNNBatchFunction(torch.autograd.Function):
         args_list = [
             (matrix, weights_np, num_qubits, num_layers, shots,
              qec_encoding_qasm, num_physical_qubits, measure_logical_only,
-             twirl_seed, dd_sequence_name, backend_target)
+             twirl_seed, dd_sequence_name, backend_target,
+             ansatz_factory, output_qubits)
             for matrix, twirl_seed in zip(matrices_np_list, twirl_seeds)
         ]
         probs_list = _work_dispatch(_worker_forward_eval, args_list, executor)
@@ -344,7 +367,6 @@ class QNNBatchFunction(torch.autograd.Function):
         ctx.matrices_np_list = matrices_np_list
         ctx.num_qubits = num_qubits
         ctx.num_layers = num_layers
-        ctx.output_qubits = output_qubits
         ctx.shots = shots
         ctx.qec_encoding_qasm = qec_encoding_qasm
         ctx.num_physical_qubits = num_physical_qubits
@@ -352,6 +374,8 @@ class QNNBatchFunction(torch.autograd.Function):
         ctx.twirl_seeds = twirl_seeds
         ctx.dd_sequence_name = dd_sequence_name
         ctx.backend_target = backend_target
+        ctx.ansatz_factory = ansatz_factory
+        ctx.output_qubits = output_qubits
 
         return torch.tensor(probs_np, dtype=weights.dtype)
 
@@ -370,7 +394,8 @@ class QNNBatchFunction(torch.autograd.Function):
             (m, weights_np, ctx.num_qubits, ctx.num_layers, ctx.shots,
              ctx.qec_encoding_qasm, ctx.num_physical_qubits,
              ctx.measure_logical_only, twirl_seed,
-             ctx.dd_sequence_name, ctx.backend_target)
+             ctx.dd_sequence_name, ctx.backend_target,
+             ctx.ansatz_factory, ctx.output_qubits)
             for m, twirl_seed in zip(ctx.matrices_np_list, ctx.twirl_seeds)
         ]
         jac_list = _work_dispatch(_worker_grad_eval, args_list, ctx.executor)
@@ -388,7 +413,6 @@ class QNNBatchFunction(torch.autograd.Function):
             None,   # matrices_np_list
             None,   # num_qubits
             None,   # num_layers
-            None,   # output_qubits
             None,   # shots
             None,   # qec_encoding_qasm
             None,   # num_physical_qubits
@@ -396,6 +420,8 @@ class QNNBatchFunction(torch.autograd.Function):
             None,   # twirl_seeds
             None,   # dd_sequence_name
             None,   # backend_target
+            None,   # ansatz_factory
+            None,   # output_qubits
         )
 
 
@@ -466,6 +492,17 @@ class VQCLayer(nn.Module):
         Note that ``StatevectorSampler`` is duration-less, so DD inserts
         pulses but the simulator will treat them as plain gates — DD only
         produces meaningful behaviour against a noise-aware backend.
+    ansatz_factory : callable | None
+        Factory that builds the parameterised VQC ansatz, invoked as
+        ``ansatz_factory(n_qubits, num_layers=num_layers, output_qubits=output_qubits)``.
+        Defaults to ``default_vqc_ansatz`` (brickwork Rx/Ry/Rz + CX).  Pass
+        ``QCNN_layer`` (or any callable with the same signature, using
+        ``**_`` to absorb unused kwargs) to swap in a different ansatz.
+        When QEC is active the factory is sized to the physical register.
+    output_qubits : int | None
+        Forwarded to the ansatz factory.  Used by ``QCNN_layer`` to set the
+        width of its classical register and the final measurement; ignored
+        by ``default_vqc_ansatz``.
 
     Usage
     -----
@@ -500,6 +537,8 @@ class VQCLayer(nn.Module):
         twirl_seed: int | None = None,
         dynamical_decoupling: str | None = None,
         backend_target=None,
+        ansatz_factory=None,
+        output_qubits: int | None = None,
     ):
         super().__init__()
         self.num_qubits = num_qubits  # logical qubits (image unitary size)
@@ -551,11 +590,23 @@ class VQCLayer(nn.Module):
             self._num_total_qubits = num_qubits
             self._qec_encoding_qasm = None
 
+        # Custom ansatz support.  Workers reconstruct the circuit
+        # independently in each forward call, so the factory itself is what
+        # must be picklable (passed through ProcessPoolExecutor).
+        self.ansatz_factory = ansatz_factory or default_vqc_ansatz
+        self.output_qubits = output_qubits
+
         # Trainable quantum weights, registered as a proper nn.Parameter so
         # that optimisers, state_dict, and requires_grad all work out of the box.
-        # Workers reconstruct the circuit independently via _build_vqc_circuit,
-        # so the Qiskit QuantumCircuit object does not need to be stored here.
-        num_params = 3 * self._num_total_qubits * num_layers
+        # Build a probe circuit to size the parameter vector — needed because
+        # ansatze like QCNN_layer add parameters dynamically as the circuit
+        # is constructed, so 3 * n * L is not always the right count.
+        probe_circuit = self.ansatz_factory(
+            self._num_total_qubits,
+            num_layers=num_layers,
+            output_qubits=output_qubits,
+        )
+        num_params = len(probe_circuit.parameters)
         self.quantum_weight = nn.Parameter(
             torch.empty(num_params).uniform_(-np.pi, np.pi)
         )
@@ -676,7 +727,6 @@ class VQCLayer(nn.Module):
             matrices_np_list,
             self.num_qubits,
             self.num_layers,
-            self.output_qubits,
             self.num_shots,
             self._qec_encoding_qasm,
             self._num_total_qubits if self.qec_code is not None else None,
@@ -684,6 +734,8 @@ class VQCLayer(nn.Module):
             twirl_seeds,
             self.dynamical_decoupling,
             self.backend_target,
+            self.ansatz_factory,
+            self.output_qubits,
         )
 
         if self.scale_output:
@@ -700,6 +752,10 @@ class VQCLayer(nn.Module):
             f"scale_output={self.scale_output}",
             f"num_params={self.quantum_weight.numel()}",
         ]
+        if self.ansatz_factory is not default_vqc_ansatz:
+            parts.append(f"ansatz={self.ansatz_factory.__name__}")
+        if self.output_qubits is not None:
+            parts.append(f"output_qubits={self.output_qubits}")
         if self.qec_code is not None:
             parts.append(f"qec={self.qec_code.name}")
             parts.append(f"total_qubits={self._num_total_qubits}")
