@@ -26,7 +26,7 @@ def default_vqc_ansatz(num_qubits: int, num_layers: int, **_):
 			vqc.cx(num_qubits - 1, 0)
 	return vqc
 
-def QCNN_layer(input_qubits: int, output_qubits: int, **_):
+def build_adaptive_qcnn_ansatz(input_qubits: int, output_qubits: int, **_):
 	"""Construct a QCNN layer with the specified parameters."""
 	# The actual circuit construction and QNN setup would go here,
 	# using ansatz_factory(num_qubits, num_layers) to get the parameterised circuit.	
@@ -174,3 +174,110 @@ def QCNN_layer(input_qubits: int, output_qubits: int, **_):
 
 	return qcnn_circuit
 
+def build_adaptive_qcnn_with_QNN_compression_layer(input_qubits: int, output_qubits: int, **_):
+	"""Construct a QCNN layer with the specified parameters."""
+	# The actual circuit construction and QNN setup would go here,
+	# using ansatz_factory(num_qubits, num_layers) to get the parameterised circuit.	
+	output_qubits = 1 if output_qubits is None else output_qubits
+	quantum_register = QuantumRegister(input_qubits)
+	classical_register = ClassicalRegister(output_qubits)
+	qcnn_circuit = QuantumCircuit(quantum_register, classical_register)
+	if output_qubits < 1 or output_qubits > input_qubits:
+		raise ValueError("output_qubits must be between 1 and input_qubits")
+
+	# ================================================================================================
+	# HELPER METHODS:
+	# ================================================================================================
+	theta_index = 0	
+	theta = ParameterVector("theta", length=0)
+	def next_thetas(count: int = 1):
+		nonlocal theta_index
+		start = theta_index
+		theta_index += count
+		theta.resize(theta_index)
+		return theta[start:theta_index]
+	
+	def build_convolution_layer(qubit_pairs, next_thetas, label):
+		used_qubits = sorted({q for pair in qubit_pairs for q in pair})
+		local = {global_q: local_q for local_q, global_q in enumerate(used_qubits)}
+		conv_layer = QuantumCircuit(len(used_qubits), name=label)
+
+		for pair in qubit_pairs:
+			q0 = local[pair[0]]
+			q1 = local[pair[1]]
+			t0, t1 = next_thetas(2)
+
+			conv_layer.rz(np.pi / 2, q1)
+			conv_layer.cx(q1, q0)
+			conv_layer.rz(2 * t0 - np.pi / 2, q0)
+			conv_layer.ry(np.pi / 2 - t1, q1)
+			conv_layer.cx(q1, q0)
+			conv_layer.ry(-np.pi / 2, q0)
+
+		return conv_layer, used_qubits
+	
+	def qnn_circuit_for_pooling(num_qubits: int, num_layers: int, **_):
+		"""Reconstruct the parameterised VQC (without the image unitary)."""
+		thetas = next_thetas(3 * num_qubits * num_layers)
+		vqc = QuantumCircuit(num_qubits)
+		for layer in range(num_layers):			
+			offset = layer * 3 * num_qubits
+			for i in range(num_qubits):
+				vqc.rx(thetas[offset + i], i)
+			for i in range(num_qubits):
+				vqc.ry(thetas[offset + num_qubits + i], i)
+			for i in range(num_qubits):
+				vqc.rz(thetas[offset + 2 * num_qubits + i], i)
+			# Alternating brickwork entanglement
+			for i in range(num_qubits - 1):
+				vqc.cx(i, i + 1)
+		return vqc
+
+	# ================================================================================================
+	# MAIN LAYER CONSTRUCTION LOOP:
+	# ================================================================================================
+
+	for idx in range(int((input_qubits))):
+		# # 0. Check if the leftover qubits are odd or even. If odd, apply a convolution and pooling gate on the last 2 qubits, then decrement the leftover qubits by 1.
+		# if input_qubits % 2 != 0:
+		# 	fix_parity_of_qubits()
+
+		# max_even_qubits = input_qubits # if input_qubits % 2 == 0 else input_qubits - 1		
+		
+		# 1. CONVOLUTION GATE:		
+		start_convolution_qubit_pos = int(np.floor(input_qubits - input_qubits / (2**idx)))
+
+		convolution_qubit_pairs= list(combinations(range(start_convolution_qubit_pos, input_qubits), 2))
+		if convolution_qubit_pairs:		
+			conv_layer, used_qubits = build_convolution_layer(
+				convolution_qubit_pairs,
+				next_thetas,
+				label=f"Convolution {idx}",
+				)
+ 
+			qcnn_circuit.append(
+				conv_layer.to_instruction(label=f"Conv {idx}"),
+				[qcnn_circuit.qubits[q] for q in used_qubits],
+				)			
+
+		# 2. POOLINGS GATES:
+		start_pooling_qubit_position = start_convolution_qubit_pos
+		active_qubits = list(range(start_pooling_qubit_position, input_qubits))
+		if active_qubits:
+			compression_layer = qnn_circuit_for_pooling(
+				num_qubits=len(active_qubits),
+				num_layers=1,
+			)
+
+			qcnn_circuit.append(
+				compression_layer.to_instruction(label=f"Compression {idx}"),
+				[qcnn_circuit.qubits[q] for q in active_qubits],
+			)
+		qcnn_circuit.barrier() 
+	
+	qcnn_circuit.measure(
+		qcnn_circuit.qubits[-output_qubits:],
+		qcnn_circuit.clbits[:output_qubits],
+	)
+
+	return qcnn_circuit
