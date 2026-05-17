@@ -1,0 +1,8 @@
+{
+  "pipeline_name": "Experiment_D_FRQI_QCNN_QNN_compression",
+  "pipeline_slug": "Experiment_D_FRQI_QCNN_QNN_compression",
+  "run_dir": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Experiment_D_FRQI_QCNN_QNN_compression/2026-05-17-00-26",
+  "started_at": "2026-05-17T00:26:25",
+  "completed_at": null,
+  "subsets": []
+}
