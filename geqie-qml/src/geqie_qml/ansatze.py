@@ -4,7 +4,7 @@ import numpy as np
 from itertools import combinations, pairwise
 
 
-def default_vqc_ansatz(num_qubits: int, num_layers: int, **_):
+def default_vqc_ansatz(num_qubits: int, num_layers: int, **_) -> QuantumCircuit:
 	"""Reconstruct the parameterised VQC (without the image unitary)."""
 	thetas = ParameterVector("theta", length=3 * num_qubits * num_layers)
 	vqc = QuantumCircuit(num_qubits)
