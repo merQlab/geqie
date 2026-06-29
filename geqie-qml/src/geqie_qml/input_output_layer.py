@@ -127,6 +127,87 @@ def _evaluate_feature_map_weight_gradient(
 	return weight_grad
 
 
+def _init_training_worker():
+	"""
+	Pin numerical libraries to one thread per process to avoid CPU oversubscription.
+	"""
+	os.environ["OMP_NUM_THREADS"] = "1"
+	os.environ["MKL_NUM_THREADS"] = "1"
+	os.environ["OPENBLAS_NUM_THREADS"] = "1"
+	os.environ["NUMEXPR_NUM_THREADS"] = "1"
+
+
+def _process_pool_worker_count(task_count: int) -> int:
+	"""Return a sensible process count for the current amount of quantum work."""
+	platform_limit = 61 if os.name == "nt" else task_count
+	return min(task_count, platform_limit, max(1, cpu_count() - 1))
+
+
+def _run_feature_map_probabilities_job(args):
+	(
+		result_index,
+		feature_map_image,
+		weights,
+		geqie_encoding,
+		ansatz_factory,
+		output_qubits,
+		shots,
+		num_layers,
+		encoding_params,
+	) = args
+	return result_index, _evaluate_feature_map_probabilities(
+		feature_map_image,
+		weights,
+		geqie_encoding,
+		ansatz_factory,
+		output_qubits,
+		shots,
+		num_layers,
+		encoding_params,
+	)
+
+
+def _run_feature_map_weight_gradient_job(args):
+	(
+		result_index,
+		feature_map_image,
+		weights,
+		geqie_encoding,
+		ansatz_factory,
+		output_qubits,
+		shots,
+		num_layers,
+		encoding_params,
+	) = args
+	return result_index, _evaluate_feature_map_weight_gradient(
+		feature_map_image,
+		weights,
+		geqie_encoding,
+		ansatz_factory,
+		output_qubits,
+		shots,
+		num_layers,
+		encoding_params,
+	)
+
+
+def _dispatch_process_pool(worker_fn, args_list):
+	"""
+	Submit all quantum evaluations to a process pool before collecting results.
+	"""
+	if not args_list:
+		return []
+
+	mp_ctx = __import__("multiprocessing").get_context("spawn")
+	with futures.ProcessPoolExecutor(
+		max_workers=_process_pool_worker_count(len(args_list)),
+		initializer=_init_training_worker,
+		mp_context=mp_ctx,
+	) as executor:
+		jobs = [executor.submit(worker_fn, args) for args in args_list]
+		return [job.result() for job in jobs]
+
+
 class GradientFunction_for_CNN_feature_maps(torch.autograd.Function):
 	"""
 	This is a custom autograd that allows us to evaluate gradients of QuantumLayer in respect to other PyTorch layers.
@@ -165,20 +246,26 @@ class GradientFunction_for_CNN_feature_maps(torch.autograd.Function):
 
 		quantum_circuit_outputs_probabilities = np.empty((batch_size, feature_map_count, 2**output_qubits), dtype=np.float32) # (batch_size, feature_maps_size, 2**output_qubits)
 
-		for j in range(batch_size): # iterate over the batch dimension
-			for k in range(feature_map_count): # iterate over the feature maps dimension
-				feature_map_image = feature_maps_for_numpy[j, k] # we treat feature maps as images
-				output_probs = _evaluate_feature_map_probabilities(
-					feature_map_image,
-					vqc_weights_np[k],
-					geqie_encoding,
-					ansatz_factory,
-					output_qubits,
-					shots,
-					num_layers,
-					encoding_params,
-				) # (2**output_qubits,)
-				quantum_circuit_outputs_probabilities[j, k] = output_probs # (2**output_qubits,)
+		probability_jobs = [
+			(
+				(j, k),
+				feature_maps_for_numpy[j, k],
+				vqc_weights_np[k],
+				geqie_encoding,
+				ansatz_factory,
+				output_qubits,
+				shots,
+				num_layers,
+				encoding_params,
+			)
+			for j in range(batch_size)
+			for k in range(feature_map_count)
+		]
+		for (j, k), output_probs in _dispatch_process_pool(
+			_run_feature_map_probabilities_job,
+			probability_jobs,
+		):
+			quantum_circuit_outputs_probabilities[j, k] = output_probs # (2**output_qubits,)
 
 
 		ctx.save_for_backward(vqc_weights)
@@ -250,20 +337,26 @@ class GradientFunction_for_CNN_feature_maps(torch.autograd.Function):
 		1. dp/dtheta - local gradient, evaluated by SamplerQNN - this is the gradient of the output probabilities with respect to the quantum weights. We will compute this gradient for each sample in the batch and for each feature map in the sample.
 		"""
 		
-		for j in range(batch_size): # iterate over the batch dimension
-			for k in range(feature_map_count): # iterate over the feature maps dimension
-				feature_map_image = feature_maps_for_numpy[j, k] # we treat feature maps as images
-				single_grad = _evaluate_feature_map_weight_gradient(
-					feature_map_image,
-					vqc_weights_np[k],
-					geqie_encoding,
-					ansatz_factory,
-					output_qubits,
-					shots,
-					num_layers,
-					encoding_params,
-				)
-				quantum_circuit_gradients[j, k] = single_grad
+		weight_gradient_jobs = [
+			(
+				(j, k),
+				feature_maps_for_numpy[j, k],
+				vqc_weights_np[k],
+				geqie_encoding,
+				ansatz_factory,
+				output_qubits,
+				shots,
+				num_layers,
+				encoding_params,
+			)
+			for j in range(batch_size)
+			for k in range(feature_map_count)
+		]
+		for (j, k), single_grad in _dispatch_process_pool(
+			_run_feature_map_weight_gradient_job,
+			weight_gradient_jobs,
+		):
+			quantum_circuit_gradients[j, k] = single_grad
 
 		"""
 		2. Evaluating dL/dtheta = dL/dp * dp/dtheta
@@ -280,6 +373,7 @@ class GradientFunction_for_CNN_feature_maps(torch.autograd.Function):
 		 3.2 dL/dx = dL/dp * dp/dx
 		"""
 		feature_maps_gradient = np.empty_like(feature_maps_for_numpy, dtype=np.float32)
+		finite_difference_probability_jobs = []
 		for j in range(batch_size):
 			for k in range(feature_map_count):
 				feature_map_image = np.array(feature_maps_for_numpy[j, k], dtype=np.float32, copy=True)
@@ -289,8 +383,8 @@ class GradientFunction_for_CNN_feature_maps(torch.autograd.Function):
 						feature_map_minus = feature_map_image.copy()
 						feature_map_plus[h, w] += finite_difference_epsilon
 						feature_map_minus[h, w] -= finite_difference_epsilon
-
-						probabilities_plus = _evaluate_feature_map_probabilities(
+						finite_difference_probability_jobs.append((
+							(j, k, h, w, 1),
 							feature_map_plus,
 							vqc_weights_np[k],
 							geqie_encoding,
@@ -299,8 +393,9 @@ class GradientFunction_for_CNN_feature_maps(torch.autograd.Function):
 							shots,
 							num_layers,
 							encoding_params,
-						)
-						probabilities_minus = _evaluate_feature_map_probabilities(
+						))
+						finite_difference_probability_jobs.append((
+							(j, k, h, w, -1),
 							feature_map_minus,
 							vqc_weights_np[k],
 							geqie_encoding,
@@ -309,7 +404,21 @@ class GradientFunction_for_CNN_feature_maps(torch.autograd.Function):
 							shots,
 							num_layers,
 							encoding_params,
-						)
+						))
+
+		finite_difference_probabilities = {}
+		for result_index, probabilities in _dispatch_process_pool(
+			_run_feature_map_probabilities_job,
+			finite_difference_probability_jobs,
+		):
+			finite_difference_probabilities[result_index] = probabilities
+
+		for j in range(batch_size):
+			for k in range(feature_map_count):
+				for h in range(height):
+					for w in range(width):
+						probabilities_plus = finite_difference_probabilities[(j, k, h, w, 1)]
+						probabilities_minus = finite_difference_probabilities[(j, k, h, w, -1)]
 						dp_dx = (probabilities_plus - probabilities_minus) / (2.0 * finite_difference_epsilon)
 						feature_maps_gradient[j, k, h, w] = np.dot(upstream_gradient_np[j, k], dp_dx)
 
@@ -346,11 +455,9 @@ class VQCLayerForCNNFeatureMaps(nn.Module):
 	post-processing (linear head, activation, loss) is left to the caller,
 	so this layer composes freely inside any nn.Sequential or custom Module.
 
-	Both the sequential (default) and parallel paths are driven by the same
-	per-sample worker functions — ``_worker_forward_eval`` for the forward
-	pass and ``_worker_grad_eval`` for the parameter-shift backward pass.
-	The only difference is whether those functions are called in a plain loop
-	or dispatched to a ``ProcessPoolExecutor`` via ``parallel_context()``.
+	Per-feature-map probability and weight-gradient evaluations are dispatched
+	to a ``ProcessPoolExecutor`` so that independent quantum circuit calls run
+	concurrently instead of one-by-one in Python loops.
 
 	Parameters
 	----------
