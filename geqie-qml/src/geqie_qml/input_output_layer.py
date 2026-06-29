@@ -1,7 +1,25 @@
+import os
+
+
+def _set_single_threaded_numeric_libraries():
+	"""
+	Set numerical thread pools before importing NumPy/Qiskit in this process.
+	"""
+	numeric_thread_count = os.environ.get("GEQIE_QML_NUMERIC_THREADS", "1")
+	for variable_name in (
+		"OMP_NUM_THREADS",
+		"MKL_NUM_THREADS",
+		"OPENBLAS_NUM_THREADS",
+		"NUMEXPR_NUM_THREADS",
+	):
+		os.environ[variable_name] = numeric_thread_count
+
+
+_set_single_threaded_numeric_libraries()
+
 from .precompute import _compute_circuit_unitary
 from types import ModuleType
 from typing import Any
-import os
 import numpy as np
 import torch
 import torch.nn as nn
@@ -131,16 +149,21 @@ def _init_training_worker():
 	"""
 	Pin numerical libraries to one thread per process to avoid CPU oversubscription.
 	"""
-	os.environ["OMP_NUM_THREADS"] = "1"
-	os.environ["MKL_NUM_THREADS"] = "1"
-	os.environ["OPENBLAS_NUM_THREADS"] = "1"
-	os.environ["NUMEXPR_NUM_THREADS"] = "1"
+	_set_single_threaded_numeric_libraries()
 
 
 def _process_pool_worker_count(task_count: int) -> int:
 	"""Return a sensible process count for the current amount of quantum work."""
+	configured_limit = os.environ.get("GEQIE_QML_MAX_WORKERS")
+	if configured_limit is not None:
+		try:
+			configured_limit = max(1, int(configured_limit))
+		except ValueError as exc:
+			raise ValueError("GEQIE_QML_MAX_WORKERS must be a positive integer.") from exc
+	else:
+		configured_limit = task_count
 	platform_limit = 61 if os.name == "nt" else task_count
-	return min(task_count, platform_limit, max(1, cpu_count() - 1))
+	return min(task_count, configured_limit, platform_limit, max(1, cpu_count() - 1))
 
 
 def _run_feature_map_probabilities_job(args):
