@@ -1,5 +1,5 @@
 {
-  "pipeline_name": "Baseline_A_Dense",
+  "pipeline_name": "Baseline A",
   "pipeline_slug": "Baseline_A_Dense",
   "run_dir": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_A_Dense/05-05-2026-10-40",
   "started_at": "2026-05-05T10:40:34",

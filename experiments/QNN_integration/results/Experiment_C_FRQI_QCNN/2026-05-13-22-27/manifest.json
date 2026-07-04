@@ -1,5 +1,5 @@
 {
-  "pipeline_name": "Experiment_C_FRQI_QCNN",
+  "pipeline_name": "Experiment C",
   "pipeline_slug": "Experiment_C_FRQI_QCNN",
   "run_dir": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Experiment_C_FRQI_QCNN/2026-05-13-22-27",
   "started_at": "2026-05-13T22:27:30",

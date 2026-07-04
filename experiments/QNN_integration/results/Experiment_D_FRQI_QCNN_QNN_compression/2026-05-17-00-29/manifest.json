@@ -1,5 +1,5 @@
 {
-  "pipeline_name": "Experiment_D_FRQI_QCNN_QNN_compression",
+  "pipeline_name": "Experiment D",
   "pipeline_slug": "Experiment_D_FRQI_QCNN_QNN_compression",
   "run_dir": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Experiment_D_FRQI_QCNN_QNN_compression/2026-05-17-00-29",
   "started_at": "2026-05-17T00:29:09",
