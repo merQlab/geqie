@@ -32,6 +32,7 @@ def encode(
     shape = image.shape[:image_dimensionality]
 
     R = int(np.ceil(np.log2(max(shape))))
+    G = None
 
     products, data_vectors, map_operators = [], [], []
 
@@ -40,9 +41,9 @@ def encode(
         map_operator = map_function(*coords, R=R, image=image, **encoding_params)
         product = data_vector.to_operator() ^ map_operator
 
-        products.append(product)
-        data_vectors.append(data_vector)
-        map_operators.append(map_operator)
+        # products.append(product)
+        # data_vectors.append(data_vector)
+        # map_operators.append(map_operator)
 
         logger.state(f"{coords=}")
         logger.state(f"{data_vector=}")
@@ -50,7 +51,12 @@ def encode(
         logger.state(f"{product=}")
         logger.state("===========")
 
-    G = np.sum(products, axis=0)
+        if G is None:
+            G = np.array(product.data, copy=True)
+        else:
+            G += product.data
+
+    # G = np.sum(products, axis=0)
     U, _r = np.linalg.qr(G)
     logger.math(f"G=\n{tabulate_complex(G)}")
     logger.math(f"U=\n{tabulate_complex(U)}")
