@@ -52,12 +52,17 @@ def compute_and_save_circuits(
     if number_of_workers is None:
         number_of_workers = max(1, cpu_count() - 1)
 
+    total_images = len(data)
     os.makedirs(save_dir, exist_ok=True)
     encoding_name = _normalize_encoding_name(geqie_encoding)
 
     logger.debug(f"Starting precompute with {number_of_workers} workers for encoding '{encoding_name}'")
+    tqdm.write(
+        f"Precomputing {total_images} images with encoding '{encoding_name}' "
+        f"using {number_of_workers} worker(s)."
+    )
     if number_of_workers == 1:
-        for i in tqdm(range(len(data)), total=len(data)):
+        for i in tqdm(range(total_images), total=total_images, desc="Processing images", unit="image"):
             _compute_save_single(
                 image=data[i],
                 label=labels[i],
@@ -79,11 +84,17 @@ def compute_and_save_circuits(
                     file_prefix=file_prefix,
                     geqie_encoding=encoding_name,
                     encoding_params=encoding_params,
-                ) for i in tqdm(range(len(data)), total=len(data), desc="Submitting tasks")
+                ) for i in tqdm(range(total_images), total=total_images, desc="Submitting images", unit="image")
             ]
 
-            for future in tqdm(futures.as_completed(precompute_futures), total=len(precompute_futures), desc="Processing tasks"):
+            for future in tqdm(
+                futures.as_completed(precompute_futures),
+                total=len(precompute_futures),
+                desc="Processing images",
+                unit="image",
+            ):
                 future.result()
+    tqdm.write(f"Finished precomputing {total_images} images into '{save_dir}'.")
 
 
 # ---------------------------------------------------------------------------
