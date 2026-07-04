@@ -7,6 +7,7 @@ from types import ModuleType
 
 import numpy as np
 from concurrent import futures
+from concurrent.futures.process import BrokenProcessPool
 from multiprocessing import cpu_count
 from tqdm import tqdm
 
@@ -15,6 +16,8 @@ from qiskit.quantum_info import Operator
 import geqie
 
 logger = logging.getLogger(__name__)
+
+MEMORY_HEAVY_ENCODINGS = {"neqr"}
 
 
 # ---------------------------------------------------------------------------
@@ -28,7 +31,7 @@ def compute_and_save_circuits(
     file_prefix: str = "matrix",
     number_of_workers: int | None = None,
     geqie_encoding: str | ModuleType = "frqi",
-    encoding_params: dict[str, Any] = {},
+    encoding_params: dict[str, Any] | None = None,
 ):
     """
     Encode a dataset of images into unitary matrices and save them as .npz files.
@@ -47,13 +50,18 @@ def compute_and_save_circuits(
     file_prefix : str
         Filename prefix; files are named ``{prefix}_{index}.npz``.
     number_of_workers : int | None
-        Worker processes.  Defaults to (cpu_count - 1), min 1.
+        Worker processes. Defaults to 1 for memory-heavy encodings such as
+        NEQR, otherwise to (cpu_count - 1), min 1.
     """
+    encoding_params = {} if encoding_params is None else dict(encoding_params)
+    encoding_name = _normalize_encoding_name(geqie_encoding)
+
     if number_of_workers is None:
-        number_of_workers = max(1, cpu_count() - 1)
+        number_of_workers = _default_worker_count(encoding_name)
+    else:
+        number_of_workers = max(1, int(number_of_workers))
 
     os.makedirs(save_dir, exist_ok=True)
-    encoding_name = _normalize_encoding_name(geqie_encoding)
 
     logger.debug(f"Starting precompute with {number_of_workers} workers for encoding '{encoding_name}'")
     if number_of_workers == 1:
@@ -68,7 +76,7 @@ def compute_and_save_circuits(
                 encoding_params=encoding_params
             )
     else:
-        with futures.ProcessPoolExecutor(max_workers=number_of_workers) as executor:
+        with futures.ProcessPoolExecutor(max_workers=number_of_workers, initializer=_init_worker) as executor:
             precompute_futures = [
                 executor.submit(
                     _compute_save_single,
@@ -82,8 +90,16 @@ def compute_and_save_circuits(
                 ) for i in tqdm(range(len(data)), total=len(data), desc="Submitting tasks")
             ]
 
-            for future in tqdm(futures.as_completed(precompute_futures), total=len(precompute_futures), desc="Processing tasks"):
-                future.result()
+            try:
+                for future in tqdm(futures.as_completed(precompute_futures), total=len(precompute_futures), desc="Processing tasks"):
+                    future.result()
+            except BrokenProcessPool as error:
+                raise RuntimeError(
+                    "A precompute worker terminated abruptly. This usually means the GEQIE "
+                    "unitary matrices exhausted available memory. Retry with "
+                    "number_of_workers=1, or use fewer workers for memory-heavy encodings "
+                    "such as NEQR."
+                ) from error
 
 
 # ---------------------------------------------------------------------------
@@ -107,12 +123,21 @@ def _init_worker():
 # Circuit encoding helpers
 # ---------------------------------------------------------------------------
 
-def _normalize_encoding_name(geqie_encoding: str) -> str:
+def _normalize_encoding_name(geqie_encoding: str | ModuleType) -> str:
     """Convert a string-or-module selector into a stable encoding key."""
+    if isinstance(geqie_encoding, ModuleType):
+        return geqie_encoding.__name__.rsplit(".", maxsplit=1)[-1].lower()
     if not isinstance(geqie_encoding, str):
-        raise TypeError(f"geqie_encoding must be a string got {type(geqie_encoding).__name__}.")        
+        raise TypeError(f"geqie_encoding must be a string or module; got {type(geqie_encoding).__name__}.")
     
     return geqie_encoding.lower()
+
+
+def _default_worker_count(encoding_name: str) -> int:
+    """Choose a conservative default for encodings that materialize huge unitaries."""
+    if encoding_name in MEMORY_HEAVY_ENCODINGS:
+        return 1
+    return max(1, cpu_count() - 1)
 
 
 def _import_encoding_module(encoding_name: str):
@@ -121,7 +146,7 @@ def _import_encoding_module(encoding_name: str):
     return importlib.import_module(f"geqie.encodings.{normalized_name}")
 
 
-def _compute_circuit_unitary(image, geqie_encoding: str = "frqi", encoding_params: dict[str, Any] = {}):
+def _compute_circuit_unitary(image, geqie_encoding: str = "frqi", encoding_params: dict[str, Any] | None = None):
     """
     Encode a single image and return its full unitary matrix.
 
@@ -141,6 +166,7 @@ def _compute_circuit_unitary(image, geqie_encoding: str = "frqi", encoding_param
     -------
     np.ndarray, complex128, shape (2**n, 2**n)
     """
+    encoding_params = {} if encoding_params is None else dict(encoding_params)
     encoding_module = _import_encoding_module(_normalize_encoding_name(geqie_encoding))
     circuit = geqie.encode(
         encoding_module.init_function,
