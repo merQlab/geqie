@@ -1,5 +1,5 @@
 {
-  "pipeline_name": "Baseline_C",
+  "pipeline_name": "Baseline C",
   "pipeline_slug": "Baseline_C",
   "run_dir": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_C/05-05-2026-22-01",
   "started_at": "2026-05-05T22:01:22",

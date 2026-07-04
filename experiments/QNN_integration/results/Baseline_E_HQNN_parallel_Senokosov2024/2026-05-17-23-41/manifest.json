@@ -1,5 +1,5 @@
 {
-  "pipeline_name": "Baseline_E_HQNN_parallel_Senokosov2024",
+  "pipeline_name": "Baseline E",
   "pipeline_slug": "Baseline_E_HQNN_parallel_Senokosov2024",
   "run_dir": "/home/ODM/mkordasz/geqie/experiments/QNN_integration/results/Baseline_E_HQNN_parallel_Senokosov2024/2026-05-17-23-41",
   "started_at": "2026-05-17T23:41:16",
