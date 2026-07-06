@@ -416,6 +416,7 @@ def train_all_subsets_neqr_qnn(
 	dataset: DataSet,
 	create_circuits: bool = True,
 	encoding_method = neqr,
+	quantization_bits: int = 4,
 	precompute_workers=1,
 	num_classes=10,
 	num_qubits=12,
@@ -438,19 +439,22 @@ def train_all_subsets_neqr_qnn(
 								labels=data_block.train.y,
 								geqie_encoding=encoding_method,
 								save_dir=os.path.join(save_dir, f"subset_{subset_idx + 1}", "train"),
-								number_of_workers=precompute_workers)
+								number_of_workers=precompute_workers,
+								encoding_params={"bitrate": quantization_bits})
 
 			compute_and_save_circuits(data=data_block.val.X,
 								labels=data_block.val.y,
 								geqie_encoding=encoding_method,
 								save_dir=os.path.join(save_dir, f"subset_{subset_idx + 1}", "val"),
-								number_of_workers=precompute_workers)
+								number_of_workers=precompute_workers,
+								encoding_params={"bitrate": quantization_bits})
 
 			compute_and_save_circuits(data=data_block.test.X,
 								labels=data_block.test.y,
 								geqie_encoding=encoding_method,
 								save_dir=os.path.join(save_dir, f"subset_{subset_idx + 1}", "test"),
-								number_of_workers=precompute_workers)
+								number_of_workers=precompute_workers,
+								encoding_params={"bitrate": quantization_bits})
 
 	return train_subsets_with_process_pool(
 		dataset=dataset,
@@ -477,7 +481,8 @@ train_all_subsets_neqr_qnn(
 	model_architecture="GEQIE/NEQR-encoded circuits -> VQCLayer(num_qubits, ansatz=build_adaptive_qcnn_ansatz) -> Linear(2**num_qubits, num_classes) -> LogSoftmax",
 	create_circuits=True,
 	encoding_method="neqr",
-	precompute_workers=2,
+	quantization_bits = 4,	# Must be given for NEQR!
+	precompute_workers=1,
 	num_classes=10,
 	num_qubits=12,
 	num_layers=5,
