@@ -15,3 +15,4 @@ logs
 *.npy
 circuits/
 experiments/results
+lightning_logs/

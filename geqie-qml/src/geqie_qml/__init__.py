@@ -3,6 +3,9 @@ import os
 
 from .layer import VQCLayer, MatrixDataset
 from .layer_v2 import GEQIELayer
+from .layer_fast import FastGEQIELayer, FastAnsatzLayer
+
+from .dataset.zip_dataset import load_precomputed_zip, ZipMatrixDataset
 from .precompute import compute_and_save_circuits
 
 LOGGER_FORMAT = "%(levelname)s %(asctime)s --- %(message)s (%(filename)s:%(lineno)d)"
