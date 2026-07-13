@@ -482,7 +482,7 @@ train_all_subsets_neqr_qnn(
 	create_circuits=True,
 	encoding_method="neqr",
 	quantization_bits = 4,	# Must be given for NEQR!
-	precompute_workers=1,
+	precompute_workers=63,
 	num_classes=10,
 	num_qubits=12,
 	num_layers=5,
