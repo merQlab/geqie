@@ -443,7 +443,7 @@ def extract_1q_generator(gate, parameter) -> np.ndarray:
     """
     qc = QuantumCircuit(1)
     qc.append(gate, [0])
-    bound = qc.assign_parameters({parameter: np.pi})
+    bound = qc.assign_parameters({parameter: np.pi})  # TODO
     u_pi = np.asarray(bound.data[0].operation.to_matrix(), dtype=np.complex128)
     gen = 1j * u_pi
 
