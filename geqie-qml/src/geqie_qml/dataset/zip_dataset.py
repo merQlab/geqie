@@ -5,6 +5,7 @@ import threading
 import weakref
 import zipfile
 
+from collections import OrderedDict
 from typing import Dict, List
 
 import numpy as np
@@ -48,7 +49,7 @@ class ZipMatrixDataset(Dataset):
     dataset safe and efficient with multi-worker ``DataLoader`` usage.
     """
 
-    def __init__(self, zip_path: str, split_name: str = "train"):
+    def __init__(self, zip_path: str, split_name: str = "train", cache_size: int = 0):
         """
         Parameters
         ----------
@@ -56,11 +57,20 @@ class ZipMatrixDataset(Dataset):
             Path to the ``.precomputed.zip`` archive.
         split_name : str
             Dataset split name from zip to load (e.g. ``"train"``, ``"test"``).
+        cache_size : int
+            Maximum number of decoded ``(matrix, label)`` items to keep in an
+            in-memory LRU cache. ``0`` (the default) disables caching, which
+            keeps memory bounded and predictable for large matrices. A positive
+            value trades memory for speed by retaining the most recently used
+            items; note the cache lives *per DataLoader worker process*.
         """
         self._zip_path = zip_path
         self._split_name = split_name
+        self._cache_size = max(0, int(cache_size))
         self._entry_index = self._index_zip(zip_path, split_name)
-        self._cache: dict = {}  # optional in-memory cache of loaded matrices
+        # LRU cache of loaded matrices; empty/unused when cache_size == 0.
+        self._cache: OrderedDict[int, tuple] = OrderedDict()
+        self._cache_lock = threading.Lock()
         self._local = threading.local()  # per-thread ZipFile handle
         self._open_handles: list[zipfile.ZipFile] = []
         self._handles_lock = threading.Lock()
@@ -81,10 +91,15 @@ class ZipMatrixDataset(Dataset):
         del state["_local"]
         del state["_open_handles"]
         del state["_handles_lock"]
+        del state["_cache_lock"]
+        # Start each worker with a fresh cache instead of shipping loaded
+        # matrices across the process boundary.
+        state["_cache"] = OrderedDict()
         return state
 
     def __setstate__(self, state: dict) -> None:
         self.__dict__.update(state)
+        self._cache_lock = threading.Lock()
         self._local = threading.local()
         self._open_handles: list[zipfile.ZipFile] = []
         self._handles_lock = threading.Lock()
@@ -198,8 +213,13 @@ class ZipMatrixDataset(Dataset):
         import torch
 
         member, label = self._entry_index[idx]
-        if idx in self._cache:
-            return self._cache[idx]
+
+        if self._cache_size > 0:
+            with self._cache_lock:
+                if idx in self._cache:
+                    # Mark as most-recently-used.
+                    self._cache.move_to_end(idx)
+                    return self._cache[idx]
 
         with self._get_zip().open(member) as f:
             buf = io.BytesIO(f.read())
@@ -207,14 +227,23 @@ class ZipMatrixDataset(Dataset):
         matrix = torch.tensor(data["matrix"], dtype=torch.complex128)
         label_tensor = torch.tensor(data["label"], dtype=torch.long)
         result = (matrix, label_tensor)
-        self._cache[idx] = result
+
+        if self._cache_size > 0:
+            with self._cache_lock:
+                self._cache[idx] = result
+                self._cache.move_to_end(idx)
+                # Evict least-recently-used items beyond the budget.
+                while len(self._cache) > self._cache_size:
+                    self._cache.popitem(last=False)
+
         return result
 
 
-def load_precomputed_zip(
+def load_precomputed_zip_matrices(
     zip_path: str,
     split_names: List[str] = ["train", "test"],
-) -> tuple["ZipMatrixDataset", ...]:
+    cache_size: int = 0,
+) -> tuple[ZipMatrixDataset, ...]:
     """
     Load train and test splits from a ``.precomputed.zip`` archive.
 
@@ -225,6 +254,10 @@ def load_precomputed_zip(
     ----------
     zip_path : str
         Path to the zip archive produced by :func:`compute_and_save_circuits`.
+    cache_size : int
+        Maximum number of decoded items each split may keep in its in-memory
+        LRU cache. ``0`` (the default) disables caching to keep memory bounded
+        for large matrices.
 
     Returns
     -------
@@ -233,5 +266,7 @@ def load_precomputed_zip(
     """
     datasets = []
     for split_name in split_names:
-        datasets.append(ZipMatrixDataset(zip_path, split_name=split_name))
+        datasets.append(
+            ZipMatrixDataset(zip_path, split_name=split_name, cache_size=cache_size)
+        )
     return tuple(datasets)

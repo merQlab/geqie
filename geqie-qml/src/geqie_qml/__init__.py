@@ -2,10 +2,9 @@ import logging
 import os
 
 from .layer import VQCLayer, MatrixDataset
-from .layer_v2 import GEQIELayer
-from .layer_fast import FastGEQIELayer, FastAnsatzLayer
+from .layer_v2 import PrecomputedInputLayer, AnsatzLayer
 
-from .dataset.zip_dataset import load_precomputed_zip, ZipMatrixDataset
+from .dataset.zip_dataset import load_precomputed_zip_matrices, ZipMatrixDataset
 from .precompute import compute_and_save_circuits
 
 LOGGER_FORMAT = "%(levelname)s %(asctime)s --- %(message)s (%(filename)s:%(lineno)d)"
