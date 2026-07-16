@@ -3,6 +3,7 @@ from __future__ import annotations
 from concurrent import futures
 import inspect
 from multiprocessing import cpu_count
+from pathlib import Path
 import pickle
 from typing import Any, Callable, Mapping
 
@@ -174,17 +175,35 @@ def train_subsets_with_process_pool(
 	batch_size: int,
 	device: str,
 	verbose: bool,
+	dataset_id: str,
+	experiment_group: str,
+	model_family: str,
+	encoding_id: str,
+	model_id: str,
 	pipeline_name: str,
 	classifier_name: str,
 	model_architecture: str,
 	save_results: bool = True,
+	results_base_dir: str | Path | None = None,
 	training_setup_extra: Mapping[str, Any] | None = None,
 	subset_trainer_kwargs_factory: Callable[[int, Any], Mapping[str, Any]] | None = None,
 	max_workers: int | None = None,
 ) -> dict[str, Any]:
 	subset_count = len(dataset.subsets)
 	all_results_by_subset: list[dict[str, Any] | None] = [None] * subset_count
-	results_writer = ExperimentResultWriter(pipeline_name=pipeline_name) if save_results else None
+	results_writer = (
+		ExperimentResultWriter(
+			pipeline_name=pipeline_name,
+			dataset_id=dataset_id,
+			experiment_group=experiment_group,
+			model_family=model_family,
+			encoding_id=encoding_id,
+			model_id=model_id,
+			base_dir=results_base_dir,
+		)
+		if save_results
+		else None
+	)
 	worker_count = max_workers or min(subset_count, max(1, cpu_count() - 1))
 	trainer_payload = cloudpickle.dumps(trainer)
 	subset_kwargs_factory_payload = (

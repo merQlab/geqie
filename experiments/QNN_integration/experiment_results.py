@@ -379,22 +379,30 @@ def sanitize_path_segment(value: str) -> str:
 
 
 def format_run_timestamp(value: datetime) -> str:
-	label = value.strftime("%Y-%m-%d-%H-%M")
-	if os.name == "nt":
-		# Windows cannot create path segments containing ":".
-		label = label.replace(":", "-")
-	return label
+	return value.strftime("%Y-%m-%dT%H-%M-%S")
 
 
 class ExperimentResultWriter:
 	def __init__(
 		self,
 		pipeline_name: str,
+		dataset_id: str,
+		experiment_group: str,
+		model_family: str,
+		encoding_id: str,
+		model_id: str,
 		base_dir: str | Path | None = None,
 		timestamp: datetime | None = None,
 	) -> None:
 		self.pipeline_name = pipeline_name
-		self.pipeline_slug = sanitize_path_segment(pipeline_name)
+		self.result_identity = {
+			"dataset_id": sanitize_path_segment(dataset_id),
+			"experiment_group": sanitize_path_segment(experiment_group),
+			"model_family": sanitize_path_segment(model_family),
+			"encoding_id": sanitize_path_segment(encoding_id),
+			"model_id": sanitize_path_segment(model_id),
+		}
+		self.pipeline_slug = self.result_identity["model_id"]
 		self.started_at = timestamp or datetime.now()
 		self.base_dir = Path(base_dir) if base_dir is not None else Path(__file__).resolve().parent / "results"
 		self.run_dir = self._make_run_dir()
@@ -402,7 +410,7 @@ class ExperimentResultWriter:
 		self._write_manifest()
 
 	def _make_run_dir(self) -> Path:
-		pipeline_dir = self.base_dir / self.pipeline_slug
+		pipeline_dir = self.base_dir.joinpath(*self.result_identity.values())
 		timestamp_label = format_run_timestamp(self.started_at)
 		candidate = pipeline_dir / timestamp_label
 
@@ -425,6 +433,7 @@ class ExperimentResultWriter:
 		manifest = {
 			"pipeline_name": self.pipeline_name,
 			"pipeline_slug": self.pipeline_slug,
+			**self.result_identity,
 			"run_dir": str(self.run_dir),
 			"started_at": self.started_at.isoformat(timespec="seconds"),
 			"completed_at": completed_at.isoformat(timespec="seconds") if completed_at else None,
@@ -571,6 +580,7 @@ class ExperimentResultWriter:
 		payload = {
 			"pipeline_name": self.pipeline_name,
 			"pipeline_slug": self.pipeline_slug,
+			**self.result_identity,
 			"subset_index": subset_index,
 			"subset_count": subset_count,
 			"saved_at": datetime.now().isoformat(timespec="seconds"),
@@ -638,7 +648,14 @@ class ExperimentResultWriter:
 		if subset_results is not None:
 			self._write_subset_metrics_csv(subset_metrics_path, subset_results)
 
-		self._write_json(summary_json_path, {"summary": dict(summary)})
+		self._write_json(
+			summary_json_path,
+			{
+				"pipeline_name": self.pipeline_name,
+				**self.result_identity,
+				"summary": dict(summary),
+			},
+		)
 		self._write_manifest(completed_at=datetime.now())
 
 		return {

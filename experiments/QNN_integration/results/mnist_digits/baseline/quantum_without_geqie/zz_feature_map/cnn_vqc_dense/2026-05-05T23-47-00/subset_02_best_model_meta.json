@@ -1,0 +1,45 @@
+{
+  "pipeline_name": "CNN + ZZ feature map + VQC + dense",
+  "pipeline_slug": "cnn_vqc_dense",
+  "subset_index": 2,
+  "subset_count": 5,
+  "saved_at": "2026-05-06T00:56:02",
+  "model": {
+    "class_name": "QNN_Baseline_CNN",
+    "module": "__main__",
+    "repr": "QNN_Baseline_CNN(\n  (cnn): Sequential(\n    (0): Conv2d(1, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))\n    (1): ReLU()\n    (2): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)\n    (3): Conv2d(16, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))\n    (4): ReLU()\n    (5): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)\n    (6): Flatten(start_dim=1, end_dim=-1)\n    (7): Linear(in_features=512, out_features=12, bias=True)\n  )\n  (qnn_pytorch_layer): TorchConnector()\n  (classical_head): Linear(in_features=4096, out_features=10, bias=True)\n  (softmax): LogSoftmax(dim=-1)\n)"
+  },
+  "torchinfo_summary": "=================================================================\nLayer (type:depth-idx)                   Param #\n=================================================================\nQNN_Baseline_CNN                         36\n├─Sequential: 1-1                        --\n│    └─Conv2d: 2-1                       160\n│    └─ReLU: 2-2                         --\n│    └─MaxPool2d: 2-3                    --\n│    └─Conv2d: 2-4                       4,640\n│    └─ReLU: 2-5                         --\n│    └─MaxPool2d: 2-6                    --\n│    └─Flatten: 2-7                      --\n│    └─Linear: 2-8                       6,156\n├─TorchConnector: 1-2                    36\n├─Linear: 1-3                            40,970\n├─LogSoftmax: 1-4                        --\n=================================================================\nTotal params: 51,998\nTrainable params: 51,998\nNon-trainable params: 0\n=================================================================",
+  "report_context": {
+    "title": "EXPERIMENTAL PROTOCOL REPORT",
+    "dataset_name": "MNIST digits stratified",
+    "classifier_name": "CNN + ZZFeatureMap + QNN",
+    "model_architecture": null,
+    "subset_name": "2/5",
+    "split_sizes": {
+      "train": 921,
+      "val": 231,
+      "test": 288
+    },
+    "training_setup": {
+      "epochs": 50,
+      "batch_size": 16,
+      "device": "cpu",
+      "qnn_lr": 0.001,
+      "head_lr": 0.01
+    },
+    "model_setup": {
+      "num_classes": 10,
+      "num_qubits": 12,
+      "num_layers": 1
+    },
+    "torchinfo_summary": "=================================================================\nLayer (type:depth-idx)                   Param #\n=================================================================\nQNN_Baseline_CNN                         36\n├─Sequential: 1-1                        --\n│    └─Conv2d: 2-1                       160\n│    └─ReLU: 2-2                         --\n│    └─MaxPool2d: 2-3                    --\n│    └─Conv2d: 2-4                       4,640\n│    └─ReLU: 2-5                         --\n│    └─MaxPool2d: 2-6                    --\n│    └─Flatten: 2-7                      --\n│    └─Linear: 2-8                       6,156\n├─TorchConnector: 1-2                    36\n├─Linear: 1-3                            40,970\n├─LogSoftmax: 1-4                        --\n=================================================================\nTotal params: 51,998\nTrainable params: 51,998\nNon-trainable params: 0\n================================================================="
+  },
+  "legacy_pipeline_name": "Baseline_D",
+  "legacy_pipeline_slug": "Baseline_D",
+  "dataset_id": "mnist_digits",
+  "experiment_group": "baseline",
+  "model_family": "quantum_without_geqie",
+  "encoding_id": "zz_feature_map",
+  "model_id": "cnn_vqc_dense"
+}
