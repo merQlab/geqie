@@ -1,57 +1,20 @@
 import numpy as np
 import torch
 import torch.nn as nn
-from qiskit import QuantumCircuit
-from qiskit.circuit import Gate, Parameter, ParameterExpression
+
+import qiskit
+import qiskit.circuit
 
 
-# ---------------------------------------------------------------------------
-# Public nn.Modules
-# ---------------------------------------------------------------------------
-
-class PrecomputedInputLayer(nn.Module):
-    """
-    Converts a pre-computed image unitary ``U`` into the encoded statevector
-    ``U|0⟩`` by extracting the first column.
-
-    No trainable parameters.  Output is a complex statevector ready to be
-    passed to :class:`AnsatzLayer` or any other quantum layer.
-
-    Parameters
-    ----------
-    num_qubits : int
-
-    Input / Output
-    --------------
-    Input  : ``(B, dim, dim)`` complex — pre-computed unitary matrices from the
-             data-loader (``dim = 2**num_qubits``).
-    Output : ``(B, dim)`` complex — encoded statevectors ``U|0⟩``.
-    """
-
-    def __init__(self, num_qubits: int):
-        super().__init__()
-        self.num_qubits = num_qubits
-        self.dim = 2 ** num_qubits
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        if x.dim() == 3 and x.shape[-2] == self.dim and x.shape[-1] == self.dim:
-            return x[:, :, 0].contiguous()     # U|0⟩ = first column of U
-        if x.dim() == 2 and x.shape[-1] == self.dim:
-            return x                            # already a statevector
-        raise ValueError(
-            f"Expected (B, {self.dim}, {self.dim}) or (B, {self.dim}), "
-            f"got {tuple(x.shape)}."
-        )
-
-    def extra_repr(self) -> str:
-        return f"num_qubits={self.num_qubits}, dim={self.dim}"
-
-
-class AnsatzLayer(nn.Module):
+class SamplerAnsatzLayer(nn.Module):
     """
     Trainable ansatz layer with analytic parameter-shift gradients.
 
-    Accepts any Qiskit ``QuantumCircuit`` as the ansatz.  The circuit is parsed
+    Designed to be placed after :class:`UnitaryInputLayer` in an ``nn.Sequential``
+    pipeline, mirroring the original ``pqc.compose(geqie_layer).compose(ansatz)``
+    pattern with ``SamplerQNN``.
+
+    Accepts any Qiskit ``QuantumCircuit`` as the ansatz. The circuit is parsed
     once at construction into a plain Python gate list; no Qiskit objects are
     retained.  All forward and backward computations are pure NumPy statevector
     operations, bypassing Qiskit's parameter-binding machinery entirely.
@@ -63,13 +26,9 @@ class AnsatzLayer(nn.Module):
     avoids the ``assign_parameters_mapping`` bottleneck that makes backward
     passes prohibitively slow for large image encodings.
 
-    Designed to be placed after :class:`PrecomputedInputLayer` in an ``nn.Sequential``
-    pipeline, mirroring the original ``pqc.compose(geqie_layer).compose(ansatz)``
-    pattern with ``SamplerQNN``.
-
     Parameters
     ----------
-    num_qubits : int
+    n_qubits : int
     ansatz : qiskit.QuantumCircuit
         Parameterized ansatz.  Any single-qubit Pauli-axis rotation
         (``rx``/``ry``/``rz`` and equivalents) may be parameterized; any fixed
@@ -82,8 +41,8 @@ class AnsatzLayer(nn.Module):
 
     Input / Output
     --------------
-    Input  : ``(B, dim)`` complex — statevectors (e.g. from :class:`PrecomputedInputLayer`).
-    Output : ``(B, dim)`` float  — measurement probability distributions
+    Input  : ``(B, 2**n_qubits)`` complex — statevectors (e.g. from :class:`UnitaryInputLayer`).
+    Output : ``(B, 2**n_qubits)`` float  — measurement probability distributions
              ``|A(θ)|input⟩|²``.
 
     Example
@@ -91,8 +50,8 @@ class AnsatzLayer(nn.Module):
     >>> from qiskit.circuit.library import real_amplitudes
     >>> ansatz = real_amplitudes(7, reps=4)
     >>> model = nn.Sequential(
-    ...     PrecomputedInputLayer(7),
-    ...     AnsatzLayer(7, ansatz),
+    ...     UnitaryInputLayer(7),
+    ...     SamplerAnsatzLayer(7, ansatz),
     ...     nn.Linear(128, 10),
     ...     nn.LogSoftmax(dim=-1),
     ... )
@@ -100,18 +59,18 @@ class AnsatzLayer(nn.Module):
 
     def __init__(
         self,
-        num_qubits: int,
-        ansatz: QuantumCircuit,
+        n_qubits: int,
+        ansatz: qiskit.QuantumCircuit,
         weight_init: torch.Tensor | None = None,
         seed: int | None = None,
     ):
         super().__init__()
-        if ansatz.num_qubits != num_qubits:
+        if ansatz.num_qubits != n_qubits:
             raise ValueError(
-                f"ansatz acts on {ansatz.num_qubits} qubits, expected {num_qubits}."
+                f"ansatz acts on {ansatz.num_qubits} qubits, expected {n_qubits}."
             )
-        self.num_qubits = num_qubits
-        self.dim = 2 ** num_qubits
+        self.n_qubits = n_qubits
+        self.dim = 2 ** n_qubits
         self.ops = parse_circuit(ansatz)        # parsed once; no live Qiskit objects
 
         n_w = ansatz.num_parameters
@@ -133,14 +92,14 @@ class AnsatzLayer(nn.Module):
                 f"Expected (B, {self.dim}) statevectors, got {tuple(states.shape)}."
             )
         return ParameterShiftFunction.apply(
-            states, self.weights, self.ops, self.num_qubits
+            states, self.weights, self.ops, self.n_qubits
         )
 
     def extra_repr(self) -> str:
         n_p = sum(1 for op in self.ops if op["type"] == "1q_param")
         n_f = len(self.ops) - n_p
         return (
-            f"num_qubits={self.num_qubits}, dim={self.dim}, "
+            f"n_qubits={self.n_qubits}, dim={self.dim}, "
             f"weights={len(self.weights)}, param_gates={n_p}, fixed_gates={n_f}"
         )
 
@@ -233,7 +192,7 @@ class ParameterShiftFunction(torch.autograd.Function):
 # Circuit parser  (called once at construction, never during training)
 # ---------------------------------------------------------------------------
 
-def parse_circuit(ansatz: QuantumCircuit) -> list[dict]:
+def parse_circuit(ansatz: qiskit.QuantumCircuit) -> list[dict]:
     """
     Parse a Qiskit ansatz circuit into a plain Python list of gate records.
 
@@ -263,13 +222,13 @@ def parse_circuit(ansatz: QuantumCircuit) -> list[dict]:
     ops: list = []
 
     for instruction in ansatz.data:
-        gate = instruction.operation
+        gate: qiskit.circuit.Gate = instruction.operation
         qubits = [ansatz.qubits.index(q) for q in instruction.qubits]
         name = gate.name.lower()
 
         symbolic = [
             p for p in gate.params
-            if isinstance(p, ParameterExpression) and p.parameters
+            if isinstance(p, qiskit.circuit.ParameterExpression) and p.parameters
         ]
 
         if gate.num_qubits == 1 and symbolic:
@@ -417,7 +376,10 @@ def param_1q(theta: float, pauli_generator: np.ndarray) -> np.ndarray:
     return np.cos(theta / 2.0) * I2 - 1j * np.sin(theta / 2.0) * pauli_generator
 
 
-def extract_1q_pauli_generator(gate: Gate, parameter: Parameter) -> np.ndarray:
+def extract_1q_pauli_generator(
+        gate: qiskit.circuit.Gate, 
+        parameter: qiskit.circuit.Parameter  # type: ignore (variable type not allowed by pylance)
+) -> np.ndarray:
     """
     Extract the Pauli generator ``P`` of a single-qubit rotation gate.
 
@@ -443,7 +405,7 @@ def extract_1q_pauli_generator(gate: Gate, parameter: Parameter) -> np.ndarray:
         scaling and/or offset of the parameter); such parameterizations are not
         supported by the single-sample generator extraction.
     """
-    circuit = QuantumCircuit(1)
+    circuit = qiskit.QuantumCircuit(1)
     circuit.append(gate, [0])
     bound = circuit.assign_parameters({parameter: np.pi})
     U_pi = np.asarray(bound.data[0].operation.to_matrix(), dtype=np.complex128)

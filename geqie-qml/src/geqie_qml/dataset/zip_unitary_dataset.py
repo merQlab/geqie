@@ -21,7 +21,7 @@ _FILENAME_RE = re.compile(r"^matrix_(\d+)_label_(\w+)\.npz$")
 # Lazy zip-based dataset
 # ---------------------------------------------------------------------------
 
-class ZipMatrixDataset(Dataset):
+class ZipUnitaryDataset(Dataset):
     """
     PyTorch Dataset that lazily reads pre-computed unitary matrices from .npz
     files stored inside a zip archive.
@@ -77,7 +77,7 @@ class ZipMatrixDataset(Dataset):
         # Fires on GC and at interpreter exit via atexit — covers normal
         # shutdown and KeyboardInterrupt.  Hard kills (SIGKILL) cannot be
         # caught at the Python level; the OS reclaims the file descriptors.
-        weakref.finalize(self, ZipMatrixDataset._close_handles,
+        weakref.finalize(self, ZipUnitaryDataset._close_handles,
                          self._open_handles, self._handles_lock)
 
     # ------------------------------------------------------------------
@@ -103,7 +103,7 @@ class ZipMatrixDataset(Dataset):
         self._local = threading.local()
         self._open_handles: list[zipfile.ZipFile] = []
         self._handles_lock = threading.Lock()
-        weakref.finalize(self, ZipMatrixDataset._close_handles,
+        weakref.finalize(self, ZipUnitaryDataset._close_handles,
                          self._open_handles, self._handles_lock)
 
     # ------------------------------------------------------------------
@@ -145,7 +145,7 @@ class ZipMatrixDataset(Dataset):
 
         with zipfile.ZipFile(zip_path, "r") as zf:
             all_names = zf.namelist()
-            prefix = ZipMatrixDataset._find_split_prefix(all_names, split_name)
+            prefix = ZipUnitaryDataset._find_split_prefix(all_names, split_name)
 
             if prefix is None:
                 import warnings
@@ -243,12 +243,12 @@ def load_precomputed_zip_matrices(
     zip_path: str,
     split_names: List[str] = ["train", "test"],
     cache_size: int = 0,
-) -> tuple[ZipMatrixDataset, ...]:
+) -> tuple[ZipUnitaryDataset, ...]:
     """
     Load train and test splits from a ``.precomputed.zip`` archive.
 
     The function searches the zip tree for ``split_names`` folders at
-    any nesting depth and returns lazy :class:`ZipMatrixDataset` objects for each split.
+    any nesting depth and returns lazy :class:`ZipUnitaryDataset` objects for each split.
 
     Parameters
     ----------
@@ -261,12 +261,12 @@ def load_precomputed_zip_matrices(
 
     Returns
     -------
-    datasets : tuple[ZipMatrixDataset, ...]
+    datasets : tuple[ZipUnitaryDataset, ...]
         Lazy datasets for each split.
     """
     datasets = []
     for split_name in split_names:
         datasets.append(
-            ZipMatrixDataset(zip_path, split_name=split_name, cache_size=cache_size)
+            ZipUnitaryDataset(zip_path, split_name=split_name, cache_size=cache_size)
         )
     return tuple(datasets)
