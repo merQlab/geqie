@@ -1,4 +1,4 @@
-"""CNN feature maps -> GEQIE(FRQI) -> VQC -> dense pipeline."""
+"""CNN feature maps -> GEQIE(NEQR) -> VQC -> dense pipeline."""
 
 from __future__ import annotations
 
@@ -16,8 +16,12 @@ from experiments.QNN_integration.experimental_pipelines.experiment.geqie.models.
 )
 
 
-def run(**kwargs):
-	return run_cnn_feature_maps_vqc_dense(encoding_id="frqi", **kwargs)
+def run(*, encoding_params=None, **kwargs):
+	params = {"bitrate": 4, **(encoding_params or {})}
+	return run_cnn_feature_maps_vqc_dense(
+		encoding_id="neqr",
+		encoding_params=params,
+		**kwargs)
 
 
 if __name__ == "__main__":

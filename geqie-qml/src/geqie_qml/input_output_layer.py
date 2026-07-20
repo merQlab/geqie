@@ -43,9 +43,12 @@ from .ansatze import default_vqc_ansatz
 def _normalize_encoding_name(geqie_encoding: str) -> str:
     """Convert a string-or-module selector into a stable encoding key."""
     if not isinstance(geqie_encoding, str):
-        raise TypeError(f"geqie_encoding must be a string got {type(geqie_encoding).__name__}.")        
-    
-    return geqie_encoding.lower()
+        raise TypeError(f"geqie_encoding must be a string; got {type(geqie_encoding).__name__}.")
+
+    normalized_name = geqie_encoding.strip().lower()
+    if not normalized_name:
+        raise ValueError("geqie_encoding must not be empty.")
+    return normalized_name
 
 
 def _import_encoding_module(encoding_name: str):
@@ -494,6 +497,11 @@ class VQCLayerForCNNFeatureMaps(nn.Module):
 		When True (default), multiply output probabilities by 2**num_qubits.
 		This rescales the near-zero probability values into a more numerically
 		convenient range before they are passed to a classical head.
+	geqie_encoding : str
+		GEQIE encoding module name used for every feature map (for example,
+		``"frqi"`` or ``"neqr"``). It can be overridden for one forward call.
+	encoding_params : dict, optional
+		Keyword arguments forwarded to the selected encoding functions.
 
 	Usage
 	-----
@@ -530,6 +538,7 @@ class VQCLayerForCNNFeatureMaps(nn.Module):
 		feature_maps: int = -1,
 		finite_difference_epsilon: float = 1e-3,
 		encoding_params: dict | None = None,
+		geqie_encoding: str = "frqi",
 	):
 		super().__init__()
 		self.num_qubits: int = num_qubits
@@ -541,6 +550,7 @@ class VQCLayerForCNNFeatureMaps(nn.Module):
 		self.batch_size: int = batch_size
 		self.feature_maps: int = feature_maps # number of input feature maps per original sample, after passing throught CNN. E. g. (16, 4, 4) -> means 16 feature maps - images.
 		self.finite_difference_epsilon: float = finite_difference_epsilon
+		self.geqie_encoding: str = _normalize_encoding_name(geqie_encoding)
 		self.encoding_params: dict | None = encoding_params
 
 		# Trainable quantum weights, registered as a proper nn.Parameter so
@@ -583,7 +593,7 @@ class VQCLayerForCNNFeatureMaps(nn.Module):
 			Probability distribution over basis states for each sample.
 			If ``scale_output=True``, values are multiplied by 2**num_qubits.
 		"""
-		geqie_encoding = kwargs.get("geqie_encoding", "frqi")
+		geqie_encoding = kwargs.get("geqie_encoding", self.geqie_encoding)
 		encoding_params = kwargs.get("encoding_params", self.encoding_params)
 		finite_difference_epsilon = kwargs.get("finite_difference_epsilon", self.finite_difference_epsilon)
 
@@ -609,7 +619,7 @@ class VQCLayerForCNNFeatureMaps(nn.Module):
 		return (
 			f"num_qubits={self.num_qubits}, num_layers={self.num_layers}, "
 			f"output_qubits={self.output_qubits}, shots={self.num_shots}, scale_output={self.scale_output}, "
-			f"num_params={self.vqc_weights.numel()}"
+			f"geqie_encoding={self.geqie_encoding!r}, num_params={self.vqc_weights.numel()}"
 		)
 
 __all__ = [

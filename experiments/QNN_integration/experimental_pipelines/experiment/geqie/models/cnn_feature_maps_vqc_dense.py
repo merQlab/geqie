@@ -1,6 +1,9 @@
-"""Shared CNN feature maps -> GEQIE(FRQI) -> VQC -> dense implementation."""
+"""Shared CNN feature maps -> GEQIE encoding -> VQC -> dense implementation."""
 
 from __future__ import annotations
+
+import importlib
+from typing import Any
 
 import numpy as np
 import torch
@@ -16,6 +19,63 @@ from experiments.QNN_integration.experimental_pipelines.common import (
 )
 
 from geqie_qml.input_output_layer import VQCLayerForCNNFeatureMaps
+
+
+def normalize_encoding_id(encoding_id: str) -> str:
+	"""Return the module name used by the GEQIE encoding registry."""
+	if not isinstance(encoding_id, str):
+		raise TypeError(f"encoding_id must be a string; got {type(encoding_id).__name__}.")
+	encoding_id = encoding_id.strip().lower()
+	if not encoding_id:
+		raise ValueError("encoding_id must not be empty.")
+	return encoding_id
+
+
+def infer_encoded_feature_map_qubits(
+	encoding_id: str,
+	feature_size: tuple[int, int],
+	encoding_params: dict[str, Any] | None = None,
+) -> int:
+	"""Infer the encoded circuit width using the selected GEQIE module."""
+	encoding_id = normalize_encoding_id(encoding_id)
+	if len(feature_size) != 2 or any(size <= 0 for size in feature_size):
+		raise ValueError(f"feature_size must contain two positive dimensions; got {feature_size!r}.")
+
+	try:
+		encoding_module = importlib.import_module(f"geqie.encodings.{encoding_id}")
+	except ModuleNotFoundError as error:
+		if error.name == f"geqie.encodings.{encoding_id}":
+			raise ValueError(f"Unknown GEQIE encoding_id: {encoding_id!r}.") from error
+		raise
+
+	params = dict(encoding_params or {})
+	probe_image = np.zeros(feature_size, dtype=np.float32)
+	coordinate_qubits = int(np.ceil(np.log2(max(feature_size))))
+	data_state = encoding_module.data_function(
+		0,
+		0,
+		R=coordinate_qubits,
+		image=probe_image,
+		**params,
+	)
+	map_operator = encoding_module.map_function(
+		0,
+		0,
+		R=coordinate_qubits,
+		image=probe_image,
+		**params,
+	)
+	num_qubits = data_state.num_qubits + map_operator.num_qubits
+
+	# The initial state is part of the encoding contract as well.  Calling it
+	# here catches inconsistent custom encodings before a training process starts.
+	initial_state = encoding_module.init_function(num_qubits, **params)
+	if initial_state.num_qubits != num_qubits:
+		raise ValueError(
+		f"GEQIE/{encoding_id.upper()} creates an initial state with "
+		f"{initial_state.num_qubits} qubits, but its data and map functions require {num_qubits}."
+	)
+	return num_qubits
 
 
 def build_feature_extractor(
@@ -46,18 +106,28 @@ class CNNFeatureMapsGEQIEVQCDenseClassifier(nn.Module):
 		self,
 		*,
 		num_classes: int,
-		num_qubits: int,
+		num_qubits: int | None,
 		num_layers: int,
 		batch_size: int,
 		convolution_depth: int = 2,
+		encoding_id: str = "frqi",
+		encoding_params: dict[str, Any] | None = None,
 	) -> None:
 		super().__init__()
+		self.encoding_id = normalize_encoding_id(encoding_id)
+		self.encoding_params = dict(encoding_params or {})
 		self.cnn, feature_maps, feature_size = build_feature_extractor(convolution_depth)
-		pixels = feature_size[0] * feature_size[1]
-		expected_qubits = int(np.log2(pixels)) + 1
-		if pixels & (pixels - 1) or num_qubits != expected_qubits:
+		expected_qubits = infer_encoded_feature_map_qubits(
+			self.encoding_id,
+			feature_size,
+			self.encoding_params,
+		)
+		if num_qubits is None:
+			num_qubits = expected_qubits
+		elif num_qubits != expected_qubits:
 			raise ValueError(
-				f"FRQI needs {expected_qubits} qubits for feature maps of shape {feature_size}; got {num_qubits}."
+				f"GEQIE/{self.encoding_id.upper()} needs {expected_qubits} qubits for feature maps "
+				f"of shape {feature_size} with encoding_params={self.encoding_params!r}; got {num_qubits}."
 			)
 		self.quantum = VQCLayerForCNNFeatureMaps(
 			num_qubits=num_qubits,
@@ -66,6 +136,8 @@ class CNNFeatureMapsGEQIEVQCDenseClassifier(nn.Module):
 			batch_size=batch_size,
 			feature_maps=feature_maps,
 			output_qubits=num_qubits,
+			geqie_encoding=self.encoding_id,
+			encoding_params=self.encoding_params,
 		)
 		self.head = nn.Linear(
 			feature_maps * (2 ** num_qubits),
@@ -75,7 +147,11 @@ class CNNFeatureMapsGEQIEVQCDenseClassifier(nn.Module):
 
 	def forward(self, x: torch.Tensor) -> torch.Tensor:
 		x = self.cnn(x)
-		x = self.quantum(x)
+		x = self.quantum(
+			x,
+			geqie_encoding=self.encoding_id,
+			encoding_params=self.encoding_params,
+		)
 		x = x.flatten(start_dim=1)
 		x = self.head(x)
 		x = self.log_softmax(x)
@@ -86,7 +162,7 @@ def train_one_subset(
 	data_block: DataBlock,
 	*,
 	num_classes=10,
-	num_qubits=5,
+	num_qubits=None,
 	num_layers=1,
 	epochs=50,
 	batch_size=16,
@@ -95,6 +171,8 @@ def train_one_subset(
 	report_context=None,
 	convolution_depth=2,
 	lr=1e-3,
+	encoding_id="frqi",
+	encoding_params=None,
 	**_,
 ):
 	model = CNNFeatureMapsGEQIEVQCDenseClassifier(
@@ -103,6 +181,8 @@ def train_one_subset(
 		num_layers=num_layers,
 		batch_size=batch_size,
 		convolution_depth=convolution_depth,
+		encoding_id=encoding_id,
+		encoding_params=encoding_params,
 	)
 	train_loader, val_loader, test_loader = image_loaders(
 		data_block,
@@ -135,11 +215,31 @@ def run_cnn_feature_maps_vqc_dense(
 	dataset_id="mnist_digits",
 	convolution_depth=2,
 	lr=1e-3,
+	encoding_id="frqi",
+	encoding_params=None,
+	num_qubits=None,
 	**overrides,
 ):
+	encoding_id = normalize_encoding_id(encoding_id)
+	encoding_params = dict(encoding_params or {})
+	_, feature_maps, feature_size = build_feature_extractor(convolution_depth)
+	expected_qubits = infer_encoded_feature_map_qubits(
+		encoding_id,
+		feature_size,
+		encoding_params,
+	)
+	if num_qubits is None:
+		num_qubits = expected_qubits
+	elif num_qubits != expected_qubits:
+		raise ValueError(
+			f"GEQIE/{encoding_id.upper()} needs {expected_qubits} qubits for feature maps "
+			f"of shape {feature_size} with encoding_params={encoding_params!r}; got {num_qubits}."
+		)
+	encoding_label = encoding_id.upper()
+
 	run_options = {
 		"num_classes": 10,
-		"num_qubits": 5,
+		"num_qubits": num_qubits,
 		"num_layers": 1,
 		"epochs": 50,
 		"batch_size": 16,
@@ -148,11 +248,14 @@ def run_cnn_feature_maps_vqc_dense(
 		"training_setup_extra": {
 			"cnn_lr": lr,
 			"convolution_depth": convolution_depth,
-			"encoding_method": "frqi",
+			"encoding_method": encoding_id,
+			"encoding_params": encoding_params,
 		},
 		"subset_kwargs_factory": lambda _index, _: {
 			"convolution_depth": convolution_depth,
 			"lr": lr,
+			"encoding_id": encoding_id,
+			"encoding_params": encoding_params,
 		},
 	}
 	run_options.update(overrides)
@@ -162,10 +265,13 @@ def run_cnn_feature_maps_vqc_dense(
 		dataset_id=dataset_id,
 		experiment_group="experiment",
 		model_family="geqie",
-		encoding_id="frqi",
+		encoding_id=encoding_id,
 		model_id="cnn_feature_maps_vqc_dense",
-		pipeline_name="CNN feature maps + GEQIE/FRQI + VQC + dense",
-		classifier_name="CNN + GEQIE(FRQI feature maps) + QNN + Dense",
-		model_architecture="16x16 -> CNN feature maps (16x4x4) -> GEQIE(FRQI) -> VQC -> Dense",
+		pipeline_name=f"CNN feature maps + GEQIE/{encoding_label} + VQC + dense",
+		classifier_name=f"CNN + GEQIE({encoding_label} feature maps) + QNN + Dense",
+		model_architecture=(
+			f"16x16 -> CNN feature maps ({feature_maps}x{feature_size[0]}x{feature_size[1]}) "
+			f"-> GEQIE({encoding_label}) -> VQC -> Dense"
+		),
 		**run_options,
 	)
