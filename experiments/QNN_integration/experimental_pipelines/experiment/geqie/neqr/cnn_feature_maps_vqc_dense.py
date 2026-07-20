@@ -17,7 +17,8 @@ from experiments.QNN_integration.experimental_pipelines.experiment.geqie.models.
 
 
 def run(*, encoding_params=None, **kwargs):
-	params = {"bitrate": 4, **(encoding_params or {})}
+	params = {"bitrate": 4,
+		   **(encoding_params or {})}
 	return run_cnn_feature_maps_vqc_dense(
 		encoding_id="neqr",
 		encoding_params=params,
