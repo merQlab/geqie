@@ -69,6 +69,7 @@ def train_one_subset(
 	device="cpu",
 	verbose=False,
 	report_context=None,
+	progress_callback=None,
 	quantum_workers=1,
 	**_,
 ):
@@ -87,6 +88,7 @@ def train_one_subset(
 		device=device,
 		verbose=verbose,
 		report_context=report_context,
+		progress_callback=progress_callback,
 		ansatz_factory=variant["ansatz_factory"],
 		output_qubits=variant["output_qubits"],
 		quantum_workers=quantum_workers,

@@ -13,7 +13,7 @@ import sys
 import zipfile
 from contextlib import nullcontext
 from pathlib import Path
-from typing import Any, Callable, ContextManager, Iterable
+from typing import Any, Callable, ContextManager, Iterable, Mapping
 
 import joblib
 import numpy as np
@@ -226,18 +226,31 @@ def zip_matrix_loaders(
 	)
 
 
-def evaluate_model(model: nn.Module, loader: DataLoader, criterion: nn.Module, device: str) -> dict[str, Any]:
+ProgressCallback = Callable[[Mapping[str, Any]], None]
+
+
+def evaluate_model(
+	model: nn.Module,
+	loader: DataLoader,
+	criterion: nn.Module,
+	device: str,
+	*,
+	on_batch_complete: Callable[[int, int], None] | None = None,
+) -> dict[str, Any]:
 	model.eval()
 	losses: list[float] = []
 	predictions: list[int] = []
 	targets: list[int] = []
+	batch_count = len(loader)
 	with torch.no_grad():
-		for x_batch, y_batch in loader:
+		for batch_idx, (x_batch, y_batch) in enumerate(loader, start=1):
 			x_batch, y_batch = x_batch.to(device), y_batch.to(device)
 			output = model(x_batch)
 			losses.append(criterion(output, y_batch).item())
 			predictions.extend(torch.argmax(output, dim=1).cpu().tolist())
 			targets.extend(y_batch.cpu().tolist())
+			if on_batch_complete is not None:
+				on_batch_complete(batch_idx, batch_count)
 	metrics = classification_metrics(targets, predictions)
 	return {"loss": float(np.mean(losses)) if losses else 0.0, **metrics, "y_true": targets, "y_pred": predictions}
 
@@ -258,6 +271,7 @@ def train_model(
 	patience: int = 5,
 	min_delta: float = 1e-4,
 	training_context: ContextManager[Any] | None = None,
+	progress_callback: ProgressCallback | None = None,
 ) -> dict[str, Any]:
 	"""Train one subset and return the common result structure used by reports."""
 	model = model.to(device)
@@ -268,6 +282,38 @@ def train_model(
 	best_state: dict[str, Any] | None = None
 	stale_epochs = 0
 	context = training_context or nullcontext()
+	train_batch_count = len(train_loader)
+	val_batch_count = len(val_loader)
+	test_batch_count = len(test_loader)
+	epoch_batch_count = train_batch_count + val_batch_count
+	total_steps = epochs * epoch_batch_count + test_batch_count
+	completed_steps = 0
+	completed_epochs = 0
+	stopped_early = False
+
+	def report_progress(
+		phase: str,
+		*,
+		epoch: int | None = None,
+		batch: int | None = None,
+		phase_total: int | None = None,
+		status: str = "running",
+	) -> None:
+		if progress_callback is None:
+			return
+		progress_callback({
+			"phase": phase,
+			"epoch": epoch,
+			"epochs": epochs,
+			"batch": batch,
+			"phase_total": phase_total,
+			"completed": completed_steps,
+			"total": total_steps,
+			"status": status,
+			"early_stopping": stopped_early,
+		})
+
+	report_progress("starting", status="starting")
 
 	with context:
 		for epoch in range(epochs):
@@ -275,7 +321,7 @@ def train_model(
 			losses: list[float] = []
 			predictions: list[int] = []
 			targets: list[int] = []
-			for x_batch, y_batch in train_loader:
+			for batch_idx, (x_batch, y_batch) in enumerate(train_loader, start=1):
 				x_batch, y_batch = x_batch.to(device), y_batch.to(device)
 				optimizer.zero_grad()
 				output = model(x_batch)
@@ -285,10 +331,35 @@ def train_model(
 				losses.append(loss.item())
 				predictions.extend(torch.argmax(output, dim=1).detach().cpu().tolist())
 				targets.extend(y_batch.detach().cpu().tolist())
+				completed_steps += 1
+				report_progress(
+					"train",
+					epoch=epoch + 1,
+					batch=batch_idx,
+					phase_total=train_batch_count,
+				)
 
 			train_metrics = classification_metrics(targets, predictions)
 			train_loss = float(np.mean(losses)) if losses else 0.0
-			validation = evaluate_model(model, val_loader, criterion, device)
+
+			def report_validation_batch(batch_idx: int, batch_count: int) -> None:
+				nonlocal completed_steps
+				completed_steps += 1
+				report_progress(
+					"validation",
+					epoch=epoch + 1,
+					batch=batch_idx,
+					phase_total=batch_count,
+				)
+
+			validation = evaluate_model(
+				model,
+				val_loader,
+				criterion,
+				device,
+				on_batch_complete=report_validation_batch,
+			)
+			completed_epochs = epoch + 1
 			for name, value in (("loss", train_loss), *train_metrics.items()):
 				history[f"train_{name}"].append(value)
 			for name in ("loss", "accuracy", "precision", "recall", "f1"):
@@ -308,6 +379,13 @@ def train_model(
 				print_epoch_table_row(epoch + 1, epochs, train_loss, train_metrics, validation["loss"], validation)
 
 			if early_stopping and stale_epochs >= patience:
+				stopped_early = True
+				total_steps = completed_steps + test_batch_count
+				report_progress(
+					"early stopping",
+					epoch=epoch + 1,
+					status="early_stopping",
+				)
 				if verbose:
 					print(f"Early stopping at epoch {epoch + 1}.")
 				break
@@ -316,7 +394,25 @@ def train_model(
 			print_epoch_table_footer()
 		if best_state is not None:
 			model.load_state_dict(best_state)
-		test = evaluate_model(model, test_loader, criterion, device)
+
+		def report_test_batch(batch_idx: int, batch_count: int) -> None:
+			nonlocal completed_steps
+			completed_steps += 1
+			report_progress(
+				"test",
+				epoch=completed_epochs,
+				batch=batch_idx,
+				phase_total=batch_count,
+			)
+
+		test = evaluate_model(
+			model,
+			test_loader,
+			criterion,
+			device,
+			on_batch_complete=report_test_batch,
+		)
+		report_progress("complete", epoch=completed_epochs, status="complete")
 
 	matrix = confusion_matrix(test["y_true"], test["y_pred"], labels=list(range(num_classes)))
 	if verbose:
@@ -360,6 +456,7 @@ def run_subsets(
 	training_setup_extra: dict[str, Any] | None = None,
 	subset_kwargs_factory: Callable[[int, DataBlock], dict[str, Any]] | None = None,
 	max_workers: int | None = None,
+	show_progress_bars: bool | None = None,
 ) -> dict[str, Any]:
 	dataset_id = normalize_dataset_id(dataset_id)
 	result_identity = {
@@ -391,6 +488,7 @@ def run_subsets(
 		},
 		subset_trainer_kwargs_factory=subset_kwargs_factory,
 		max_workers=max_workers,
+		show_progress_bars=show_progress_bars,
 	)
 
 
@@ -485,6 +583,7 @@ def train_geqie_first_subset(
 	ansatz_factory: Callable[..., Any],
 	output_qubits: int | None = None,
 	quantum_workers: int = 1,
+	progress_callback: ProgressCallback | None = None,
 ) -> dict[str, Any]:
 	"""Train a GEQIE-first model from a matrix directory or a ZIP archive."""
 	if (circuits_dir is None) == (zip_path is None):
@@ -513,4 +612,5 @@ def train_geqie_first_subset(
 		verbose=verbose,
 		report_context=report_context,
 		training_context=model.vqc.parallel_context(num_workers=quantum_workers),
+		progress_callback=progress_callback,
 	)

@@ -101,6 +101,7 @@ def train_one_subset(
 	device="cpu",
 	verbose=False,
 	report_context=None,
+	progress_callback=None,
 ):
 	model = CNNZZVQCDenseClassifier(num_qubits, num_layers, num_classes)
 	train_loader, val_loader, test_loader = image_loaders(
@@ -125,6 +126,7 @@ def train_one_subset(
 		device=device,
 		verbose=verbose,
 		report_context=report_context,
+		progress_callback=progress_callback,
 	)
 
 

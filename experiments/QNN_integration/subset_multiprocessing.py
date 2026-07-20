@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 from concurrent import futures
+from contextlib import ExitStack
 import inspect
-from multiprocessing import cpu_count
+from multiprocessing import Manager, cpu_count
 from pathlib import Path
 import pickle
-from typing import Any, Callable, Mapping
+from queue import Empty
+from typing import Any, Callable, Iterator, Mapping
 
 import cloudpickle
 import numpy as np
@@ -71,6 +73,7 @@ def _run_subset_task(
 	data_block: Any,
 	train_kwargs: Mapping[str, Any],
 	report_kwargs: Mapping[str, Any],
+	progress_queue: Any | None,
 ) -> tuple[int, dict[str, Any], dict[str, Any]]:
 	trainer = cloudpickle.loads(trainer_payload)
 	subset_kwargs_factory = (
@@ -112,9 +115,36 @@ def _run_subset_task(
 		trainer_kwargs["subset_idx"] = subset_idx
 	if accepts_var_kwargs or "subset_count" in trainer_parameters:
 		trainer_kwargs["subset_count"] = subset_count
+	if progress_queue is not None:
+		progress_queue.put((subset_idx, {
+			"phase": "initializing",
+			"status": "starting",
+			"completed": 0,
+		}))
+		if accepts_var_kwargs or "progress_callback" in trainer_parameters:
+			def report_progress(event: Mapping[str, Any]) -> None:
+				progress_queue.put((subset_idx, dict(event)))
 
-	result = trainer(**trainer_kwargs)
-	return subset_idx, report_context, _prepare_result_for_ipc(result)
+			trainer_kwargs["progress_callback"] = report_progress
+
+	try:
+		result = trainer(**trainer_kwargs)
+		prepared_result = _prepare_result_for_ipc(result)
+	except BaseException as error:
+		if progress_queue is not None:
+			progress_queue.put((subset_idx, {
+				"phase": "failed",
+				"status": "failed",
+				"error": f"{type(error).__name__}: {error}",
+			}))
+		raise
+
+	if progress_queue is not None:
+		progress_queue.put((subset_idx, {
+			"phase": "complete",
+			"status": "complete",
+		}))
+	return subset_idx, report_context, prepared_result
 
 
 def _prepare_result_for_ipc(result: dict[str, Any]) -> dict[str, Any]:
@@ -164,6 +194,87 @@ def _summarize_subset_results(subset_results: list[dict[str, Any]]) -> dict[str,
 	}
 
 
+def _progress_details(event: Mapping[str, Any]) -> str:
+	phase = str(event.get("phase", "working"))
+	details = [phase]
+	epoch = event.get("epoch")
+	epochs = event.get("epochs")
+	if epoch is not None and epochs is not None and phase != "test":
+		details.append(f"epoch {epoch}/{epochs}")
+	batch = event.get("batch")
+	phase_total = event.get("phase_total")
+	if batch is not None and phase_total is not None:
+		details.append(f"batch {batch}/{phase_total}")
+	if event.get("early_stopping") or event.get("status") == "early_stopping":
+		details.append("early stop")
+	return " | ".join(details)
+
+
+def _apply_progress_event(progress_bar: tqdm, event: Mapping[str, Any]) -> None:
+	total = event.get("total")
+	total_changed = total is not None and progress_bar.total != int(total)
+	if total is not None:
+		progress_bar.total = int(total)
+	completed = event.get("completed")
+	advance = 0
+	if completed is not None:
+		advance = int(completed) - int(progress_bar.n)
+
+	status = event.get("status")
+	if status == "complete":
+		if progress_bar.total is None:
+			progress_bar.total = max(1, int(progress_bar.n))
+		advance = int(progress_bar.total) - int(progress_bar.n)
+	elif status == "failed":
+		progress_bar.set_description_str(f"{progress_bar.desc.split(' [', 1)[0]} [FAILED]")
+
+	progress_bar.set_postfix_str(_progress_details(event), refresh=False)
+	if advance > 0:
+		progress_bar.update(advance)
+	elif advance < 0:
+		progress_bar.n += advance
+		progress_bar.refresh()
+	elif total_changed or status in {"starting", "early_stopping", "complete", "failed"}:
+		progress_bar.refresh()
+
+
+def _drain_progress_events(
+	progress_queue: Any,
+	progress_bars: list[tqdm],
+	*,
+	timeout: float,
+) -> None:
+	try:
+		subset_idx, event = progress_queue.get(timeout=timeout)
+	except Empty:
+		return
+	_apply_progress_event(progress_bars[subset_idx], event)
+
+	while True:
+		try:
+			subset_idx, event = progress_queue.get_nowait()
+		except Empty:
+			return
+		_apply_progress_event(progress_bars[subset_idx], event)
+
+
+def _completed_futures_with_progress(
+	future_to_subset: Mapping[futures.Future[Any], int],
+	progress_queue: Any,
+	progress_bars: list[tqdm],
+) -> Iterator[futures.Future[Any]]:
+	pending = set(future_to_subset)
+	while pending:
+		_drain_progress_events(progress_queue, progress_bars, timeout=0.1)
+		done, pending = futures.wait(
+			pending,
+			timeout=0,
+			return_when=futures.FIRST_COMPLETED,
+		)
+		yield from done
+	_drain_progress_events(progress_queue, progress_bars, timeout=0)
+
+
 def train_subsets_with_process_pool(
 	*,
 	dataset: Any,
@@ -188,7 +299,21 @@ def train_subsets_with_process_pool(
 	training_setup_extra: Mapping[str, Any] | None = None,
 	subset_trainer_kwargs_factory: Callable[[int, Any], Mapping[str, Any]] | None = None,
 	max_workers: int | None = None,
+	show_progress_bars: bool | None = None,
 ) -> dict[str, Any]:
+	"""Train subsets in separate processes with either detailed logs or fixed progress bars.
+
+	When ``show_progress_bars`` is omitted, bars are enabled exactly when
+	``verbose`` is false. Set both flags to false for completely quiet execution.
+	"""
+	if show_progress_bars is None:
+		show_progress_bars = not verbose
+	if show_progress_bars and verbose:
+		raise ValueError(
+			"verbose output and progress bars cannot be enabled at the same time; "
+			"set either verbose=False or show_progress_bars=False."
+		)
+
 	subset_count = len(dataset.subsets)
 	all_results_by_subset: list[dict[str, Any] | None] = [None] * subset_count
 	results_writer = (
@@ -226,7 +351,10 @@ def train_subsets_with_process_pool(
 		"training_setup_extra": training_setup_extra,
 	}
 
-	with futures.ProcessPoolExecutor(max_workers=worker_count) as executor:
+	with ExitStack() as stack:
+		manager = stack.enter_context(Manager()) if show_progress_bars else None
+		progress_queue = manager.Queue() if manager is not None else None
+		executor = stack.enter_context(futures.ProcessPoolExecutor(max_workers=worker_count))
 		future_to_subset = {
 			executor.submit(
 				_run_subset_task,
@@ -237,30 +365,66 @@ def train_subsets_with_process_pool(
 				data_block,
 				train_kwargs,
 				report_kwargs,
+				progress_queue,
 			): subset_idx
 			for subset_idx, data_block in enumerate(dataset.subsets)
 		}
 
-		for future in tqdm(
-			futures.as_completed(future_to_subset),
-			total=len(future_to_subset),
-			desc="Processing results",
-		):
-			subset_idx, report_context, result = future.result()
-			if results_writer is not None:
-				results_writer.save_subset(
-					subset_index=subset_idx + 1,
-					subset_count=subset_count,
-					report_context=result.get("report_context", report_context),
-					history=result["history"],
-					test_metrics=result["test_metrics"],
-					confusion_matrix=result["confusion_matrix"],
-					model=result.get("model"),
-					model_artifacts=result.get("model_artifacts"),
+		progress_bars = (
+			[
+				tqdm(
+					total=None,
+					desc=f"Subset {subset_idx + 1}/{subset_count}",
+					position=subset_idx,
+					leave=True,
+					dynamic_ncols=True,
+					unit="batch",
 				)
-			result = dict(result)
-			result.pop("model_artifacts", None)
-			all_results_by_subset[subset_idx] = result
+				for subset_idx in range(subset_count)
+			]
+			if show_progress_bars
+			else []
+		)
+		for progress_bar in progress_bars:
+			progress_bar.set_postfix_str("waiting", refresh=False)
+			progress_bar.refresh()
+
+		completed_futures: Iterator[futures.Future[Any]] = (
+			_completed_futures_with_progress(
+				future_to_subset,
+				progress_queue,
+				progress_bars,
+			)
+			if show_progress_bars
+			else futures.as_completed(future_to_subset)
+		)
+		try:
+			for future in completed_futures:
+				subset_idx, report_context, result = future.result()
+				if progress_bars:
+					_apply_progress_event(progress_bars[subset_idx], {
+						"phase": "complete",
+						"status": "complete",
+					})
+				if results_writer is not None:
+					results_writer.save_subset(
+						subset_index=subset_idx + 1,
+						subset_count=subset_count,
+						report_context=result.get("report_context", report_context),
+						history=result["history"],
+						test_metrics=result["test_metrics"],
+						confusion_matrix=result["confusion_matrix"],
+						model=result.get("model"),
+						model_artifacts=result.get("model_artifacts"),
+					)
+				result = dict(result)
+				result.pop("model_artifacts", None)
+				all_results_by_subset[subset_idx] = result
+		finally:
+			if progress_queue is not None:
+				_drain_progress_events(progress_queue, progress_bars, timeout=0)
+			for progress_bar in progress_bars:
+				progress_bar.close()
 
 	subset_results = [
 		result for result in all_results_by_subset

@@ -169,6 +169,7 @@ def train_one_subset(
 	device="cpu",
 	verbose=True,
 	report_context=None,
+	progress_callback=None,
 	convolution_depth=2,
 	lr=1e-3,
 	encoding_id="frqi",
@@ -206,6 +207,7 @@ def train_one_subset(
 		device=device,
 		verbose=verbose,
 		report_context=report_context,
+		progress_callback=progress_callback,
 	)
 
 
