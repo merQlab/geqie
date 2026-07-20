@@ -215,7 +215,7 @@ def run_cnn_feature_maps_vqc_dense(
 	dataset_id="mnist_digits",
 	convolution_depth=2,
 	lr=1e-3,
-	encoding_id="frqi",
+	encoding_id=None,
 	encoding_params=None,
 	num_qubits=None,
 	**overrides,
