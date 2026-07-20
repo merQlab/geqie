@@ -424,7 +424,7 @@ def train_all_subsets_neqr_qnn(
 	epochs=10,
 	batch_size=32,
 	device="cpu",
-	geqie_circuits_path="./datasets/NEQR/circuits",
+	geqie_circuits_path="/mnt/data02/mkordasz/circuits/NEQR/circuits",
 	verbose=True,
 	save_results=True,
 	pipeline_name=None,
@@ -435,6 +435,8 @@ def train_all_subsets_neqr_qnn(
 	save_dir = os.path.join(cwd, geqie_circuits_path)
 	if create_circuits:
 		for subset_idx, data_block in enumerate(dataset.subsets):
+			if subset_idx == 0:
+				continue
 			compute_and_save_circuits(data=data_block.train.X,
 								labels=data_block.train.y,
 								geqie_encoding=encoding_method,
