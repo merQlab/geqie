@@ -1,0 +1,9 @@
+ipykernel
+pytest
+
+lightning
+torchinfo
+torchmetrics
+torchvision
+
+pylatexenc
