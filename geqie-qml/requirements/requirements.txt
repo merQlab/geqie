@@ -56,5 +56,6 @@ torch==2.12.1
     #   qiskit-machine-learning
 typing-extensions==4.16.0
     # via
+    #   -r ./requirements/requirements.in
     #   qiskit
     #   torch

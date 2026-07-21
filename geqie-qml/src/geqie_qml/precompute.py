@@ -10,7 +10,7 @@ from concurrent import futures
 from multiprocessing import cpu_count
 from tqdm import tqdm
 
-from qiskit.quantum_info import Operator
+import qiskit.quantum_info
 
 import geqie
 
@@ -35,7 +35,7 @@ def compute_and_save_circuits(
 
     Each output file contains ``matrix`` (complex128 unitary) and ``label``
     (integer).  Files are named ``{prefix}_{index}_label_{label}.npz`` and can
-    be loaded at training time via :class:`ZipMatrixDataset`.
+    be loaded at training time via :class:`ZipUnitaryDataset`.
 
     Parameters
     ----------
@@ -164,7 +164,7 @@ def _compute_circuit_unitary(image, geqie_encoding: str = "frqi", encoding_param
         perform_measurement=False,
         encoding_params=encoding_params,
     )
-    return Operator.from_circuit(circuit).to_matrix()
+    return qiskit.quantum_info.Operator.from_circuit(circuit).to_matrix()
 
 
 def _compute_save_single(image, label, sample_index, save_dir, file_prefix, geqie_encoding, encoding_params):

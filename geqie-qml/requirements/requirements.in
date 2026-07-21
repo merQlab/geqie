@@ -2,3 +2,4 @@
 
 qiskit-machine-learning[torch]
 torch
+typing_extensions

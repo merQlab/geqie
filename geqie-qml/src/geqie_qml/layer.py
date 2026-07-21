@@ -7,6 +7,7 @@ from contextlib import contextmanager
 from concurrent import futures
 from multiprocessing import cpu_count
 from torch.utils.data import Dataset
+from typing_extensions import deprecated
 from qiskit import QuantumCircuit
 from qiskit.circuit import ParameterVector
 from qiskit.circuit.library import UnitaryGate
@@ -16,10 +17,12 @@ from qiskit_machine_learning.neural_networks import SamplerQNN
 
 from .ansatze import default_vqc_ansatz
 
+
 # ---------------------------------------------------------------------------
 # Dataset
 # ---------------------------------------------------------------------------
 
+@deprecated("MatrixDataset is deprecated and will be removed in a future version.")
 class MatrixDataset(Dataset):
     """
     PyTorch Dataset that reads pre-computed unitary matrices from .npz files.
@@ -173,6 +176,7 @@ def _work_dispatch(fn, args_list, executor):
 # Custom autograd Function — unified sequential and parallel paths
 # ---------------------------------------------------------------------------
 
+@deprecated("QNNBatchFunction is deprecated and will be removed in a future version.")
 class QNNBatchFunction(torch.autograd.Function):
     """
     Custom autograd Function that evaluates a batch of quantum circuits and
@@ -258,6 +262,7 @@ class QNNBatchFunction(torch.autograd.Function):
 # VQCLayer — a composable PyTorch layer
 # ---------------------------------------------------------------------------
 
+@deprecated("VQCLayer is deprecated and will be removed in a future version.")
 class VQCLayer(nn.Module):
     """
     Variational Quantum Circuit layer, usable as a standard PyTorch nn.Module.
