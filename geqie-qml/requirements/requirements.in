@@ -1,7 +1,5 @@
 -r ../../geqie/requirements/requirements.txt
 
-# geqie>=1.0
-
 qiskit-machine-learning[torch]
-torch
+torch>=2.11
 typing_extensions
