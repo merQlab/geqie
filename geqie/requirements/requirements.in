@@ -1,8 +1,11 @@
 cloup
 matplotlib
-numpy==2.3
 pillow
 qiskit>=2.0.0
 qiskit-aer
 qiskit_ibm_runtime
 tabulate
+
+# compatibility constraints
+scipy<1.16.0  # python 3.10 is not compatible with scipy>=1.16, see https://docs.scipy.org/doc/scipy/dev/toolchain.html#numpy
+numpy<2.5.0   # due to scipy<1.16.0
