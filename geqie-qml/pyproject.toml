@@ -14,7 +14,7 @@ package-dir = {"" = "src"}
 
 [tool.setuptools.dynamic]
 dependencies = {file = ["./requirements/requirements.txt"]}
-optional-dependencies.dev = {file = ["./requirements/requirements_dev_extras.in"]}
+optional-dependencies.dev = {file = ["./requirements/requirements_dev.txt"]}
 
 [tool.setuptools.packages.find]
 where = ["src"]

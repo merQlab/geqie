@@ -1,6 +1,6 @@
 cloup
 matplotlib
-pillow
+pillow<=12.0.0  # due to torchvision compatibility in geqie-qml
 qiskit>=2.0.0
 qiskit-aer
 qiskit_ibm_runtime

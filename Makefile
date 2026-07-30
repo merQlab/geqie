@@ -30,10 +30,30 @@ install-requirements-uv:
 install-requirements-uv-dev:
 	uv pip install -r requirements/requirements_dev.in
 
+regenerate-requirements-geqie:
+	uv pip compile \
+		geqie/requirements/requirements.in \
+		-o geqie/requirements/requirements.txt
+	uv pip compile \
+		geqie/requirements/requirements.in \
+		geqie/requirements/requirements_dev.in \
+		-o geqie/requirements/requirements_dev.txt
+
+regenerate-requirements-geqie-qml:
+	uv pip compile \
+		geqie/requirements/requirements.txt \
+		geqie-qml/requirements/requirements.in \
+		-o geqie-qml/requirements/requirements.txt
+	uv pip compile \
+		geqie/requirements/requirements.txt \
+		geqie-qml/requirements/requirements.in \
+		geqie-qml/requirements/requirements_dev.in \
+		-o geqie-qml/requirements/requirements_dev.txt
+
+regenerate-requirements: regenerate-requirements-geqie regenerate-requirements-geqie-qml
+
+
 ## CI Targets
-regenerate-requirements:
-	uv pip compile -o requirements/requirements.txt requirements/requirements.in
-	uv pip compile -o requirements/requirements_dev.txt requirements/requirements_dev.in
 
 install-requirements-ci:
 	pip install -U uv
