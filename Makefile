@@ -49,6 +49,7 @@ regenerate-requirements-geqie-qml:
 		-o geqie-qml/requirements/requirements.txt
 	uv pip compile \
 		geqie/requirements/requirements.txt \
+		geqie/requirements/requirements_dev.txt \
 		geqie-qml/requirements/requirements.in \
 		geqie-qml/requirements/requirements_dev.in \
 		-o geqie-qml/requirements/requirements_dev.txt
