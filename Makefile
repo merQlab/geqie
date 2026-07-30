@@ -17,6 +17,7 @@ up-dev: build-dev
 down:
 	- bash -lc 'cd gui && docker compose down'
 
+
 ## Installation Targets
 install-requirements:
 	pip install -r requirements/requirements.in
@@ -30,6 +31,8 @@ install-requirements-uv:
 install-requirements-uv-dev:
 	uv pip install -r requirements/requirements_dev.in
 
+
+## Regenerate requirements
 regenerate-requirements-geqie:
 	uv pip compile \
 		geqie/requirements/requirements.in \
