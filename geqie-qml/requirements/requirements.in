@@ -1,5 +1,6 @@
 # geqie>=1.0
 
+numpy==2.3
 qiskit-machine-learning[torch]
 torch
 typing_extensions

@@ -1,5 +1,6 @@
 cloup
 matplotlib
+numpy==2.3
 pillow
 qiskit>=2.0.0
 qiskit-aer

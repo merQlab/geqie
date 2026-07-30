@@ -36,8 +36,9 @@ kiwisolver==1.4.9
     # via matplotlib
 matplotlib==3.10.7
     # via -r ./requirements/requirements.in
-numpy==2.3.5
+numpy==2.3.0
     # via
+    #   -r ./requirements/requirements.in
     #   contourpy
     #   matplotlib
     #   qiskit
