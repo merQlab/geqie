@@ -1,0 +1,72 @@
+{
+  "generator": "generate_baseline_architectures.py",
+  "pytorch_version": "2.10.0+cpu",
+  "pytorch2tikz_version": "0.0.1",
+  "architectures": [
+    {
+      "key": "classical_cnn_classifier",
+      "title": "CNN classifier",
+      "source": "experimental_pipelines/baseline/classical/cnn_classifier.py",
+      "tex": "baseline_classical_cnn_classifier.tex",
+      "pdf": "baseline_classical_cnn_classifier.pdf",
+      "png": "baseline_classical_cnn_classifier.png",
+      "dpi": 300,
+      "pixels": [
+        2164,
+        391
+      ]
+    },
+    {
+      "key": "classical_dense_classifier",
+      "title": "Dense classifier",
+      "source": "experimental_pipelines/baseline/classical/dense_classifier.py",
+      "tex": "baseline_classical_dense_classifier.tex",
+      "pdf": "baseline_classical_dense_classifier.pdf",
+      "png": "baseline_classical_dense_classifier.png",
+      "dpi": 300,
+      "pixels": [
+        867,
+        391
+      ]
+    },
+    {
+      "key": "quantum_cnn_angle_vqc_dense_senokosov2024",
+      "title": "CNN + angle embedding + VQC + dense (Senokosov 2024)",
+      "source": "experimental_pipelines/baseline/quantum_without_geqie/cnn_angle_vqc_dense_senokosov2024.py",
+      "tex": "baseline_quantum_cnn_angle_vqc_dense_senokosov2024.tex",
+      "pdf": "baseline_quantum_cnn_angle_vqc_dense_senokosov2024.pdf",
+      "png": "baseline_quantum_cnn_angle_vqc_dense_senokosov2024.png",
+      "dpi": 300,
+      "pixels": [
+        2849,
+        407
+      ]
+    },
+    {
+      "key": "quantum_cnn_zz_vqc_dense",
+      "title": "CNN + ZZ feature map + VQC + dense",
+      "source": "experimental_pipelines/baseline/quantum_without_geqie/cnn_zz_vqc_dense.py",
+      "tex": "baseline_quantum_cnn_zz_vqc_dense.tex",
+      "pdf": "baseline_quantum_cnn_zz_vqc_dense.pdf",
+      "png": "baseline_quantum_cnn_zz_vqc_dense.png",
+      "dpi": 300,
+      "pixels": [
+        2637,
+        407
+      ]
+    },
+    {
+      "key": "quantum_pca_zz_vqc_dense",
+      "title": "PCA + ZZ feature map + VQC + dense",
+      "source": "experimental_pipelines/baseline/quantum_without_geqie/pca_zz_vqc_dense.py",
+      "tex": "baseline_quantum_pca_zz_vqc_dense.tex",
+      "pdf": "baseline_quantum_pca_zz_vqc_dense.pdf",
+      "png": "baseline_quantum_pca_zz_vqc_dense.png",
+      "dpi": 300,
+      "pixels": [
+        1558,
+        407
+      ]
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+# pytorch2tikz imports torchvision at runtime but does not declare it.
+pytorch2tikz==0.0.1
+torchvision==0.25.0
+Pillow
+pypdf
