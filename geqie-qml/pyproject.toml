@@ -1,6 +1,6 @@
 [project]
 name = "geqie-qml"
-version = "0.3.0"
+version = "0.4.0"
 description = "GEQIE QML extension"
 requires-python = ">=3.10"
 dynamic = ["dependencies", "optional-dependencies"]
@@ -14,7 +14,7 @@ package-dir = {"" = "src"}
 
 [tool.setuptools.dynamic]
 dependencies = {file = ["./requirements/requirements.txt"]}
-optional-dependencies.dev = {file = ["./requirements/requirements_dev_extras.in"]}
+optional-dependencies.dev = {file = ["./requirements/requirements_dev.txt"]}
 
 [tool.setuptools.packages.find]
 where = ["src"]
