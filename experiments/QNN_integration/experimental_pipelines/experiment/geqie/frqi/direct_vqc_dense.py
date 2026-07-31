@@ -15,7 +15,14 @@ from experiments.QNN_integration.experimental_pipelines.experiment.geqie.models.
 
 
 def run(**kwargs):
-	return run_direct_geqie(encoding_id="frqi", model_id="direct_vqc_dense", **kwargs)
+	return run_direct_geqie(encoding_id="frqi", 
+						 model_id="direct_vqc_dense", 
+						 dataset_id="mnist_fashion",
+						 zip_root=Path("/mnt/data02/mkordasz/circuits/FRQI/MNIST_Fashion"),
+						 quantum_workers=32, 
+						 create_circuits=False,
+						 show_progress_bars=True,
+						 **kwargs)
 
 
 if __name__ == "__main__":

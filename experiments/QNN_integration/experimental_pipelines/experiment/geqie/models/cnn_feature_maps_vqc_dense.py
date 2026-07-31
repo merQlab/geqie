@@ -246,8 +246,9 @@ def run_cnn_feature_maps_vqc_dense(
 		"epochs": 50,
 		"batch_size": 16,
 		"device": "cpu",
-		"verbose": True,
+		"verbose": False,
 		"max_workers": 16,
+		"show_progress_bars": True,
 		"training_setup_extra": {
 			"cnn_lr": lr,
 			"convolution_depth": convolution_depth,

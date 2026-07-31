@@ -200,12 +200,12 @@ def zip_matrix_loaders(
 	batch_size: int,
 ) -> tuple[DataLoader, DataLoader, DataLoader]:
 	"""Load train/validation/test GEQIE matrices lazily from one ZIP archive."""
-	from geqie_qml import load_precomputed_zip
+	from geqie_qml import load_precomputed_zip_matrices
 
 	if not zip_path.is_file():
 		raise FileNotFoundError(f"Precomputed GEQIE ZIP archive does not exist: {zip_path}")
 
-	train_dataset, val_dataset, test_dataset = load_precomputed_zip(
+	train_dataset, val_dataset, test_dataset = load_precomputed_zip_matrices(
 		str(zip_path),
 		split_names=["train", "val", "test"],
 	)
@@ -503,7 +503,7 @@ def precompute_geqie_dataset(
 	"""Precompute and package each subset as ``subset_N.zip``.
 
 	The ZIP root contains direct ``train/``, ``val/``, and ``test/`` folders,
-	which is the layout consumed by :func:`geqie_qml.load_precomputed_zip`.
+	which is the layout consumed by :func:`geqie_qml.load_precomputed_zip_matrices`.
 	"""
 	from geqie_qml import compute_and_save_circuits
 

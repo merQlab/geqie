@@ -105,7 +105,7 @@ def run_direct_geqie(
 	zip_root: Path | None = None,
 	encoding_params: dict[str, Any] | None = None,
 	precompute_workers: int = 1,
-	quantum_workers: int = 1,
+	quantum_workers: int = 32,
 	num_qubits: int | None = None,
 	num_layers: int | None = None,
 	**overrides,
@@ -140,6 +140,7 @@ def run_direct_geqie(
 		"batch_size": 16,
 		"device": "cpu",
 		"verbose": False,
+		"show_progress_bars": True,
 		"training_setup_extra": {
 			"encoding_method": encoding_id,
 			"encoding_params": encoding_params,

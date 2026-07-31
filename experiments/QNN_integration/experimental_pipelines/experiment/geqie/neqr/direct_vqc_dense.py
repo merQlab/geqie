@@ -19,6 +19,7 @@ def run(*, encoding_params=None, **kwargs):
 	return run_direct_geqie(
 		encoding_id="neqr",
 		model_id="direct_vqc_dense",
+		zip_root=Path("/mnt/data02/mkordasz/circuits/NEQR/MNIST_Fashion/"),
 		encoding_params=params,
 		**kwargs,
 	)
