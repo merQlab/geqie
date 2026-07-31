@@ -1,0 +1,18 @@
+{
+  "pipeline_name": "Direct GEQIE + VQC + dense",
+  "dataset_id": "mnist_fashion",
+  "experiment_group": "experiment",
+  "model_family": "geqie",
+  "encoding_id": "frqi",
+  "model_id": "direct_vqc_dense",
+  "summary": {
+    "accuracy_mean": 0.6888888888888889,
+    "accuracy_std": 0.03194444444444445,
+    "precision_mean": 0.7192495033704912,
+    "precision_std": 0.0323015847147668,
+    "recall_mean": 0.6888888888888889,
+    "recall_std": 0.03194444444444445,
+    "f1_mean": 0.6827225140106421,
+    "f1_std": 0.038214731538115373
+  }
+}
