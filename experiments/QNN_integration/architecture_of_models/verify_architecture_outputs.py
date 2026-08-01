@@ -20,14 +20,15 @@ def _parse_args() -> argparse.Namespace:
 	return parser.parse_args()
 
 
-def main() -> int:
-	args = _parse_args()
-	output_dir = args.output_dir.resolve()
+def verify_outputs(output_dir: Path, *, expected_count: int) -> None:
+	output_dir = output_dir.resolve()
 	manifest_path = output_dir / "manifest.json"
 	manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
 	architectures = manifest.get("architectures", [])
-	if len(architectures) != 5:
-		raise AssertionError(f"Expected 5 baseline architectures, found {len(architectures)}.")
+	if len(architectures) != expected_count:
+		raise AssertionError(
+			f"Expected {expected_count} architectures, found {len(architectures)}."
+		)
 
 	for entry in architectures:
 		for field in ("tex", "pdf", "png"):
@@ -48,6 +49,11 @@ def main() -> int:
 			if tuple(entry["pixels"]) != image.size:
 				raise AssertionError(f"PNG dimensions disagree with manifest: {png_path}")
 		print(f"OK  {entry['key']}: {entry['pixels'][0]}x{entry['pixels'][1]} px @ {dpi[0]:.1f} DPI")
+
+
+def main() -> int:
+	args = _parse_args()
+	verify_outputs(args.output_dir, expected_count=5)
 
 	return 0
 

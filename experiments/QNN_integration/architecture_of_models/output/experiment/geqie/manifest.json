@@ -1,0 +1,98 @@
+{
+  "generator": "generate_experiment_geqie_architectures.py",
+  "pytorch_version": "2.10.0+cpu",
+  "pytorch2tikz_version": "0.0.1",
+  "architectures": [
+    {
+      "key": "frqi_adaptive_qnn_no_qnn_inspired_dense",
+      "title": "GEQIE/FRQI: Adaptive QNN inspired by No-QNN + dense",
+      "source": "experimental_pipelines/experiment/geqie/frqi/adaptive_qnn_no_qnn_inspired_dense.py",
+      "tex": "experiment_geqie_frqi_adaptive_qnn_no_qnn_inspired_dense.tex",
+      "pdf": "experiment_geqie_frqi_adaptive_qnn_no_qnn_inspired_dense.pdf",
+      "png": "experiment_geqie_frqi_adaptive_qnn_no_qnn_inspired_dense.png",
+      "dpi": 300,
+      "pixels": [
+        1948,
+        410
+      ]
+    },
+    {
+      "key": "frqi_adaptive_qnn_no_qnn_inspired_qnn_compression_dense",
+      "title": "GEQIE/FRQI: Adaptive QNN inspired by No-QNN with QNN compression + dense",
+      "source": "experimental_pipelines/experiment/geqie/frqi/adaptive_qnn_no_qnn_inspired_qnn_compression_dense.py",
+      "tex": "experiment_geqie_frqi_adaptive_qnn_no_qnn_inspired_qnn_compression_dense.tex",
+      "pdf": "experiment_geqie_frqi_adaptive_qnn_no_qnn_inspired_qnn_compression_dense.pdf",
+      "png": "experiment_geqie_frqi_adaptive_qnn_no_qnn_inspired_qnn_compression_dense.png",
+      "dpi": 300,
+      "pixels": [
+        2019,
+        410
+      ]
+    },
+    {
+      "key": "frqi_cnn_feature_maps_vqc_dense",
+      "title": "CNN feature maps + GEQIE/FRQI + VQC + dense",
+      "source": "experimental_pipelines/experiment/geqie/frqi/cnn_feature_maps_vqc_dense.py",
+      "tex": "experiment_geqie_frqi_cnn_feature_maps_vqc_dense.tex",
+      "pdf": "experiment_geqie_frqi_cnn_feature_maps_vqc_dense.pdf",
+      "png": "experiment_geqie_frqi_cnn_feature_maps_vqc_dense.png",
+      "dpi": 300,
+      "pixels": [
+        2520,
+        411
+      ]
+    },
+    {
+      "key": "frqi_direct_vqc_dense",
+      "title": "GEQIE/FRQI: Direct GEQIE + VQC + dense",
+      "source": "experimental_pipelines/experiment/geqie/frqi/direct_vqc_dense.py",
+      "tex": "experiment_geqie_frqi_direct_vqc_dense.tex",
+      "pdf": "experiment_geqie_frqi_direct_vqc_dense.pdf",
+      "png": "experiment_geqie_frqi_direct_vqc_dense.png",
+      "dpi": 300,
+      "pixels": [
+        1665,
+        407
+      ]
+    },
+    {
+      "key": "neqr_adaptive_qnn_no_qnn_inspired_dense",
+      "title": "GEQIE/NEQR: Adaptive QNN inspired by No-QNN + dense",
+      "source": "experimental_pipelines/experiment/geqie/neqr/adaptive_qnn_no_qnn_inspired_dense.py",
+      "tex": "experiment_geqie_neqr_adaptive_qnn_no_qnn_inspired_dense.tex",
+      "pdf": "experiment_geqie_neqr_adaptive_qnn_no_qnn_inspired_dense.pdf",
+      "png": "experiment_geqie_neqr_adaptive_qnn_no_qnn_inspired_dense.png",
+      "dpi": 300,
+      "pixels": [
+        1948,
+        410
+      ]
+    },
+    {
+      "key": "neqr_cnn_feature_maps_vqc_dense",
+      "title": "CNN feature maps + GEQIE/NEQR + VQC + dense",
+      "source": "experimental_pipelines/experiment/geqie/neqr/cnn_feature_maps_vqc_dense.py",
+      "tex": "experiment_geqie_neqr_cnn_feature_maps_vqc_dense.tex",
+      "pdf": "experiment_geqie_neqr_cnn_feature_maps_vqc_dense.pdf",
+      "png": "experiment_geqie_neqr_cnn_feature_maps_vqc_dense.png",
+      "dpi": 300,
+      "pixels": [
+        2520,
+        411
+      ]
+    },
+    {
+      "key": "neqr_direct_vqc_dense",
+      "title": "GEQIE/NEQR: Direct GEQIE + VQC + dense",
+      "source": "experimental_pipelines/experiment/geqie/neqr/direct_vqc_dense.py",
+      "tex": "experiment_geqie_neqr_direct_vqc_dense.tex",
+      "pdf": "experiment_geqie_neqr_direct_vqc_dense.pdf",
+      "png": "experiment_geqie_neqr_direct_vqc_dense.png",
+      "dpi": 300,
+      "pixels": [
+        1665,
+        407
+      ]
+    }
+  ]
+}

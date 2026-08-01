@@ -50,3 +50,18 @@ actual dimensions (`q` and `2^q`). These proxies do not modify training models.
 ```powershell
 .\.venv\Scripts\python.exe experiments\QNN_integration\architecture_of_models\verify_architecture_outputs.py
 ```
+
+## Experimental GEQIE models
+
+Generate the seven FRQI/NEQR experiment variants from
+`experimental_pipelines/experiment/geqie`:
+
+```powershell
+.\.venv\Scripts\python.exe experiments\QNN_integration\architecture_of_models\generate_experiment_geqie_architectures.py
+```
+
+Their outputs are written to `output/experiment/geqie`. Verify them with:
+
+```powershell
+.\.venv\Scripts\python.exe experiments\QNN_integration\architecture_of_models\verify_experiment_geqie_outputs.py
+```

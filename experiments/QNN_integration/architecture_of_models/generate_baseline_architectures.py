@@ -89,6 +89,7 @@ class DiagramSpec:
 	model: nn.Module
 	trace_model: nn.Module
 	input_tensor: torch.Tensor
+	output_prefix: str = "baseline"
 	presentations: dict[nn.Module, BlockPresentation] = field(default_factory=dict)
 
 
@@ -534,7 +535,7 @@ def _rasterize_pdf(pdf_path: Path, dpi: int) -> tuple[Path, tuple[int, int]]:
 
 def generate(spec: DiagramSpec, output_dir: Path, dpi: int) -> dict[str, object]:
 	output_dir.mkdir(parents=True, exist_ok=True)
-	stem = f"baseline_{spec.key}"
+	stem = f"{spec.output_prefix}_{spec.key}"
 	tex_path = output_dir / f"{stem}.tex"
 	# Remove only artifacts owned by this model so reruns cannot leave stale
 	# input images or LaTeX auxiliaries behind.
@@ -546,7 +547,7 @@ def generate(spec: DiagramSpec, output_dir: Path, dpi: int) -> dict[str, object]
 			stale_path.unlink()
 	architecture = Architecture(
 		spec.trace_model,
-		block_offset=13,
+		block_offset=10,
 		height_depth_factor=0.55,
 		width_factor=0.55,
 		linear_factor=0.92,
