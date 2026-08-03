@@ -1,7 +1,11 @@
 cloup
 matplotlib
-pillow
+pillow<=12.0.0  # due to torchvision compatibility in geqie-qml
 qiskit>=2.0.0
 qiskit-aer
 qiskit_ibm_runtime
 tabulate
+
+# compatibility constraints
+scipy<1.15.0  # numpy compatibility issues
+numpy<2.4.0   # due to scipy
