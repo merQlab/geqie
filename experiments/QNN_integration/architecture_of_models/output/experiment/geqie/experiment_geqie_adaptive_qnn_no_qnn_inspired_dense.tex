@@ -382,7 +382,7 @@ name=,
 \tikzstyle{copyconnection}=[ultra thick,every node/.style={sloped,allow upside down},draw={rgb:blue,4;red,1;green,1;black,3},opacity=0.7]
 
 
-\node[canvas is zy plane at x=0] (ImgInput_1) at (0, 0, 0) {\includegraphics[width=1.2cm, height=1.2cm]{experiment_geqie_frqi_adaptive_qnn_no_qnn_inspired_dense_input_1.png}};
+\node[canvas is zy plane at x=0] (ImgInput_1) at (0, 0, 0) {\includegraphics[width=1.2cm, height=1.2cm]{experiment_geqie_adaptive_qnn_no_qnn_inspired_dense_input_1.png}};
 
 
 \pic[shift={(2.0, 0.0, 0.0)}] at (0, 0, 0)
@@ -390,7 +390,7 @@ name=,
         name=LinearAct_1,
         fill={rgb,255:red,89;green,161;blue,79},
         opacity=0.82,
-        caption={\scriptsize \shortstack{GEQIE/FRQI encoding\\$16\!\times\!16 \rightarrow q=9$}},
+        caption={\scriptsize \shortstack{GEQIE encoding\\$16\!\times\!16 \rightarrow q$}},
         width=3.5,
         height=1.0,
         depth=1.125
@@ -403,7 +403,7 @@ name=,
         name=LinearAct_2,
         fill={rgb,255:red,111;green,76;blue,155},
         opacity=0.82,
-        caption={\scriptsize \shortstack{Adaptive QCNN\\No-QNN-inspired convolution + pooling\\$q_{in}=9$, $q_{out}=4$}},
+        caption={\scriptsize \shortstack{Adaptive QCNN\\No-QNN-inspired convolution + pooling\\$q_{in}=q$, $q_{out}=4$}},
         width=2.25,
         height=3.5,
         depth=3.5
@@ -416,7 +416,7 @@ name=,
         name=LinearAct_3,
         fill={rgb,255:red,178;green,121;blue,162},
         opacity=0.82,
-        caption={\scriptsize \shortstack{Linear\\$512 \rightarrow 10$; LogSoftmax}},
+        caption={\scriptsize \shortstack{Linear\\$2^q \rightarrow 10$; LogSoftmax}},
         width=1.0,
         height=3.5,
         depth=3.5,

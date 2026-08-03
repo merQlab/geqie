@@ -382,144 +382,52 @@ name=,
 \tikzstyle{copyconnection}=[ultra thick,every node/.style={sloped,allow upside down},draw={rgb:blue,4;red,1;green,1;black,3},opacity=0.7]
 
 
-\node[canvas is zy plane at x=0] (ImgInput_1) at (0, 0, 0) {\includegraphics[width=1.2cm, height=1.2cm]{experiment_geqie_neqr_cnn_feature_maps_vqc_dense_input_1.png}};
+\node[canvas is zy plane at x=0] (ImgInput_1) at (0, 0, 0) {\includegraphics[width=1.2cm, height=1.2cm]{experiment_geqie_direct_vqc_dense_input_1.png}};
 
 
 \pic[shift={(2.0, 0.0, 0.0)}] at (0, 0, 0)
     {Box={
-        name=Conv_1,
-        fill=\ConvColor,
+        name=LinearAct_1,
+        fill={rgb,255:red,89;green,161;blue,79},
         opacity=0.82,
-        caption={},
-        width=1.0,
-        height=2.0,
-        depth=2.0
+        caption={\scriptsize \shortstack{GEQIE encoding\\$16\!\times\!16 \rightarrow q$}},
+        width=3.5,
+        height=1.0,
+        depth=1.125
         }
     };
 
 
-\pic[shift={(0.0, 0.0, 0.0)}] at (Conv_1-east)
+\pic[shift={(3.2, 0.0, 0.0)}] at (LinearAct_1-east)
     {Box={
-        name=Norm_2,
-        fill=\NormColor,
-        opacity=0.82,
-        caption={},
-        width=1.0,
-        height=2.0,
-        depth=2.0
-        }
-    };
-
-
-\pic[shift={(0.0, 0.0, 0.0)}] at (Norm_2-east)
-    {Box={
-        name=Act_3,
-        fill=\ActivationColor,
-        opacity=0.82,
-        caption={},
-        width=1.0,
-        height=2.0,
-        depth=2.0
-        }
-    };
-
-
-\pic[shift={(0.0, 0.0, 0.0)}] at (Act_3-east)
-    {Box={
-        name=Pool_4,
-        fill=\PoolColor,
-        opacity=0.82,
-        caption={\scriptsize \shortstack{Conv($3\!\times\!3$) + BN + ReLU\\MaxPool($2\!\times\!2$)\\$1\!\times\!16\!\times\!16 \rightarrow 8\!\times\!8\!\times\!8$}},
-        width=1.0,
-        height=1.275,
-        depth=1.275
-        }
-    };
-
-
-\pic[shift={(3.6, 0.0, 0.0)}] at (Pool_4-east)
-    {Box={
-        name=Conv_5,
-        fill=\ConvColor,
-        opacity=0.82,
-        caption={},
-        width=1.45,
-        height=1.275,
-        depth=1.275
-        }
-    };
-
-
-\pic[shift={(0.0, 0.0, 0.0)}] at (Conv_5-east)
-    {Box={
-        name=Norm_6,
-        fill=\NormColor,
-        opacity=0.82,
-        caption={},
-        width=1,
-        height=1.275,
-        depth=1.275
-        }
-    };
-
-
-\pic[shift={(0.0, 0.0, 0.0)}] at (Norm_6-east)
-    {Box={
-        name=Act_7,
-        fill=\ActivationColor,
-        opacity=0.82,
-        caption={},
-        width=1,
-        height=1.275,
-        depth=1.275
-        }
-    };
-
-
-\pic[shift={(0.0, 0.0, 0.0)}] at (Act_7-east)
-    {Box={
-        name=Pool_8,
-        fill=\PoolColor,
-        opacity=0.82,
-        caption={\scriptsize \shortstack{Conv($3\!\times\!3$) + BN + ReLU\\MaxPool($2\!\times\!2$)\\$8\!\times\!8\!\times\!8 \rightarrow 16\!\times\!4\!\times\!4$}},
-        width=1,
-        height=1,
-        depth=1
-        }
-    };
-
-
-\pic[shift={(3.6, 0.0, 0.0)}] at (Pool_8-east)
-    {Box={
-        name=LinearAct_9,
+        name=LinearAct_2,
         fill={rgb,255:red,111;green,76;blue,155},
         opacity=0.82,
-        caption={\scriptsize \shortstack{GEQIE/NEQR + VQC per feature map\\$16$ maps; $q=8$, $L=1$\\Flatten: $16\!\times\!256 \rightarrow 4096$}},
-        width=2.5,
+        caption={\scriptsize \shortstack{Variational quantum circuit\\$q$ qubits, $L=5$\\$q \rightarrow 2^q$}},
+        width=2.25,
         height=3.5,
         depth=3.5
         }
     };
 
 
-\pic[shift={(5.2, 0.0, 0.0)}] at (LinearAct_9-east)
+\pic[shift={(3.0, 0.0, 0.0)}] at (LinearAct_2-east)
     {RightBandedBox={
-        name=LinearAct_10,
+        name=LinearAct_3,
         fill={rgb,255:red,178;green,121;blue,162},
         opacity=0.82,
-        caption={\scriptsize \shortstack{Linear\\$4096 \rightarrow 10$; LogSoftmax}},
-        width=1,
+        caption={\scriptsize \shortstack{Linear\\$2^q \rightarrow 10$; LogSoftmax}},
+        width=1.0,
         height=3.5,
         depth=3.5,
         bandfill=\ActivationColor
         }
     };
 
-\draw [connection] (Pool_4-east) -- node {\midarrow} (Conv_5-west);
-\draw [connection] (Pool_8-east) -- node {\midarrow} (LinearAct_9-west);
-\draw [connection] (LinearAct_9-east) -- node {\midarrow} (LinearAct_10-west);
+\draw [connection] (LinearAct_1-east) -- node {\midarrow} (LinearAct_2-west);
+\draw [connection] (LinearAct_2-east) -- node {\midarrow} (LinearAct_3-west);
 
-\draw [connection] (ImgInput_1.east) -- node {\midarrow} (Conv_1-west);
+\draw [connection] (ImgInput_1.east) -- node {\midarrow} (LinearAct_1-west);
 \node[below=5pt of ImgInput_1, font=\bfseries\scriptsize, align=center] {Input\\$1\!\times\!16\!\times\!16$};
 \path (current bounding box.east) ++(3cm,0) node[inner sep=0pt] {};
 \end{tikzpicture}

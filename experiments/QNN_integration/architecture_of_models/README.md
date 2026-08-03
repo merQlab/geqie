@@ -53,7 +53,7 @@ actual dimensions (`q` and `2^q`). These proxies do not modify training models.
 
 ## Experimental GEQIE models
 
-Generate the seven FRQI/NEQR experiment variants from
+Generate the four encoding-independent experiment architectures from
 `experimental_pipelines/experiment/geqie`:
 
 ```powershell
@@ -65,3 +65,8 @@ Their outputs are written to `output/experiment/geqie`. Verify them with:
 ```powershell
 .\.venv\Scripts\python.exe experiments\QNN_integration\architecture_of_models\verify_experiment_geqie_outputs.py
 ```
+
+The diagrams intentionally use the common `GEQIE` label rather than separate
+FRQI and NEQR variants. Dimensions which depend on the selected image encoding
+are expressed symbolically as `q` and `2^q`; the encoding choice can therefore
+be documented independently in the article text without duplicating figures.

@@ -22,29 +22,32 @@ from generate_baseline_architectures import (
 
 
 OUTPUT_DIR = HERE / "output" / "experiment" / "geqie"
+# pytorch2tikz must trace concrete tensor sizes even though the publication
+# diagrams describe the encoding-independent architecture symbolically.  These
+# values are drawing-only representatives and are never exposed as an encoding.
+TRACE_DIRECT_QUBITS = 9
+TRACE_FEATURE_MAP_QUBITS = 5
 
 
-def _direct_spec(encoding_id: str, model_id: str) -> DiagramSpec:
+def _direct_spec(model_id: str) -> DiagramSpec:
 	from experiments.QNN_integration.experimental_pipelines.common import GEQIEFirstClassifier
 	from experiments.QNN_integration.experimental_pipelines.experiment.geqie.models.direct_geqie import (
-		ENCODING_QUBITS,
 		MODEL_VARIANTS,
 	)
 
 	variant = MODEL_VARIANTS[model_id]
-	num_qubits = ENCODING_QUBITS[encoding_id]
 	num_layers = variant["num_layers"]
 	model = GEQIEFirstClassifier(
-		num_qubits=num_qubits,
+		num_qubits=TRACE_DIRECT_QUBITS,
 		num_layers=num_layers,
 		num_classes=10,
 		ansatz_factory=variant["ansatz_factory"],
 		output_qubits=variant["output_qubits"],
 	).eval()
 
-	encoding_proxy = nn.Linear(16 * 16, num_qubits, bias=False)
+	encoding_proxy = nn.Linear(16 * 16, TRACE_DIRECT_QUBITS, bias=False)
 	encoding_separator = nn.ReLU()
-	quantum_proxy = nn.Linear(num_qubits, model.head.in_features, bias=False)
+	quantum_proxy = nn.Linear(TRACE_DIRECT_QUBITS, model.head.in_features, bias=False)
 	quantum_separator = nn.ReLU()
 	trace_model = TraceModel(
 		nn.Flatten(),
@@ -56,38 +59,34 @@ def _direct_spec(encoding_id: str, model_id: str) -> DiagramSpec:
 		model.log_softmax,
 	).eval()
 	presentations = _standard_presentations(trace_model)
-	encoding_label = encoding_id.upper()
 	presentations[encoding_proxy] = BlockPresentation(
-		caption=(
-			rf"\shortstack{{GEQIE/{encoding_label} encoding\\"
-			rf"$16\!\times\!16 \rightarrow q={num_qubits}$}}"
-		),
+		caption=r"\shortstack{GEQIE encoding\\$16\!\times\!16 \rightarrow q$}",
 		kind="preprocess",
 		width=2*14,
 	)
 
 	if model_id == "direct_vqc_dense":
 		quantum_caption = (
-			rf"\shortstack{{Variational quantum circuit\\"
-			rf"$q={num_qubits}$, $L={num_layers}$\\"
-			rf"${num_qubits} \rightarrow {model.head.in_features}$}}"
+			r"\shortstack{Variational quantum circuit\\"
+			rf"$q$ qubits, $L={num_layers}$\\"
+			r"$q \rightarrow 2^q$}"
 		)
 	elif model_id == "adaptive_qnn_no_qnn_inspired_dense":
 		quantum_caption = (
 			r"\shortstack{Adaptive QCNN\\No-QNN-inspired convolution + pooling\\"
-			rf"$q_{{in}}={num_qubits}$, $q_{{out}}={variant['output_qubits']}$}}"
+			rf"$q_{{in}}=q$, $q_{{out}}={variant['output_qubits']}$}}"
 		)
 	else:
-		quantum_caption = (
+			quantum_caption = (
 			r"\shortstack{Adaptive QCNN + QNN compression\\"
 			r"No-QNN-inspired convolution + pooling\\"
-			rf"$q_{{in}}={num_qubits}$, $q_{{out}}={variant['output_qubits']}$}}"
+			rf"$q_{{in}}=q$, $q_{{out}}={variant['output_qubits']}$}}"
 		)
 
 	presentations[quantum_proxy] = BlockPresentation(
 		caption=quantum_caption,
 		kind="quantum",
-		output_label=str(model.head.in_features),
+		output_label=r"$2^q$",
 		width=18,
 		extra_offset=6,
 	)
@@ -97,22 +96,17 @@ def _direct_spec(encoding_id: str, model_id: str) -> DiagramSpec:
 		"adaptive_qnn_no_qnn_inspired_qnn_compression_dense": 20,
 	}[model_id]
 	presentations[model.head] = BlockPresentation(
-		caption=(
-			rf"\shortstack{{Linear\\${model.head.in_features} \rightarrow 10$; LogSoftmax}}"
-		),
+		caption=r"\shortstack{Linear\\$2^q \rightarrow 10$; LogSoftmax}",
 		kind="classifier",
 		output_label="10",
 		banded=True,
 		extra_offset=classifier_offset,
 	)
 
-	source = Path(
-		f"experimental_pipelines/experiment/geqie/{encoding_id}/{model_id}.py"
-	)
 	return DiagramSpec(
-		key=f"{encoding_id}_{model_id}",
-		title=f"GEQIE/{encoding_label}: {variant['pipeline_name']}",
-		source=source,
+		key=model_id,
+		title=variant["pipeline_name"],
+		source=Path("experimental_pipelines/experiment/geqie/models/direct_geqie.py"),
 		model=model,
 		trace_model=trace_model,
 		input_tensor=_sample_tensor(),
@@ -121,83 +115,73 @@ def _direct_spec(encoding_id: str, model_id: str) -> DiagramSpec:
 	)
 
 
-def _cnn_feature_maps_spec(encoding_id: str) -> DiagramSpec:
+def _cnn_feature_maps_spec() -> DiagramSpec:
 	from experiments.QNN_integration.experimental_pipelines.experiment.geqie.models.cnn_feature_maps_vqc_dense import (
-		CNNFeatureMapsGEQIEVQCDenseClassifier,
+		build_feature_extractor,
 	)
 
-	encoding_params = {"bitrate": 4} if encoding_id == "neqr" else {}
-	model = CNNFeatureMapsGEQIEVQCDenseClassifier(
-		num_classes=10,
-		num_qubits=None,
-		num_layers=1,
-		batch_size=16,
-		convolution_depth=2,
-		encoding_id=encoding_id,
-		encoding_params=encoding_params,
-	).eval()
-	num_qubits = model.quantum.num_qubits
-	feature_maps = model.quantum.feature_maps
-	quantum_proxy = nn.Linear(feature_maps * 4 * 4, model.head.in_features, bias=False)
+	cnn, feature_maps, feature_size = build_feature_extractor(depth=2)
+	trace_output_features = feature_maps * (2**TRACE_FEATURE_MAP_QUBITS)
+	quantum_proxy = nn.Linear(
+		feature_maps * feature_size[0] * feature_size[1],
+		trace_output_features,
+		bias=False,
+	)
 	quantum_separator = nn.ReLU()
+	head = nn.Linear(trace_output_features, 10)
+	log_softmax = nn.LogSoftmax(dim=-1)
 	trace_model = TraceModel(
-		*list(model.cnn.children()),
+		*list(cnn.children()),
 		nn.Flatten(),
 		quantum_proxy,
 		quantum_separator,
-		model.head,
-		model.log_softmax,
+		head,
+		log_softmax,
 	).eval()
 	presentations = _standard_presentations(trace_model)
-	presentations[model.cnn[0]] = BlockPresentation(caption="", kind="conv")
-	presentations[model.cnn[4]] = BlockPresentation(
+	presentations[cnn[0]] = BlockPresentation(caption="", kind="conv")
+	presentations[cnn[4]] = BlockPresentation(
 		caption="", kind="conv", extra_offset=8
 	)
-	for activation in (model.cnn[2], model.cnn[6]):
+	for activation in (cnn[2], cnn[6]):
 		presentations[activation] = BlockPresentation(caption="", kind="activation")
-	presentations[model.cnn[3]] = BlockPresentation(
+	presentations[cnn[3]] = BlockPresentation(
 		caption=(
 			r"\shortstack{Conv($3\!\times\!3$) + BN + ReLU\\MaxPool($2\!\times\!2$)\\"
 			r"$1\!\times\!16\!\times\!16 \rightarrow 8\!\times\!8\!\times\!8$}"
 		),
 		kind="pool",
 	)
-	presentations[model.cnn[7]] = BlockPresentation(
+	presentations[cnn[7]] = BlockPresentation(
 		caption=(
 			r"\shortstack{Conv($3\!\times\!3$) + BN + ReLU\\MaxPool($2\!\times\!2$)\\"
 			r"$8\!\times\!8\!\times\!8 \rightarrow 16\!\times\!4\!\times\!4$}"
 		),
 		kind="pool",
 	)
-	encoding_label = encoding_id.upper()
-	per_map_outputs = 2**num_qubits
 	presentations[quantum_proxy] = BlockPresentation(
 		caption=(
-			rf"\shortstack{{GEQIE/{encoding_label} + VQC per feature map\\"
-			rf"$16$ maps; $q={num_qubits}$, $L=1$\\"
-			rf"Flatten: $16\!\times\!{per_map_outputs} \rightarrow {model.head.in_features}$}}"
+			r"\shortstack{GEQIE + VQC per feature map\\"
+			r"$16$ maps; $q$ qubits, $L=1$\\"
+			r"Flatten: $16\!\times\!2^q \rightarrow 16\!\cdot\!2^q$}"
 		),
 		kind="quantum",
-		output_label=str(model.head.in_features),
+		output_label=r"$16\cdot2^q$",
 		width=20,
 		extra_offset=8,
 	)
-	presentations[model.head] = BlockPresentation(
-		caption=(
-			rf"\shortstack{{Linear\\${model.head.in_features} \rightarrow 10$; LogSoftmax}}"
-		),
+	presentations[head] = BlockPresentation(
+		caption=r"\shortstack{Linear\\$16\!\cdot\!2^q \rightarrow 10$; LogSoftmax}",
 		kind="classifier",
 		output_label="10",
 		banded=True,
 		extra_offset=16,
 	)
 	return DiagramSpec(
-		key=f"{encoding_id}_cnn_feature_maps_vqc_dense",
-		title=f"CNN feature maps + GEQIE/{encoding_label} + VQC + dense",
-		source=Path(
-			f"experimental_pipelines/experiment/geqie/{encoding_id}/cnn_feature_maps_vqc_dense.py"
-		),
-		model=model,
+		key="cnn_feature_maps_vqc_dense",
+		title="CNN feature maps + GEQIE + VQC + dense",
+		source=Path("experimental_pipelines/experiment/geqie/models/cnn_feature_maps_vqc_dense.py"),
+		model=trace_model,
 		trace_model=trace_model,
 		input_tensor=_sample_tensor(),
 		output_prefix="experiment_geqie",
@@ -206,20 +190,29 @@ def _cnn_feature_maps_spec(encoding_id: str) -> DiagramSpec:
 
 
 BUILDERS: dict[str, Callable[[], DiagramSpec]] = {
-	"frqi_direct_vqc_dense": lambda: _direct_spec("frqi", "direct_vqc_dense"),
-	"frqi_adaptive_qnn_no_qnn_inspired_dense": lambda: _direct_spec(
-		"frqi", "adaptive_qnn_no_qnn_inspired_dense"
+	"direct_vqc_dense": lambda: _direct_spec("direct_vqc_dense"),
+	"adaptive_qnn_no_qnn_inspired_dense": lambda: _direct_spec(
+		"adaptive_qnn_no_qnn_inspired_dense"
 	),
-	"frqi_adaptive_qnn_no_qnn_inspired_qnn_compression_dense": lambda: _direct_spec(
-		"frqi", "adaptive_qnn_no_qnn_inspired_qnn_compression_dense"
+	"adaptive_qnn_no_qnn_inspired_qnn_compression_dense": lambda: _direct_spec(
+		"adaptive_qnn_no_qnn_inspired_qnn_compression_dense"
 	),
-	"frqi_cnn_feature_maps_vqc_dense": lambda: _cnn_feature_maps_spec("frqi"),
-	"neqr_direct_vqc_dense": lambda: _direct_spec("neqr", "direct_vqc_dense"),
-	"neqr_adaptive_qnn_no_qnn_inspired_dense": lambda: _direct_spec(
-		"neqr", "adaptive_qnn_no_qnn_inspired_dense"
-	),
-	"neqr_cnn_feature_maps_vqc_dense": lambda: _cnn_feature_maps_spec("neqr"),
+	"cnn_feature_maps_vqc_dense": _cnn_feature_maps_spec,
 }
+
+
+def _remove_stale_architectures(output_dir: Path) -> None:
+	"""Remove outputs from architecture keys superseded by the current set."""
+	active_stems = {f"experiment_geqie_{key}" for key in BUILDERS}
+	for path in output_dir.glob("experiment_geqie_*"):
+		is_active = any(
+			path.name == f"{stem}{suffix}"
+			or path.name.startswith(f"{stem}_input_")
+			for stem in active_stems
+			for suffix in (".tex", ".pdf", ".png", ".aux", ".log")
+		)
+		if path.is_file() and not is_active:
+			path.unlink()
 
 
 def _parse_args() -> argparse.Namespace:
@@ -236,6 +229,9 @@ def main() -> int:
 		raise ValueError("Publication output must use at least 300 DPI.")
 	torch.manual_seed(0)
 	selected = BUILDERS if args.model == "all" else {args.model: BUILDERS[args.model]}
+	if args.model == "all":
+		args.output_dir.resolve().mkdir(parents=True, exist_ok=True)
+		_remove_stale_architectures(args.output_dir.resolve())
 	entries = []
 	for key, builder in selected.items():
 		print(f"Generating {key} ...", flush=True)
