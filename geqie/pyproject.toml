@@ -13,7 +13,7 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.dynamic]
 dependencies = {file = ["./requirements/requirements.txt"]}
-optional-dependencies.dev = {file = ["./requirements/requirements_dev_extras.in"]}
+optional-dependencies.dev = {file = ["./requirements/requirements_dev.txt"]}
 
 [tool.setuptools]
 package-dir = {"" = "src"}

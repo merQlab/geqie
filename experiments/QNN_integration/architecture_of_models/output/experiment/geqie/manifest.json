@@ -1,0 +1,59 @@
+{
+  "generator": "generate_experiment_geqie_architectures.py",
+  "pytorch_version": "2.10.0+cpu",
+  "pytorch2tikz_version": "0.0.1",
+  "architectures": [
+    {
+      "key": "adaptive_qnn_no_qnn_inspired_dense",
+      "title": "Adaptive QNN inspired by No-QNN + dense",
+      "source": "experimental_pipelines/experiment/geqie/models/direct_geqie.py",
+      "tex": "experiment_geqie_adaptive_qnn_no_qnn_inspired_dense.tex",
+      "pdf": "experiment_geqie_adaptive_qnn_no_qnn_inspired_dense.pdf",
+      "png": "experiment_geqie_adaptive_qnn_no_qnn_inspired_dense.png",
+      "dpi": 300,
+      "pixels": [
+        1948,
+        410
+      ]
+    },
+    {
+      "key": "adaptive_qnn_no_qnn_inspired_qnn_compression_dense",
+      "title": "Adaptive QNN inspired by No-QNN with QNN compression + dense",
+      "source": "experimental_pipelines/experiment/geqie/models/direct_geqie.py",
+      "tex": "experiment_geqie_adaptive_qnn_no_qnn_inspired_qnn_compression_dense.tex",
+      "pdf": "experiment_geqie_adaptive_qnn_no_qnn_inspired_qnn_compression_dense.pdf",
+      "png": "experiment_geqie_adaptive_qnn_no_qnn_inspired_qnn_compression_dense.png",
+      "dpi": 300,
+      "pixels": [
+        2019,
+        410
+      ]
+    },
+    {
+      "key": "cnn_feature_maps_vqc_dense",
+      "title": "CNN feature maps + GEQIE + VQC + dense",
+      "source": "experimental_pipelines/experiment/geqie/models/cnn_feature_maps_vqc_dense.py",
+      "tex": "experiment_geqie_cnn_feature_maps_vqc_dense.tex",
+      "pdf": "experiment_geqie_cnn_feature_maps_vqc_dense.pdf",
+      "png": "experiment_geqie_cnn_feature_maps_vqc_dense.png",
+      "dpi": 300,
+      "pixels": [
+        2520,
+        410
+      ]
+    },
+    {
+      "key": "direct_vqc_dense",
+      "title": "Direct GEQIE + VQC + dense",
+      "source": "experimental_pipelines/experiment/geqie/models/direct_geqie.py",
+      "tex": "experiment_geqie_direct_vqc_dense.tex",
+      "pdf": "experiment_geqie_direct_vqc_dense.pdf",
+      "png": "experiment_geqie_direct_vqc_dense.png",
+      "dpi": 300,
+      "pixels": [
+        1665,
+        411
+      ]
+    }
+  ]
+}
