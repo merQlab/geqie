@@ -19,7 +19,12 @@ def run(*, encoding_params=None, **kwargs):
 	return run_direct_geqie(
 		encoding_id="neqr",
 		model_id="direct_vqc_dense",
-		zip_root=Path("/mnt/data02/mkordasz/circuits/NEQR/MNIST_Fashion/"),
+		zip_root=Path("/mnt/data02/mkordasz/circuits/NEQR/MNIST_Fashion"),
+		dataset_id="mnist_fashion",
+		quantum_workers=32, 
+		precompute_workers=12,
+		create_circuits=False,
+		show_progress_bars=True,
 		encoding_params=params,
 		**kwargs,
 	)
