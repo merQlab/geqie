@@ -1,4 +1,4 @@
-"""Classical baseline: 16x16 image -> dense classifier."""
+"""Classical baseline: image -> dense classifier."""
 
 from __future__ import annotations
 
@@ -16,6 +16,9 @@ from torch.optim import Adam
 
 from experiments.QNN_integration.experimental_pipelines.common import (
 	DataBlock,
+	data_block_image_shape,
+	dataset_image_shape,
+	describe_image_shape,
 	image_loaders,
 	load_dataset,
 	run_subsets,
@@ -27,19 +30,20 @@ class DenseClassifier(nn.Module):
 	def __init__(
 		self,
 		num_classes: int = 10,
+		dim_input: tuple[int, int, int] = (1, 32, 32),
 	) -> None:
 		super().__init__()
 		self.flatten = nn.Flatten()
 		self.classifier = nn.Linear(
-			16 * 16,
+			dim_input[0] * dim_input[1] * dim_input[2],
 			num_classes,
 		)
-		self.log_softmax = nn.LogSoftmax(dim=-1)
+		self.softmax = nn.Softmax(dim=-1)
 
 	def forward(self, x):
 		x = self.flatten(x)
 		x = self.classifier(x)
-		x = self.log_softmax(x)
+		x = self.softmax(x)
 		return x
 
 
@@ -56,7 +60,8 @@ def train_one_subset(
 	report_context=None,
 	progress_callback=None,
 ):
-	model = DenseClassifier(num_classes)
+	image_shape = data_block_image_shape(data_block)
+	model = DenseClassifier(num_classes, dim_input=image_shape)
 	train_loader, val_loader, test_loader = image_loaders(
 		data_block,
 		batch_size,
@@ -85,7 +90,7 @@ def train_one_subset(
 def run(
 	dataset=None,
 	*,
-	dataset_id="mnist_digits",
+	dataset_id="cifar_bw",
 	**overrides,
 ):
 	run_options = {
@@ -98,8 +103,11 @@ def run(
 		"verbose": True,
 	}
 	run_options.update(overrides)
+	dataset = dataset or load_dataset(dataset_id)
+	image_shape = dataset_image_shape(dataset)
+	input_features = image_shape[0] * image_shape[1] * image_shape[2]
 	return run_subsets(
-		dataset=dataset or load_dataset(dataset_id),
+		dataset=dataset,
 		trainer=train_one_subset,
 		dataset_id=dataset_id,
 		experiment_group="baseline",
@@ -108,7 +116,10 @@ def run(
 		model_id="dense_classifier",
 		pipeline_name="Dense classifier",
 		classifier_name="Dense classifier",
-		model_architecture="16x16 grayscale -> Flatten(256) -> Linear(256, num_classes) -> LogSoftmax",
+		model_architecture=(
+			f"{describe_image_shape(image_shape)} -> Flatten({input_features}) -> "
+			f"Linear({input_features}, num_classes) -> Softmax"
+		),
 		**run_options,
 	)
 

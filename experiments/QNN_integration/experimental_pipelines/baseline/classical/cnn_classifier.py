@@ -1,4 +1,4 @@
-"""Classical baseline: 16x16 image -> CNN -> dense classifier."""
+"""Classical baseline: image -> CNN -> dense classifier."""
 
 from __future__ import annotations
 
@@ -17,6 +17,9 @@ from torch.optim import Adam
 
 from experiments.QNN_integration.experimental_pipelines.common import (
 	DataBlock,
+	data_block_image_shape,
+	dataset_image_shape,
+	describe_image_shape,
 	image_loaders,
 	load_dataset,
 	run_subsets,
@@ -28,19 +31,22 @@ class CNNClassifier(nn.Module):
 	def __init__(
 		self,
 		num_classes: int = 10,
+		input_shape: tuple[int, int, int] = (1, 32, 32),
 	) -> None:
 		super().__init__()
 		self.features = nn.Sequential(
-			nn.Conv2d(1, 16, 3, padding=1),
+			nn.Conv2d(input_shape[0], 16, 3, padding=1),
 			nn.ReLU(),
 			nn.MaxPool2d(2),
 			nn.Conv2d(16, 32, 3, padding=1),
 			nn.ReLU(),
 			nn.MaxPool2d(2),
 		)
+		with torch.no_grad():
+			feature_count = self.features(torch.zeros(1, *input_shape)).numel()
 		self.classifier = nn.Sequential(
 			nn.Flatten(),
-			nn.Linear(32 * 4 * 4, 64),
+			nn.Linear(feature_count, 64),
 			nn.ReLU(),
 			nn.Linear(64, num_classes),
 			nn.LogSoftmax(dim=-1),
@@ -65,7 +71,8 @@ def train_one_subset(
 	report_context=None,
 	progress_callback=None,
 ):
-	model = CNNClassifier(num_classes)
+	image_shape = data_block_image_shape(data_block)
+	model = CNNClassifier(num_classes, input_shape=image_shape)
 	train_loader, val_loader, test_loader = image_loaders(
 		data_block,
 		batch_size,
@@ -107,8 +114,10 @@ def run(
 		"verbose": True,
 	}
 	run_options.update(overrides)
+	dataset = dataset or load_dataset(dataset_id)
+	image_shape = dataset_image_shape(dataset)
 	return run_subsets(
-		dataset=dataset or load_dataset(dataset_id),
+		dataset=dataset,
 		trainer=train_one_subset,
 		dataset_id=dataset_id,
 		experiment_group="baseline",
@@ -117,7 +126,10 @@ def run(
 		model_id="cnn_classifier",
 		pipeline_name="CNN classifier",
 		classifier_name="CNN + Dense",
-		model_architecture="16x16 grayscale -> Conv(1,16) -> Pool -> Conv(16,32) -> Pool -> Linear(512,64) -> Linear(64, classes)",
+		model_architecture=(
+			f"{describe_image_shape(image_shape)} -> Conv({image_shape[0]},16) -> Pool -> "
+			"Conv(16,32) -> Pool -> Flatten -> Linear(64) -> Linear(classes)"
+		),
 		**run_options,
 	)
 

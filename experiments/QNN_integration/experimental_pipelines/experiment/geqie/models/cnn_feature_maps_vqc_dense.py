@@ -12,6 +12,9 @@ from torch.optim import Adam
 
 from experiments.QNN_integration.experimental_pipelines.common import (
 	DataBlock,
+	data_block_image_shape,
+	dataset_image_shape,
+	describe_image_shape,
 	image_loaders,
 	load_dataset,
 	run_subsets,
@@ -80,14 +83,17 @@ def infer_encoded_feature_map_qubits(
 
 def build_feature_extractor(
 	depth: int = 2,
+	input_shape: tuple[int, int, int] = (1, 32, 32),
 ) -> tuple[nn.Sequential, int, tuple[int, int]]:
 	if depth not in (1, 2, 3):
 		raise ValueError("convolution_depth must be 1, 2, or 3.")
+	if len(input_shape) != 3 or any(size <= 0 for size in input_shape):
+		raise ValueError(f"input_shape must be (channels, height, width); got {input_shape!r}.")
 
-	height = width = 16
+	input_channels, height, width = input_shape
 	layers: list[nn.Module] = []
 	for level in range(depth):
-		in_channels = 1 if level == 0 else 2 ** (level + 2)
+		in_channels = input_channels if level == 0 else 2 ** (level + 2)
 		out_channels = 2 ** (level + 3)
 		layers.extend((
 			nn.Conv2d(in_channels, out_channels, 3, padding=1),
@@ -112,11 +118,15 @@ class CNNFeatureMapsGEQIEVQCDenseClassifier(nn.Module):
 		convolution_depth: int = 2,
 		encoding_id: str = "frqi",
 		encoding_params: dict[str, Any] | None = None,
+		input_shape: tuple[int, int, int] = (1, 32, 32),
 	) -> None:
 		super().__init__()
 		self.encoding_id = normalize_encoding_id(encoding_id)
 		self.encoding_params = dict(encoding_params or {})
-		self.cnn, feature_maps, feature_size = build_feature_extractor(convolution_depth)
+		self.cnn, feature_maps, feature_size = build_feature_extractor(
+			convolution_depth,
+			input_shape,
+		)
 		expected_qubits = infer_encoded_feature_map_qubits(
 			self.encoding_id,
 			feature_size,
@@ -176,6 +186,7 @@ def train_one_subset(
 	encoding_params=None,
 	**_,
 ):
+	image_shape = data_block_image_shape(data_block)
 	model = CNNFeatureMapsGEQIEVQCDenseClassifier(
 		num_classes=num_classes,
 		num_qubits=num_qubits,
@@ -184,6 +195,7 @@ def train_one_subset(
 		convolution_depth=convolution_depth,
 		encoding_id=encoding_id,
 		encoding_params=encoding_params,
+		input_shape=image_shape,
 	)
 	train_loader, val_loader, test_loader = image_loaders(
 		data_block,
@@ -224,7 +236,12 @@ def run_cnn_feature_maps_vqc_dense(
 ):
 	encoding_id = normalize_encoding_id(encoding_id)
 	encoding_params = dict(encoding_params or {})
-	_, feature_maps, feature_size = build_feature_extractor(convolution_depth)
+	dataset = dataset or load_dataset(dataset_id)
+	image_shape = dataset_image_shape(dataset)
+	_, feature_maps, feature_size = build_feature_extractor(
+		convolution_depth,
+		image_shape,
+	)
 	expected_qubits = infer_encoded_feature_map_qubits(
 		encoding_id,
 		feature_size,
@@ -264,7 +281,7 @@ def run_cnn_feature_maps_vqc_dense(
 	}
 	run_options.update(overrides)
 	return run_subsets(
-		dataset=dataset or load_dataset(dataset_id),
+		dataset=dataset,
 		trainer=train_one_subset,
 		dataset_id=dataset_id,
 		experiment_group="experiment",
@@ -274,7 +291,8 @@ def run_cnn_feature_maps_vqc_dense(
 		pipeline_name=f"CNN feature maps + GEQIE/{encoding_label} + VQC + dense",
 		classifier_name=f"CNN + GEQIE({encoding_label} feature maps) + QNN + Dense",
 		model_architecture=(
-			f"16x16 -> CNN feature maps ({feature_maps}x{feature_size[0]}x{feature_size[1]}) "
+			f"{describe_image_shape(image_shape)} -> CNN feature maps "
+			f"({feature_maps}x{feature_size[0]}x{feature_size[1]}) "
 			f"-> GEQIE({encoding_label}) -> VQC -> Dense"
 		),
 		**run_options,

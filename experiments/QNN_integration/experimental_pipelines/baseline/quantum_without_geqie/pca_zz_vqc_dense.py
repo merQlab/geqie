@@ -18,6 +18,8 @@ from torch.optim import Adam
 
 from experiments.QNN_integration.experimental_pipelines.common import (
 	DataBlock,
+	dataset_image_shape,
+	describe_image_shape,
 	load_dataset,
 	pca_image_loaders,
 	run_subsets,
@@ -144,8 +146,11 @@ def run(
 		"verbose": False,
 	}
 	run_options.update(overrides)
+	dataset = dataset or load_dataset(dataset_id)
+	image_shape = dataset_image_shape(dataset)
+	input_features = image_shape[0] * image_shape[1] * image_shape[2]
 	return run_subsets(
-		dataset=dataset or load_dataset(dataset_id),
+		dataset=dataset,
 		trainer=train_one_subset,
 		dataset_id=dataset_id,
 		experiment_group="baseline",
@@ -154,7 +159,10 @@ def run(
 		model_id="pca_vqc_dense",
 		pipeline_name="PCA + ZZ feature map + VQC + dense",
 		classifier_name="PCA + ZZFeatureMap + QNN + Dense",
-		model_architecture="16x16 -> Flatten(256) -> PCA(qubits) -> ZZFeatureMap -> VQC -> QNN -> Dense",
+		model_architecture=(
+			f"{describe_image_shape(image_shape)} -> Flatten({input_features}) -> PCA(qubits) "
+			"-> ZZFeatureMap -> VQC -> QNN -> Dense"
+		),
 		**run_options,
 	)
 

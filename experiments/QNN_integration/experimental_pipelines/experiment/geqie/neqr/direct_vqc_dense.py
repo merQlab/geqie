@@ -14,17 +14,17 @@ if __package__ in (None, ""):
 from experiments.QNN_integration.experimental_pipelines.experiment.geqie.models.direct_geqie import run_direct_geqie
 
 
-def run(*, encoding_params=None, **kwargs):
+def run(*, dataset_id="mnist_fashion", zip_root=None, encoding_params=None, **kwargs):
 	params = {"bitrate": 4, **(encoding_params or {})}
+	kwargs.setdefault("quantum_workers", 32)
+	kwargs.setdefault("precompute_workers", 12)
+	kwargs.setdefault("create_circuits", False)
+	kwargs.setdefault("show_progress_bars", True)
 	return run_direct_geqie(
 		encoding_id="neqr",
 		model_id="direct_vqc_dense",
-		zip_root=Path("/mnt/data02/mkordasz/circuits/NEQR/MNIST_Fashion"),
-		dataset_id="mnist_fashion",
-		quantum_workers=32, 
-		precompute_workers=12,
-		create_circuits=False,
-		show_progress_bars=True,
+		dataset_id=dataset_id,
+		zip_root=zip_root,
 		encoding_params=params,
 		**kwargs,
 	)

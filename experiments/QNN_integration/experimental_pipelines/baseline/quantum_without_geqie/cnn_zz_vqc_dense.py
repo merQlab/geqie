@@ -18,6 +18,9 @@ from torch.optim import Adam
 
 from experiments.QNN_integration.experimental_pipelines.common import (
 	DataBlock,
+	data_block_image_shape,
+	dataset_image_shape,
+	describe_image_shape,
 	image_loaders,
 	load_dataset,
 	run_subsets,
@@ -40,19 +43,21 @@ class CNNZZVQCDenseClassifier(nn.Module):
 		num_layers: int = 1,
 		num_classes: int = 10,
 		shots: int = 1024,
+		input_shape: tuple[int, int, int] = (1, 32, 32),
 	) -> None:
 		super().__init__()
 		self.num_qubits = num_qubits
 		self.cnn = nn.Sequential(
-			nn.Conv2d(1, 16, 3, padding=1),
+			nn.Conv2d(input_shape[0], 16, 3, padding=1),
 			nn.ReLU(),
 			nn.MaxPool2d(2),
 			nn.Conv2d(16, 32, 3, padding=1),
 			nn.ReLU(),
 			nn.MaxPool2d(2),
-			nn.Flatten(),
-			nn.Linear(32 * 4 * 4, num_qubits),
 		)
+		with torch.no_grad():
+			feature_count = self.cnn(torch.zeros(1, *input_shape)).numel()
+		self.cnn.extend((nn.Flatten(), nn.Linear(feature_count, num_qubits)))
 		feature_map = zz_feature_map(
 			feature_dimension=num_qubits,
 			reps=1,
@@ -79,9 +84,6 @@ class CNNZZVQCDenseClassifier(nn.Module):
 		self.log_softmax = nn.LogSoftmax(dim=-1)
 
 	def forward(self, x: torch.Tensor) -> torch.Tensor:
-		if x.ndim == 3:
-			x = x.unsqueeze(1)
-		x = x.float() / 255.0
 		x = self.cnn(x)
 		x = self.qnn(x)
 		x = x * (2 ** self.num_qubits)
@@ -103,12 +105,18 @@ def train_one_subset(
 	report_context=None,
 	progress_callback=None,
 ):
-	model = CNNZZVQCDenseClassifier(num_qubits, num_layers, num_classes)
+	image_shape = data_block_image_shape(data_block)
+	model = CNNZZVQCDenseClassifier(
+		num_qubits,
+		num_layers,
+		num_classes,
+		input_shape=image_shape,
+	)
 	train_loader, val_loader, test_loader = image_loaders(
 		data_block,
 		batch_size,
-		normalize=False,
-		add_channel=False,
+		normalize=True,
+		add_channel=True,
 	)
 	optimizer = Adam([
 		{"params": model.cnn.parameters(), "lr": 1e-3},
@@ -146,8 +154,10 @@ def run(
 		"verbose": False,
 	}
 	run_options.update(overrides)
+	dataset = dataset or load_dataset(dataset_id)
+	image_shape = dataset_image_shape(dataset)
 	return run_subsets(
-		dataset=dataset or load_dataset(dataset_id),
+		dataset=dataset,
 		trainer=train_one_subset,
 		dataset_id=dataset_id,
 		experiment_group="baseline",
@@ -156,7 +166,10 @@ def run(
 		model_id="cnn_vqc_dense",
 		pipeline_name="CNN + ZZ feature map + VQC + dense",
 		classifier_name="CNN + ZZFeatureMap + QNN + Dense",
-		model_architecture="16x16 -> CNN -> Linear(512, qubits) -> ZZFeatureMap -> VQC -> QNN -> Dense",
+		model_architecture=(
+			f"{describe_image_shape(image_shape)} -> CNN(channels={image_shape[0]}) -> "
+			"Linear(qubits) -> ZZFeatureMap -> VQC -> QNN -> Dense"
+		),
 		**run_options,
 	)
 

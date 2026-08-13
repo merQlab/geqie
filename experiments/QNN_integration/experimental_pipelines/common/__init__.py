@@ -41,12 +41,18 @@ DATASETS_DIR = QNN_INTEGRATION_DIR / "datasets"
 DATASET_FILES = {
 	"mnist_digits": "MNIST_Digits_5_subsets_train_val_test_16x16.joblib",
 	"mnist_fashion": "MNIST_Fashion_5_subsets_train_val_test_16x16.joblib",
+	"cifar_bw": "CIFAR-10/.CIFAR-BW_5_subsets_train_val_test_32x32.joblib",
+	"cifar_rgb": "CIFAR-10/.CIFAR-RGB_5_subsets_train_val_test_32x32.joblib",
 }
 DATASET_ALIASES = {
 	"mnist": "mnist_digits",
 	"mnist_digit": "mnist_digits",
 	"fashion_mnist": "mnist_fashion",
 	"fashion": "mnist_fashion",
+	"cifar": "cifar_bw",
+	"cifar_10": "cifar_bw",
+	"cifar_10_bw": "cifar_bw",
+	"cifar_10_rgb": "cifar_rgb",
 }
 
 
@@ -78,7 +84,7 @@ def normalize_dataset_id(dataset_id: str) -> str:
 
 
 def load_dataset(dataset_id: str = "mnist_digits") -> DataSet:
-	"""Load a configured 16x16 protocol dataset by its canonical identifier."""
+	"""Load a configured protocol dataset by its canonical identifier."""
 	canonical = normalize_dataset_id(dataset_id)
 	try:
 		filename = DATASET_FILES[canonical]
@@ -100,6 +106,74 @@ def load_dataset(dataset_id: str = "mnist_digits") -> DataSet:
 def load_mnist_digits_dataset() -> DataSet:
 	"""Backward-compatible alias for the canonical dataset registry."""
 	return load_dataset("mnist_digits")
+
+
+def infer_image_shape(images: np.ndarray) -> tuple[int, int, int]:
+	"""Return an image batch shape as ``(channels, height, width)``.
+
+	Protocol datasets store grayscale images as ``NHW`` and RGB images as
+	``NHWC``.  ``NCHW`` is accepted as well, which keeps callers independent of
+	the storage layout used by a future dataset notebook.
+	"""
+	values = np.asarray(images)
+	if values.ndim == 3:
+		_, height, width = values.shape
+		return 1, int(height), int(width)
+	if values.ndim != 4:
+		raise ValueError(
+			"Expected an image batch with shape NHW, NHWC, or NCHW; "
+			f"got {values.shape}."
+		)
+
+	sample_shape = tuple(int(size) for size in values.shape[1:])
+	if sample_shape[-1] in (1, 3, 4):
+		height, width, channels = sample_shape
+		return channels, height, width
+	if sample_shape[0] in (1, 3, 4):
+		channels, height, width = sample_shape
+		return channels, height, width
+	raise ValueError(
+		"Could not identify the channel axis in image batch "
+		f"with shape {values.shape}."
+	)
+
+
+def data_block_image_shape(data_block: DataBlock) -> tuple[int, int, int]:
+	"""Infer and validate one common image shape for all splits."""
+	shapes = {
+		split_name: infer_image_shape(getattr(data_block, split_name).X)
+		for split_name in ("train", "val", "test")
+	}
+	if len(set(shapes.values())) != 1:
+		raise ValueError(f"Dataset splits use inconsistent image shapes: {shapes}.")
+	return shapes["train"]
+
+
+def dataset_image_shape(dataset: DataSet) -> tuple[int, int, int]:
+	"""Infer and validate one common image shape for every dataset subset."""
+	if not dataset.subsets:
+		raise ValueError("Dataset does not contain any subsets.")
+	shapes = [data_block_image_shape(block) for block in dataset.subsets]
+	if len(set(shapes)) != 1:
+		raise ValueError(f"Dataset subsets use inconsistent image shapes: {shapes}.")
+	return shapes[0]
+
+
+def describe_image_shape(image_shape: tuple[int, int, int]) -> str:
+	"""Return a compact human-readable ``HxW``/``HxWxC`` shape label."""
+	channels, height, width = image_shape
+	return f"{height}x{width}" if channels == 1 else f"{height}x{width}x{channels}"
+
+
+def _channels_first_images(images: np.ndarray) -> torch.Tensor:
+	"""Convert a protocol image batch to the NCHW layout expected by PyTorch."""
+	values = torch.as_tensor(np.asarray(images), dtype=torch.float32)
+	channels, _, _ = infer_image_shape(images)
+	if values.ndim == 3:
+		return values.unsqueeze(1)
+	if values.shape[1] == channels:
+		return values
+	return values.permute(0, 3, 1, 2).contiguous()
 
 
 def classification_metrics(y_true: Iterable[int], y_pred: Iterable[int]) -> dict[str, float]:
@@ -127,11 +201,13 @@ def image_loaders(
 ) -> tuple[DataLoader, DataLoader, DataLoader]:
 	"""Create loaders from image splits while keeping preprocessing explicit."""
 	def make_loader(x: np.ndarray, y: np.ndarray, shuffle: bool) -> DataLoader:
-		values = torch.tensor(np.asarray(x), dtype=torch.float32)
+		values = (
+			_channels_first_images(x)
+			if add_channel
+			else torch.as_tensor(np.asarray(x), dtype=torch.float32)
+		)
 		if normalize:
 			values = values / 255.0
-		if add_channel:
-			values = values.unsqueeze(1)
 		labels = torch.tensor(np.asarray(y), dtype=torch.long)
 		return DataLoader(TensorDataset(values, labels), batch_size=batch_size, shuffle=shuffle)
 

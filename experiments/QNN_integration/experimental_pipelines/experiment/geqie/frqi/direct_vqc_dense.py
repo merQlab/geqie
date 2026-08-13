@@ -14,15 +14,17 @@ if __package__ in (None, ""):
 from experiments.QNN_integration.experimental_pipelines.experiment.geqie.models.direct_geqie import run_direct_geqie
 
 
-def run(**kwargs):
-	return run_direct_geqie(encoding_id="frqi", 
-						 model_id="direct_vqc_dense", 
-						 dataset_id="mnist_fashion",
-						 zip_root=Path("/mnt/data02/mkordasz/circuits/FRQI/MNIST_Fashion"),
-						 quantum_workers=32, 
-						 create_circuits=False,
-						 show_progress_bars=True,
-						 **kwargs)
+def run(*, dataset_id="mnist_fashion", zip_root=None, **kwargs):
+	kwargs.setdefault("quantum_workers", 32)
+	kwargs.setdefault("create_circuits", False)
+	kwargs.setdefault("show_progress_bars", True)
+	return run_direct_geqie(
+		encoding_id="frqi",
+		model_id="direct_vqc_dense",
+		dataset_id=dataset_id,
+		zip_root=zip_root,
+		**kwargs,
+	)
 
 
 if __name__ == "__main__":
