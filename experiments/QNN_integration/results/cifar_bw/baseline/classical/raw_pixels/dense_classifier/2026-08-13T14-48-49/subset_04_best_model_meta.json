@@ -1,0 +1,48 @@
+{
+  "pipeline_name": "Dense classifier",
+  "pipeline_slug": "dense_classifier",
+  "dataset_id": "cifar_bw",
+  "experiment_group": "baseline",
+  "model_family": "classical",
+  "encoding_id": "raw_pixels",
+  "model_id": "dense_classifier",
+  "subset_index": 4,
+  "subset_count": 5,
+  "saved_at": "2026-08-13T14:49:02",
+  "model": {
+    "class_name": "DenseClassifier",
+    "module": "__main__",
+    "repr": "DenseClassifier(\n  (flatten): Flatten(start_dim=1, end_dim=-1)\n  (classifier): Linear(in_features=1024, out_features=10, bias=True)\n  (softmax): Softmax(dim=-1)\n)"
+  },
+  "torchinfo_summary": "torchinfo.summary unavailable: No module named 'torchinfo'",
+  "report_context": {
+    "title": "EXPERIMENTAL PROTOCOL REPORT",
+    "dataset_name": "MNIST digits stratified",
+    "classifier_name": "Dense classifier",
+    "model_architecture": null,
+    "subset_name": "4/5",
+    "split_sizes": {
+      "train": 921,
+      "val": 231,
+      "test": 288
+    },
+    "training_setup": {
+      "epochs": 50,
+      "batch_size": 16,
+      "device": "cpu",
+      "qnn_lr": 0.001,
+      "head_lr": 0.01,
+      "dataset_id": "cifar_bw",
+      "experiment_group": "baseline",
+      "model_family": "classical",
+      "encoding_id": "raw_pixels",
+      "model_id": "dense_classifier"
+    },
+    "model_setup": {
+      "num_classes": 10,
+      "num_qubits": 0,
+      "num_layers": 0
+    },
+    "torchinfo_summary": "torchinfo.summary unavailable: No module named 'torchinfo'"
+  }
+}
