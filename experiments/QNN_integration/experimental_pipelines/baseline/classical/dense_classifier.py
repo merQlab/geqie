@@ -33,18 +33,18 @@ class DenseClassifier(nn.Module):
 		dim_input: tuple[int, int, int] = (1, 32, 32),
 	) -> None:
 		super().__init__()
-		self.flatten = nn.Flatten()
-		self.classifier = nn.Linear(
-			dim_input[0] * dim_input[1] * dim_input[2],
-			num_classes,
+		hidden_dim = 128
+		self.classfier = nn.Sequential(
+			nn.Flatten(),
+			nn.Linear(dim_input[0] * dim_input[1] * dim_input[2], hidden_dim),
+			nn.ReLU(),	
+			nn.Dropout(0.2),
+			nn.Linear(hidden_dim, num_classes),
+			nn.LogSoftmax(dim=-1)
 		)
-		self.softmax = nn.Softmax(dim=-1)
 
 	def forward(self, x):
-		x = self.flatten(x)
-		x = self.classifier(x)
-		x = self.softmax(x)
-		return x
+		return self.classfier(x)
 
 
 def train_one_subset(

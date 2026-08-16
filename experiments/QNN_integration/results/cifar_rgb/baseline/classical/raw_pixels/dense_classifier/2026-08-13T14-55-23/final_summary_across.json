@@ -1,0 +1,18 @@
+{
+  "pipeline_name": "Dense classifier",
+  "dataset_id": "cifar_rgb",
+  "experiment_group": "baseline",
+  "model_family": "classical",
+  "encoding_id": "raw_pixels",
+  "model_id": "dense_classifier",
+  "summary": {
+    "accuracy_mean": 0.1847222222222222,
+    "accuracy_std": 0.008038775626937656,
+    "precision_mean": 0.07259140935036842,
+    "precision_std": 0.04332926419353408,
+    "recall_mean": 0.1847222222222222,
+    "recall_std": 0.008038775626937656,
+    "f1_mean": 0.0805900281524237,
+    "f1_std": 0.014808124372045135
+  }
+}
