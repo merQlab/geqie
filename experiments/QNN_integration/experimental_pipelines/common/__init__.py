@@ -41,8 +41,8 @@ DATASETS_DIR = QNN_INTEGRATION_DIR / "datasets"
 DATASET_FILES = {
 	"mnist_digits": "MNIST_Digits_5_subsets_train_val_test_16x16.joblib",
 	"mnist_fashion": "MNIST_Fashion_5_subsets_train_val_test_16x16.joblib",
-	"cifar_bw": "CIFAR-10/.CIFAR-BW_5_subsets_train_val_test_32x32.joblib",
-	"cifar_rgb": "CIFAR-10/.CIFAR-RGB_5_subsets_train_val_test_32x32.joblib",
+	"cifar_bw": "CIFAR-10/CIFAR-BW_5_subsets_train_val_test_32x32.joblib",
+	"cifar_rgb": "CIFAR-10/CIFAR-RGB_5_subsets_train_val_test_32x32.joblib",
 }
 DATASET_ALIASES = {
 	"mnist": "mnist_digits",
