@@ -14,9 +14,9 @@ if __package__ in (None, ""):
 from experiments.QNN_integration.experimental_pipelines.experiment.geqie.models.direct_geqie import run_direct_geqie
 
 
-def run(*, dataset_id="mnist_fashion", zip_root=None, **kwargs):
+def run(*, dataset_id="cifar_bw", zip_root=None, **kwargs):
 	kwargs.setdefault("quantum_workers", 32)
-	kwargs.setdefault("create_circuits", False)
+	kwargs.setdefault("create_circuits", True)
 	kwargs.setdefault("show_progress_bars", True)
 	return run_direct_geqie(
 		encoding_id="frqi",

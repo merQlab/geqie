@@ -1,0 +1,18 @@
+{
+  "pipeline_name": "CNN classifier",
+  "dataset_id": "cifar_bw",
+  "experiment_group": "baseline",
+  "model_family": "classical",
+  "encoding_id": "raw_pixels",
+  "model_id": "cnn_classifier",
+  "summary": {
+    "accuracy_mean": 0.3506944444444445,
+    "accuracy_std": 0.014400306495366475,
+    "precision_mean": 0.37025522334825045,
+    "precision_std": 0.01630238295980617,
+    "recall_mean": 0.3506944444444445,
+    "recall_std": 0.014400306495366475,
+    "f1_mean": 0.3426042831870058,
+    "f1_std": 0.012305420113344597
+  }
+}

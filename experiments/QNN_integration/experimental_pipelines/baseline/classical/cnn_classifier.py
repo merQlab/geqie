@@ -101,7 +101,7 @@ def train_one_subset(
 def run(
 	dataset=None,
 	*,
-	dataset_id="mnist_digits",
+	dataset_id="cifar_rgb",
 	**overrides,
 ):
 	run_options = {
