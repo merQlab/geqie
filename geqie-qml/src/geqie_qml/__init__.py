@@ -1,7 +1,7 @@
 import logging
 import os
 
-from .layer import VQCLayer, MatrixDataset
+from .layer import VQCLayer, MatrixDataset, QCNNOutputInterpret
 from .layers import UnitaryInputLayer, SamplerAnsatzLayer, GEQIELayer
 
 from .dataset.zip_unitary_dataset import load_precomputed_zip_matrices, ZipUnitaryDataset

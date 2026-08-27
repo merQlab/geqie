@@ -20,6 +20,7 @@ from geqie_qml.ansatze import (
 	build_adaptive_qcnn_with_QNN_compression_layer,
 	default_vqc_ansatz,
 )
+from geqie_qml import QCNNOutputInterpret
 
 
 MODEL_VARIANTS = {
@@ -38,6 +39,15 @@ MODEL_VARIANTS = {
 		"pipeline_name": "Adaptive QNN inspired by No-QNN + dense",
 		"classifier_name": "GEQIE + adaptive QNN inspired by No-QNN + dense",
 		"architecture": "GEQIE matrices -> adaptive QNN inspired by No-QNN -> Dense -> LogSoftmax",
+	},
+	"adaptive_qnn_no_qnn_inspired_dense_interpret": {
+		"ansatz_factory": build_adaptive_qcnn_ansatz,
+		"output_qubits": 4,
+		"num_layers": 5,
+		"interpret": QCNNOutputInterpret(4),
+		"pipeline_name": "Adaptive QNN inspired by No-QNN + interpret + dense",
+		"classifier_name": "GEQIE + adaptive QNN inspired by No-QNN + interpret + dense",
+		"architecture": "GEQIE matrices -> adaptive QNN inspired by No-QNN -> interpret -> Dense -> LogSoftmax",
 	},
 	"adaptive_qnn_no_qnn_inspired_qnn_compression_dense": {
 		"ansatz_factory": build_adaptive_qcnn_with_QNN_compression_layer,
@@ -152,6 +162,7 @@ def train_one_subset(
 		progress_callback=progress_callback,
 		ansatz_factory=variant["ansatz_factory"],
 		output_qubits=variant["output_qubits"],
+		interpret=variant.get("interpret"),
 		quantum_workers=quantum_workers,
 	)
 

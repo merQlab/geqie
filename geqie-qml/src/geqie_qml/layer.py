@@ -18,6 +18,27 @@ from qiskit_machine_learning.neural_networks import SamplerQNN
 from .ansatze import default_vqc_ansatz
 
 
+class QCNNOutputInterpret:
+    """Picklable SamplerQNN interpret that keeps only the QCNN output-qubit register.
+
+    The adaptive QCNN ansatz measures its ``output_qubits`` surviving qubits into
+    a classical register of the same width, so a measured integer already lies in
+    ``[0, 2**output_qubits)``.  Combined with ``output_shape=2**output_qubits`` on
+    the ``SamplerQNN`` this collapses the raw ``2**num_qubits`` distribution down
+    to the qubits that actually matter in the last QCNN layer.
+    """
+
+    def __init__(self, output_qubits: int):
+        self.output_qubits = int(output_qubits)
+        self.output_shape = 2 ** self.output_qubits
+
+    def __call__(self, value: int) -> int:
+        return int(value) % self.output_shape
+
+    def __repr__(self) -> str:
+        return f"QCNNOutputInterpret(output_qubits={self.output_qubits})"
+
+
 # ---------------------------------------------------------------------------
 # Dataset
 # ---------------------------------------------------------------------------
@@ -86,7 +107,7 @@ def _worker_forward_eval(args):
     np.ndarray, shape (2**num_qubits,)
         Probability distribution over basis states.
     """
-    matrix_np, weights_np, num_qubits, num_layers, output_qubits, shots, ansatz_factory = args
+    matrix_np, weights_np, num_qubits, num_layers, output_qubits, shots, ansatz_factory, interpret, output_shape = args
     ansatz_params = {'num_layers': num_layers, 'output_qubits': output_qubits}
     vqc = ansatz_factory(num_qubits, **ansatz_params)
     qc = QuantumCircuit(num_qubits)
@@ -100,6 +121,8 @@ def _worker_forward_eval(args):
         weight_params=list(qc.parameters),
         sampler=sampler,
         gradient=SPSASamplerGradient(sampler=sampler),
+        interpret=interpret,
+        output_shape=output_shape,
     )
     return qnn.forward(input_data=None, weights=weights_np).flatten()
 
@@ -113,7 +136,7 @@ def _worker_grad_eval(args):
     np.ndarray, shape (output_size, num_weights)
         Jacobian of the output probabilities w.r.t. the quantum weights.
     """
-    matrix_np, weights_np, num_qubits, num_layers, output_qubits, shots, ansatz_factory = args
+    matrix_np, weights_np, num_qubits, num_layers, output_qubits, shots, ansatz_factory, interpret, output_shape = args
     ansatz_params = {'num_layers': num_layers, 'output_qubits': output_qubits}
     vqc = ansatz_factory(num_qubits, **ansatz_params)
     qc = QuantumCircuit(num_qubits)
@@ -128,6 +151,8 @@ def _worker_grad_eval(args):
         weight_params=list(qc.parameters),
         sampler=sampler,
         gradient=grad_fn,
+        interpret=interpret,
+        output_shape=output_shape,
     )
     # SamplerQNN.backward → (input_grad, weight_grad)
     # weight_grad shape: (1, output_size, num_weights) for a single sample
@@ -202,11 +227,12 @@ class QNNBatchFunction(torch.autograd.Function):
 
     @staticmethod
     def forward(ctx, weights, executor, matrices_np_list,
-                num_qubits, num_layers, output_qubits, shots, ansatz_factory):
+                num_qubits, num_layers, output_qubits, shots, ansatz_factory,
+                interpret=None, output_shape=None):
         weights_np = weights.detach().numpy()
 
         args_list = [
-            (matrix, weights_np, num_qubits, num_layers, output_qubits, shots, ansatz_factory)
+            (matrix, weights_np, num_qubits, num_layers, output_qubits, shots, ansatz_factory, interpret, output_shape)
             for matrix in matrices_np_list
         ]
         probs_list = _work_dispatch(_worker_forward_eval, args_list, executor)
@@ -220,6 +246,8 @@ class QNNBatchFunction(torch.autograd.Function):
         ctx.output_qubits = output_qubits
         ctx.shots = shots
         ctx.ansatz_factory = ansatz_factory
+        ctx.interpret = interpret
+        ctx.output_shape = output_shape
         return torch.tensor(probs_np, dtype=weights.dtype)
 
     @staticmethod
@@ -234,7 +262,7 @@ class QNNBatchFunction(torch.autograd.Function):
         weights_np = weights.detach().numpy()
 
         args_list = [
-            (m, weights_np, ctx.num_qubits, ctx.num_layers, ctx.output_qubits, ctx.shots, ctx.ansatz_factory)
+            (m, weights_np, ctx.num_qubits, ctx.num_layers, ctx.output_qubits, ctx.shots, ctx.ansatz_factory, ctx.interpret, ctx.output_shape)
             for m in ctx.matrices_np_list
         ]
         jac_list = _work_dispatch(_worker_grad_eval, args_list, ctx.executor)
@@ -255,6 +283,8 @@ class QNNBatchFunction(torch.autograd.Function):
             None,   # output_qubits
             None,   # shots
             None,   # ansatz_factory
+            None,   # interpret
+            None,   # output_shape
         )
 
 
@@ -320,6 +350,8 @@ class VQCLayer(nn.Module):
         scale_output: bool = True,
         ansatz_factory=None,
         output_qubits: int = None,
+        interpret=None,
+        output_shape: int = None,
     ):
         super().__init__()
         self.num_qubits = num_qubits
@@ -328,6 +360,22 @@ class VQCLayer(nn.Module):
         self.scale_output = scale_output
         self.ansatz_factory = ansatz_factory
         self.output_qubits = output_qubits
+        # When an interpret callable is given, the SamplerQNN maps each measured
+        # basis state through it, yielding an ``output_shape``-sized distribution
+        # instead of the full 2**num_qubits one.  The callable must be picklable
+        # so worker processes can rebuild it (see QCNNOutputInterpret).
+        self.interpret = interpret
+        if interpret is not None:
+            if output_shape is None:
+                output_shape = getattr(interpret, "output_shape", None)
+            if output_shape is None:
+                raise ValueError(
+                    "When 'interpret' is provided, pass 'output_shape' or expose "
+                    "it as 'interpret.output_shape'."
+                )
+            self.output_size = int(output_shape)
+        else:
+            self.output_size = 2 ** num_qubits
         # Trainable quantum weights, registered as a proper nn.Parameter so
         # that optimisers, state_dict, and requires_grad all work out of the box.
         # Workers reconstruct the circuit independently via _build_vqc_circuit,
@@ -415,10 +463,12 @@ class VQCLayer(nn.Module):
             self.output_qubits,
             self.num_shots,
             self.ansatz_factory,
+            self.interpret,
+            self.output_size if self.interpret is not None else None,
         )
 
         if self.scale_output:
-            probs = probs * dim
+            probs = probs * self.output_size
 
         return probs
 
@@ -426,6 +476,7 @@ class VQCLayer(nn.Module):
         """Adds layer details to the standard nn.Module string representation."""
         return (
             f"num_qubits={self.num_qubits}, num_layers={self.num_layers}, "
-            f"output_qubits={self.output_qubits}, shots={self.num_shots}, scale_output={self.scale_output}, "
+            f"output_qubits={self.output_qubits}, interpret={self.interpret!r}, "
+            f"output_size={self.output_size}, shots={self.num_shots}, scale_output={self.scale_output}, "
             f"num_params={self.quantum_weight.numel()}"
         )

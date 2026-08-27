@@ -619,6 +619,7 @@ class GEQIEFirstClassifier(nn.Module):
 		num_classes: int,
 		ansatz_factory: Callable[..., Any],
 		output_qubits: int | None = None,
+		interpret: Callable[[int], int] | None = None,
 		shots: int = 1024,
 	) -> None:
 		super().__init__()
@@ -630,9 +631,10 @@ class GEQIEFirstClassifier(nn.Module):
 			shots=shots,
 			ansatz_factory=ansatz_factory,
 			output_qubits=output_qubits,
+			interpret=interpret,
 		)
 		self.head = nn.Linear(
-			2 ** num_qubits,
+			self.vqc.output_size,
 			num_classes,
 		)
 		self.log_softmax = nn.LogSoftmax(dim=-1)
@@ -658,6 +660,7 @@ def train_geqie_first_subset(
 	report_context: dict[str, Any] | None,
 	ansatz_factory: Callable[..., Any],
 	output_qubits: int | None = None,
+	interpret: Callable[[int], int] | None = None,
 	quantum_workers: int = 1,
 	progress_callback: ProgressCallback | None = None,
 ) -> dict[str, Any]:
@@ -670,6 +673,7 @@ def train_geqie_first_subset(
 		num_classes=num_classes,
 		ansatz_factory=ansatz_factory,
 		output_qubits=output_qubits,
+		interpret=interpret,
 	)
 	if zip_path is not None:
 		loaders = zip_matrix_loaders(zip_path, batch_size)
