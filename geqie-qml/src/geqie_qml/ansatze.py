@@ -281,3 +281,173 @@ def build_adaptive_qcnn_with_QNN_compression_layer(input_qubits: int, output_qub
 	)
 
 	return qcnn_circuit
+
+def build_adaptive_qcnn_with_real_amplitudes(input_qubits: int, output_qubits: int, num_layers: int = 1, **_):
+	"""QCNN (convolution + pooling) followed by a RealAmplitudes block on the surviving qubits.
+
+	The QCNN reduces ``input_qubits`` down to ``output_qubits`` meaningful qubits, exactly as in
+	``build_adaptive_qcnn_ansatz``.  A ``RealAmplitudes`` circuit with ``num_layers`` repetitions is
+	then applied only to those surviving qubits before the read-out measurement.
+	"""
+	output_qubits = 1 if output_qubits is None else output_qubits
+	num_layers = 1 if num_layers is None else num_layers
+	quantum_register = QuantumRegister(input_qubits)
+	classical_register = ClassicalRegister(output_qubits)
+	qcnn_circuit = QuantumCircuit(quantum_register, classical_register)
+	if output_qubits < 1 or output_qubits > input_qubits:
+		raise ValueError("output_qubits must be between 1 and input_qubits")
+	if num_layers < 1:
+		raise ValueError("num_layers must be at least 1")
+
+	# ================================================================================================
+	# HELPER METHODS:
+	# ================================================================================================
+	theta_index = 0
+	theta = ParameterVector("theta", length=0)
+	def next_thetas(count: int = 1):
+		nonlocal theta_index
+		start = theta_index
+		theta_index += count
+		theta.resize(theta_index)
+		return theta[start:theta_index]
+
+	def build_convolution_layer(qubit_pairs, next_thetas, label):
+		used_qubits = sorted({q for pair in qubit_pairs for q in pair})
+		local = {global_q: local_q for local_q, global_q in enumerate(used_qubits)}
+		conv_layer = QuantumCircuit(len(used_qubits), name=label)
+
+		for pair in qubit_pairs:
+			q0 = local[pair[0]]
+			q1 = local[pair[1]]
+			t0, t1 = next_thetas(2)
+
+			conv_layer.rz(np.pi / 2, q1)
+			conv_layer.cx(q1, q0)
+			conv_layer.rz(2 * t0 - np.pi / 2, q0)
+			conv_layer.ry(np.pi / 2 - t1, q1)
+			conv_layer.cx(q1, q0)
+			conv_layer.ry(-np.pi / 2, q0)
+
+		return conv_layer, used_qubits
+
+	def build_pooling_layer(qubit_pairs, next_thetas, label):
+		used_qubits = sorted({q for pair in qubit_pairs for q in pair})
+		local = {global_q: local_q for local_q, global_q in enumerate(used_qubits)}
+		pool_layer = QuantumCircuit(len(used_qubits), name=label)
+
+		for pair in qubit_pairs:
+			q0 = local[pair[0]]
+			q1 = local[pair[1]]
+
+			t0, t1 = next_thetas(2)
+
+			pool_layer.rz(-np.pi / 2, q1)
+			pool_layer.cx(q1, q0)
+			pool_layer.rz(2 * t0 - np.pi / 2, q0)
+			pool_layer.cx(q0, q1)
+			pool_layer.ry(np.pi / 2 - t1, q1)
+			pool_layer.ry(np.pi / 2, q1)
+
+		return pool_layer, used_qubits
+
+	def build_real_amplitudes_layer(num_qubits, reps, next_thetas, label):
+		"""RealAmplitudes block (Ry rotations + linear CX entanglement) on ``num_qubits`` qubits."""
+		ra_layer = QuantumCircuit(num_qubits, name=label)
+		for _ in range(reps):
+			for q in range(num_qubits):
+				ra_layer.ry(next_thetas(1)[0], q)
+			for q in range(num_qubits - 1):
+				ra_layer.cx(q, q + 1)
+		for q in range(num_qubits):
+			ra_layer.ry(next_thetas(1)[0], q)
+		return ra_layer
+
+	def apply_real_amplitudes_and_measure():
+		"""Append the RealAmplitudes block on the surviving qubits, then measure the read-out."""
+		meaningful_qubits = list(range(input_qubits - output_qubits, input_qubits))
+		ra_layer = build_real_amplitudes_layer(
+			len(meaningful_qubits),
+			num_layers,
+			next_thetas,
+			label="RealAmplitudes",
+		)
+		qcnn_circuit.append(
+			ra_layer.to_instruction(label="RealAmp"),
+			[qcnn_circuit.qubits[q] for q in meaningful_qubits],
+		)
+		qcnn_circuit.barrier()
+		qcnn_circuit.measure(
+			qcnn_circuit.qubits[-output_qubits:],
+			qcnn_circuit.clbits[:output_qubits],
+		)
+
+	# ================================================================================================
+	# MAIN LAYER CONSTRUCTION LOOP:
+	# ================================================================================================
+
+	for idx in range(int((input_qubits))):
+		# 1. CONVOLUTION GATE:
+		start_convolution_qubit_pos = int(np.floor(input_qubits - input_qubits / (2**idx)))
+
+		convolution_qubit_pairs = list(combinations(range(start_convolution_qubit_pos, input_qubits), 2))
+		if convolution_qubit_pairs:
+			conv_layer, used_qubits = build_convolution_layer(
+				convolution_qubit_pairs,
+				next_thetas,
+				label=f"Convolution {idx}",
+			)
+
+			qcnn_circuit.append(
+				conv_layer.to_instruction(label=f"Conv {idx}"),
+				[qcnn_circuit.qubits[q] for q in used_qubits],
+			)
+
+		# 2. POOLINGS GATES:
+		start_pooling_qubit_position = start_convolution_qubit_pos
+
+		# 2.1. Special case - reaching the limit given by output_qubits -> "stairway" pooling.
+		next_convolution_qubit_pos = int(np.floor(input_qubits - input_qubits / (2**(idx + 1))))
+		length_of_next_convolution = len(range(next_convolution_qubit_pos, input_qubits))
+		if length_of_next_convolution < output_qubits:
+			pooling_steps = input_qubits - start_convolution_qubit_pos - output_qubits
+			pairwise_pooling_qubits = list(pairwise(range(start_pooling_qubit_position, start_pooling_qubit_position + pooling_steps + 1)))
+			if pairwise_pooling_qubits:
+				pool_layer, used_qubits = build_pooling_layer(
+					pairwise_pooling_qubits,
+					next_thetas,
+					label=f"Final pooling {idx}",
+				)
+				qcnn_circuit.append(
+					pool_layer.to_instruction(label=f"F_pool {idx}"),
+					[qcnn_circuit.qubits[q] for q in used_qubits],
+				)
+
+				qcnn_circuit.barrier()
+
+			apply_real_amplitudes_and_measure()
+			return qcnn_circuit
+
+		# 2.2. Standard case - regular pooling (pool half of the active qubits).
+		qubits_to_be_pooled = input_qubits - start_pooling_qubit_position
+		half_qubits_pos = int((qubits_to_be_pooled) / 2)
+		least_pooling_pos = half_qubits_pos
+
+		pooling_qubit_pairs = list(zip(
+			range(start_pooling_qubit_position, start_pooling_qubit_position + least_pooling_pos),
+			range(start_pooling_qubit_position + least_pooling_pos, input_qubits),
+		))
+		if pooling_qubit_pairs:
+			pool_layer, used_qubits = build_pooling_layer(
+				pooling_qubit_pairs,
+				next_thetas,
+				label=f"Pooling {idx}",
+			)
+			qcnn_circuit.append(
+				pool_layer.to_instruction(label=f"Pool {idx}"),
+				[qcnn_circuit.qubits[q] for q in used_qubits],
+			)
+		qcnn_circuit.barrier()
+
+	apply_real_amplitudes_and_measure()
+
+	return qcnn_circuit
