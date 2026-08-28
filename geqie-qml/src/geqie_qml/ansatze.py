@@ -351,15 +351,19 @@ def build_adaptive_qcnn_with_real_amplitudes(input_qubits: int, output_qubits: i
 		return pool_layer, used_qubits
 
 	def build_real_amplitudes_layer(num_qubits, reps, next_thetas, label):
-		"""RealAmplitudes block (Ry rotations + linear CX entanglement) on ``num_qubits`` qubits."""
+		"""RealAmplitudes-inspired block (Rx/Ry/Rz rotations + linear CX entanglement) on ``num_qubits`` qubits."""
 		ra_layer = QuantumCircuit(num_qubits, name=label)
 		for _ in range(reps):
 			for q in range(num_qubits):
+				ra_layer.rx(next_thetas(1)[0], q)
 				ra_layer.ry(next_thetas(1)[0], q)
+				ra_layer.rz(next_thetas(1)[0], q)
 			for q in range(num_qubits - 1):
 				ra_layer.cx(q, q + 1)
 		for q in range(num_qubits):
+			ra_layer.rx(next_thetas(1)[0], q)
 			ra_layer.ry(next_thetas(1)[0], q)
+			ra_layer.rz(next_thetas(1)[0], q)
 		return ra_layer
 
 	def apply_real_amplitudes_and_measure():
@@ -522,15 +526,19 @@ def build_real_amplitudes_then_adaptive_qcnn(input_qubits: int, output_qubits: i
 		return pool_layer, used_qubits
 
 	def build_real_amplitudes_layer(num_qubits, reps, next_thetas, label):
-		"""RealAmplitudes block (Ry rotations + linear CX entanglement) on ``num_qubits`` qubits."""
+		"""RealAmplitudes-inspired block (Rx/Ry/Rz rotations + linear CX entanglement) on ``num_qubits`` qubits."""
 		ra_layer = QuantumCircuit(num_qubits, name=label)
 		for _ in range(reps):
 			for q in range(num_qubits):
+				ra_layer.rx(next_thetas(1)[0], q)
 				ra_layer.ry(next_thetas(1)[0], q)
+				ra_layer.rz(next_thetas(1)[0], q)
 			for q in range(num_qubits - 1):
 				ra_layer.cx(q, q + 1)
 		for q in range(num_qubits):
+			ra_layer.rx(next_thetas(1)[0], q)
 			ra_layer.ry(next_thetas(1)[0], q)
+			ra_layer.rz(next_thetas(1)[0], q)
 		return ra_layer
 
 	# ================================================================================================
