@@ -552,7 +552,203 @@ def build_real_amplitudes_then_adaptive_qcnn(input_qubits: int, output_qubits: i
 	qcnn_circuit.barrier()
 
 	# ================================================================================================
-	# MAIN LAYER CONSTRUCTION LOOP (QCNN convolution + pooling compression):
+	# MAIN LAYER CONSTRUCTION LOOP (QCNN convolution + pooling compression, RealAmplitudes variant):
+	# ================================================================================================
+
+	for idx in range(int((input_qubits))):
+		# 1. CONVOLUTION GATE:
+		start_convolution_qubit_pos = int(np.floor(input_qubits - input_qubits / (2**idx)))
+
+		convolution_qubit_pairs = list(combinations(range(start_convolution_qubit_pos, input_qubits), 2))
+		if convolution_qubit_pairs:
+			conv_layer, used_qubits = build_convolution_layer(
+				convolution_qubit_pairs,
+				next_thetas,
+				label=f"Convolution {idx}",
+			)
+
+			qcnn_circuit.append(
+				conv_layer.to_instruction(label=f"Conv {idx}"),
+				[qcnn_circuit.qubits[q] for q in used_qubits],
+			)
+
+		# 2. POOLINGS GATES:
+		start_pooling_qubit_position = start_convolution_qubit_pos
+
+		# 2.1. Special case - reaching the limit given by output_qubits -> "stairway" pooling.
+		next_convolution_qubit_pos = int(np.floor(input_qubits - input_qubits / (2**(idx + 1))))
+		length_of_next_convolution = len(range(next_convolution_qubit_pos, input_qubits))
+		if length_of_next_convolution < output_qubits:
+			pooling_steps = input_qubits - start_convolution_qubit_pos - output_qubits
+			pairwise_pooling_qubits = list(pairwise(range(start_pooling_qubit_position, start_pooling_qubit_position + pooling_steps + 1)))
+			if pairwise_pooling_qubits:
+				pool_layer, used_qubits = build_pooling_layer(
+					pairwise_pooling_qubits,
+					next_thetas,
+					label=f"Final pooling {idx}",
+				)
+				qcnn_circuit.append(
+					pool_layer.to_instruction(label=f"F_pool {idx}"),
+					[qcnn_circuit.qubits[q] for q in used_qubits],
+				)
+
+				qcnn_circuit.barrier()
+
+			qcnn_circuit.measure(
+				qcnn_circuit.qubits[-output_qubits:],
+				qcnn_circuit.clbits[:output_qubits],
+			)
+			return qcnn_circuit
+
+		# 2.2. Standard case - regular pooling (pool half of the active qubits).
+		qubits_to_be_pooled = input_qubits - start_pooling_qubit_position
+		half_qubits_pos = int((qubits_to_be_pooled) / 2)
+		least_pooling_pos = half_qubits_pos
+
+		pooling_qubit_pairs = list(zip(
+			range(start_pooling_qubit_position, start_pooling_qubit_position + least_pooling_pos),
+			range(start_pooling_qubit_position + least_pooling_pos, input_qubits),
+		))
+		if pooling_qubit_pairs:
+			pool_layer, used_qubits = build_pooling_layer(
+				pooling_qubit_pairs,
+				next_thetas,
+				label=f"Pooling {idx}",
+			)
+			qcnn_circuit.append(
+				pool_layer.to_instruction(label=f"Pool {idx}"),
+				[qcnn_circuit.qubits[q] for q in used_qubits],
+			)
+		qcnn_circuit.barrier()
+
+	qcnn_circuit.measure(
+		qcnn_circuit.qubits[-output_qubits:],
+		qcnn_circuit.clbits[:output_qubits],
+	)
+
+	return qcnn_circuit
+
+
+def build_quantum_neurons_then_adaptive_qcnn(input_qubits: int, output_qubits: int, num_layers: int = 1, **_):
+	"""Quantum neurons on all qubits, followed by QCNN (convolution + pooling) compression.
+
+	Same ordering as ``build_real_amplitudes_then_adaptive_qcnn`` (feature block first, QCNN
+	compression second), but the feature block is a stack of *quantum neurons* based on
+	Cao, Guerreschi & Aspuru-Guzik, "Quantum Neuron: an elementary building block for machine
+	learning on quantum computers" (arXiv:1711.11240), instead of a ``RealAmplitudes`` circuit.
+
+	Each neuron is the *second-degree* neuron of that work: a single repeat-until-success (RUS)
+	iteration realising the activation ``q(theta) = arctan(tan^2 theta)`` (their Fig. 1c/1d). The
+	weighted input ``theta = w * x + b`` is loaded with the controlled-``Ry(2w)`` / ``Ry(2b)``
+	construction of their Fig. 4c / Fig. 11, and the RUS activation is transcribed in its coherent,
+	ancilla-free form so that **every gate acts on at most 2 qubits** and no extra qubits or
+	mid-circuit measurements are introduced (consistent with the statevector pipeline used here).
+	Neurons are arranged in a brickwork over ``num_layers`` repetitions so that a qubit accumulates
+	weighted contributions from its neighbours, approximating the multi-input weighted sum. The
+	QCNN then reduces ``input_qubits`` down to ``output_qubits`` exactly as in
+	``build_adaptive_qcnn_ansatz``.
+	"""
+	output_qubits = 1 if output_qubits is None else output_qubits
+	num_layers = 1 if num_layers is None else num_layers
+	quantum_register = QuantumRegister(input_qubits)
+	classical_register = ClassicalRegister(output_qubits)
+	qcnn_circuit = QuantumCircuit(quantum_register, classical_register)
+	if output_qubits < 1 or output_qubits > input_qubits:
+		raise ValueError("output_qubits must be between 1 and input_qubits")
+	if num_layers < 1:
+		raise ValueError("num_layers must be at least 1")
+
+	# ================================================================================================
+	# HELPER METHODS:
+	# ================================================================================================
+	theta_index = 0
+	theta = ParameterVector("theta", length=0)
+	def next_thetas(count: int = 1):
+		nonlocal theta_index
+		start = theta_index
+		theta_index += count
+		theta.resize(theta_index)
+		return theta[start:theta_index]
+
+	def build_convolution_layer(qubit_pairs, next_thetas, label):
+		used_qubits = sorted({q for pair in qubit_pairs for q in pair})
+		local = {global_q: local_q for local_q, global_q in enumerate(used_qubits)}
+		conv_layer = QuantumCircuit(len(used_qubits), name=label)
+
+		for pair in qubit_pairs:
+			q0 = local[pair[0]]
+			q1 = local[pair[1]]
+			t0, t1 = next_thetas(2)
+
+			conv_layer.rz(np.pi / 2, q1)
+			conv_layer.cx(q1, q0)
+			conv_layer.rz(2 * t0 - np.pi / 2, q0)
+			conv_layer.ry(np.pi / 2 - t1, q1)
+			conv_layer.cx(q1, q0)
+			conv_layer.ry(-np.pi / 2, q0)
+
+		return conv_layer, used_qubits
+
+	def build_pooling_layer(qubit_pairs, next_thetas, label):
+		used_qubits = sorted({q for pair in qubit_pairs for q in pair})
+		local = {global_q: local_q for local_q, global_q in enumerate(used_qubits)}
+		pool_layer = QuantumCircuit(len(used_qubits), name=label)
+
+		for pair in qubit_pairs:
+			q0 = local[pair[0]]
+			q1 = local[pair[1]]
+
+			t0, t1 = next_thetas(2)
+
+			pool_layer.rz(-np.pi / 2, q1)
+			pool_layer.cx(q1, q0)
+			pool_layer.rz(2 * t0 - np.pi / 2, q0)
+			pool_layer.cx(q0, q1)
+			pool_layer.ry(np.pi / 2 - t1, q1)
+			pool_layer.ry(np.pi / 2, q1)
+
+		return pool_layer, used_qubits
+
+	def apply_quantum_neuron(circuit, ctrl, out, next_thetas):
+		"""One second-degree Cao quantum neuron on a (control, output) qubit pair.
+
+		``ctrl`` plays the role of the input / RUS ancilla and ``out`` the neuron output qubit.
+		The weighted input ``w * x_ctrl`` is loaded with a controlled-``Ry(2w)`` (Fig. 4c) and the
+		bias ``b`` with an ``Ry(2b)`` on the ancilla; the second-degree RUS activation
+		``q(theta) = arctan(tan^2 theta)`` is applied via the coherent single-iteration circuit of
+		Fig. 1c (``Ry(2 theta) . controlled-Y . Rz(-pi/2) . Ry(-2 theta)``), uncomputing the ancilla
+		rotation. Only 1- and 2-qubit gates are used.
+		"""
+		w, b = next_thetas(2)
+		# Weighted input from ctrl onto the neuron output (Fig. 4c controlled-Ry weighted input).
+		circuit.cry(2 * w, ctrl, out)
+		# Second-degree RUS activation (Fig. 1c); ctrl = ancilla, out = output.
+		circuit.ry(2 * b, ctrl)
+		circuit.cy(ctrl, out)
+		circuit.rz(-np.pi / 2, ctrl)
+		circuit.ry(-2 * b, ctrl)
+
+	def build_quantum_neuron_layer(num_qubits, reps, next_thetas, label):
+		"""Brickwork of second-degree Cao quantum neurons on ``num_qubits`` qubits."""
+		neuron_layer = QuantumCircuit(num_qubits, name=label)
+		for _ in range(reps):
+			for start in (0, 1):
+				for q in range(start, num_qubits - 1, 2):
+					apply_quantum_neuron(neuron_layer, q, q + 1, next_thetas)
+		return neuron_layer
+
+	# ================================================================================================
+	# 0. QUANTUM NEURONS ON ALL QUBITS (applied before the QCNN compression):
+	# ================================================================================================
+	neuron_layer = build_quantum_neuron_layer(input_qubits, num_layers, next_thetas, label="QuantumNeurons")
+	qcnn_circuit.append(
+		neuron_layer.to_instruction(label="QNeurons"),
+		list(qcnn_circuit.qubits),
+	)
+	qcnn_circuit.barrier()
+
+	# ================================================================================================
+	# MAIN LAYER CONSTRUCTION LOOP (QCNN convolution + pooling compression, quantum-neuron variant):
 	# ================================================================================================
 
 	for idx in range(int((input_qubits))):
