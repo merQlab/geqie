@@ -85,24 +85,31 @@ def build_feature_extractor(
 	depth: int = 2,
 	input_shape: tuple[int, int, int] = (1, 32, 32),
 ) -> tuple[nn.Sequential, int, tuple[int, int]]:
-	if depth not in (1, 2, 3):
-		raise ValueError("convolution_depth must be 1, 2, or 3.")
+	if depth not in (0, 1, 2, 3):
+		raise ValueError("convolution_depth must be 0, 1, 2, or 3.")
 	if len(input_shape) != 3 or any(size <= 0 for size in input_shape):
 		raise ValueError(f"input_shape must be (channels, height, width); got {input_shape!r}.")
 
 	input_channels, height, width = input_shape
 	layers: list[nn.Module] = []
-	for level in range(depth):
-		in_channels = input_channels if level == 0 else 2 ** (level + 2)
-		out_channels = 2 ** (level + 3)
+	if depth == 0:
 		layers.extend((
-			nn.Conv2d(in_channels, out_channels, 3, padding=1),
-			nn.BatchNorm2d(out_channels),
+			nn.Conv2d(input_channels, input_channels, 3, padding=1),
+			nn.BatchNorm2d(input_channels),
 			nn.ReLU(),
-			nn.MaxPool2d(2),
 		))
-		height //= 2
-		width //= 2
+	else:
+		for level in range(depth):
+			in_channels = input_channels if level == 0 else 2 ** (level + 2)
+			out_channels = 2 ** (level + 3)
+			layers.extend((
+				nn.Conv2d(in_channels, out_channels, 3, padding=1),
+				nn.BatchNorm2d(out_channels),
+				nn.ReLU(),
+				nn.MaxPool2d(2),
+			))
+			height //= 2
+			width //= 2
 
 	return nn.Sequential(*layers), out_channels, (height, width)
 
