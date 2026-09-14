@@ -76,6 +76,11 @@ def _direct_spec(model_id: str) -> DiagramSpec:
 			r"\shortstack{Adaptive QCNN\\No-QNN-inspired convolution + pooling\\"
 			rf"$q_{{in}}=q$, $q_{{out}}={variant['output_qubits']}$}}"
 		)
+	elif model_id == "adaptive_qnn_no_qnn_inspired_dense_interpret":
+		quantum_caption = (
+			r"\shortstack{Adaptive QCNN + interpret\\No-QNN-inspired convolution + pooling\\"
+			rf"$q_{{in}}=q$, $q_{{out}}={variant['output_qubits']}$; read-out on $q_{{out}}$}}"
+		)
 	else:
 			quantum_caption = (
 			r"\shortstack{Adaptive QCNN + QNN compression\\"
@@ -83,20 +88,28 @@ def _direct_spec(model_id: str) -> DiagramSpec:
 			rf"$q_{{in}}=q$, $q_{{out}}={variant['output_qubits']}$}}"
 		)
 
+	interpret_readout = variant.get("interpret") is not None
+	quantum_output_label = r"$2^{q_{out}}$" if interpret_readout else r"$2^q$"
 	presentations[quantum_proxy] = BlockPresentation(
 		caption=quantum_caption,
 		kind="quantum",
-		output_label=r"$2^q$",
+		output_label=quantum_output_label,
 		width=18,
 		extra_offset=6,
 	)
 	classifier_offset = {
 		"direct_vqc_dense": 5,
 		"adaptive_qnn_no_qnn_inspired_dense": 17,
+		"adaptive_qnn_no_qnn_inspired_dense_interpret": 17,
 		"adaptive_qnn_no_qnn_inspired_qnn_compression_dense": 20,
 	}[model_id]
+	head_caption = (
+		r"\shortstack{Linear\\$2^{q_{out}} \rightarrow 10$; LogSoftmax}"
+		if interpret_readout
+		else r"\shortstack{Linear\\$2^q \rightarrow 10$; LogSoftmax}"
+	)
 	presentations[model.head] = BlockPresentation(
-		caption=r"\shortstack{Linear\\$2^q \rightarrow 10$; LogSoftmax}",
+		caption=head_caption,
 		kind="classifier",
 		output_label="10",
 		banded=True,
@@ -193,6 +206,9 @@ BUILDERS: dict[str, Callable[[], DiagramSpec]] = {
 	"direct_vqc_dense": lambda: _direct_spec("direct_vqc_dense"),
 	"adaptive_qnn_no_qnn_inspired_dense": lambda: _direct_spec(
 		"adaptive_qnn_no_qnn_inspired_dense"
+	),
+	"adaptive_qnn_no_qnn_inspired_dense_interpret": lambda: _direct_spec(
+		"adaptive_qnn_no_qnn_inspired_dense_interpret"
 	),
 	"adaptive_qnn_no_qnn_inspired_qnn_compression_dense": lambda: _direct_spec(
 		"adaptive_qnn_no_qnn_inspired_qnn_compression_dense"
