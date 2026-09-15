@@ -165,6 +165,7 @@ def train_one_subset(
 	quantum_workers=1,
 	training_backend="torch",
 	lightning_options=None,
+	data_loader_workers=0,
 	**_,
 ):
 	"""Train one subset for any direct-GEQIE model variant."""
@@ -198,6 +199,7 @@ def train_one_subset(
 		use_sampler_ansatz=variant.get("use_sampler_ansatz", False),
 		training_backend=training_backend,
 		lightning_options=lightning_options,
+		data_loader_workers=data_loader_workers,
 	)
 
 
@@ -217,6 +219,7 @@ def run_direct_geqie(
 	training_backend: str = "torch",
 	lightning_options: dict[str, Any] | None = None,
 	lightning_log_root: str | Path = "lightning_logs",
+	data_loader_workers: int = 0,
 	**overrides,
 ):
 	"""Train every existing subset_N.zip, independently of the raw dataset count.
@@ -225,6 +228,7 @@ def run_direct_geqie(
 	images to encode. Explicit precomputation runs before archive discovery.
 	Direct_vqc_dense ignores quantum_workers.
 	Lightning is opt-in; each archive gets a separate Trainer and log directory.
+	data_loader_workers sets num_workers for each train/val/test DataLoader.
 	"""
 	encoding_id = str(encoding_id).strip().lower()
 	dataset_id = normalize_dataset_id(dataset_id)
@@ -233,6 +237,8 @@ def run_direct_geqie(
 	except KeyError as error:
 		raise ValueError(f"Unknown direct GEQIE model_id: {model_id!r}.") from error
 
+	if data_loader_workers < 0:
+		raise ValueError("data_loader_workers must be non-negative.")
 	if training_backend not in ("torch", "lightning"):
 		raise ValueError(f"Unknown training backend: {training_backend!r}.")
 	if training_backend == "lightning" and not variant.get("use_sampler_ansatz", False):
@@ -314,6 +320,7 @@ def run_direct_geqie(
 		"show_progress_bars": True,
 		"training_setup_extra": {
 			**training_setup,
+			"data_loader_workers": data_loader_workers,
 			"encoding_method": encoding_id,
 			"encoding_params": encoding_params,
 			"precompute_workers": precompute_workers,
@@ -329,6 +336,7 @@ def run_direct_geqie(
 			"model_id": model_id,
 			"quantum_workers": quantum_workers,
 			"training_backend": training_backend,
+			"data_loader_workers": data_loader_workers,
 			"lightning_options": {
 				**lightning_options,
 				"log_dir": str(Path(lightning_options["log_dir"]) / archives[index].stem),

@@ -28,6 +28,20 @@ def write_subset_archive(path, counts=(2, 1, 1)):
 
 
 class DirectSamplerPipelineTests(unittest.TestCase):
+    def test_worker_count_reaches_all_training_loaders(self):
+        with tempfile.TemporaryDirectory() as directory:
+            archive = Path(directory) / "subset_1.zip"
+            write_subset_archive(archive)
+            for workers in (0, 2):
+                with self.subTest(workers=workers), \
+                     patch.object(common, "train_model", side_effect=lambda **kw: kw):
+                    training = direct_geqie.train_one_subset(
+                        0, zip_path=str(archive), model_id="direct_vqc_dense",
+                        num_qubits=3, num_layers=1, data_loader_workers=workers,
+                    )
+                for name in ("train_loader", "val_loader", "test_loader"):
+                    self.assertEqual(training[name].num_workers, workers)
+
     def test_probabilities_and_gradients_match_qiskit(self):
         matrices = np.stack([random_unitary(8, seed=seed).data for seed in (17, 23)])
         for factory in (default_vqc_ansatz, real_amplitudes_ansatz):
@@ -197,6 +211,8 @@ class DirectArchiveDiscoveryTests(unittest.TestCase):
         with patch.object(direct_vqc_dense, "run_direct_geqie", side_effect=lambda **kw: kw):
             self.assertFalse(direct_vqc_dense.run()["create_circuits"])
             self.assertTrue(direct_vqc_dense.run(create_circuits=True)["create_circuits"])
+            self.assertEqual(direct_vqc_dense.run()["data_loader_workers"], 16)
+            self.assertEqual(direct_vqc_dense.run(data_loader_workers=2)["data_loader_workers"], 2)
 
     def test_explicit_precompute_discovers_archives_after_generation(self):
         with tempfile.TemporaryDirectory() as directory:

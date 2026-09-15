@@ -48,6 +48,7 @@ if __name__ == "__main__":
         epochs=50,
         batch_size=16,
         max_workers=2,
+        data_loader_workers=4,
         lightning_options={"lr": 0.1, "patience": 10},
         lightning_log_root="lightning_logs",
     )
@@ -67,6 +68,11 @@ and archive has a separate directory under
 `metrics.csv`, hyperparameters, and best/last checkpoints. Test metrics and
 the returned model use the checkpoint with the lowest validation loss.
 The standard experiment reports and model exports remain available.
+
+`data_loader_workers` sets PyTorch's `num_workers` for each training,
+validation and test DataLoader within every subset. MCQI defaults to `16`;
+use `0` to load data in the subset's training process. `max_workers` separately
+controls how many subsets train concurrently.
 
 FRQI, NEQR and adaptive variants retain their existing training defaults.
 The shared runner also accepts `training_backend="torch"` for the previous

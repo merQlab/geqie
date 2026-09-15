@@ -132,7 +132,7 @@ class LightningPipelineTests(unittest.TestCase):
                 write_archive(root / f"subset_{number}.zip", qubits=5)
             result = direct_vqc_dense.run(
                 dataset=dataset, zip_root=root, epochs=1, num_layers=1,
-                num_classes=2, batch_size=2, max_workers=2,
+                num_classes=2, batch_size=2, max_workers=2, data_loader_workers=1,
                 lightning_log_root=root / "logs", lightning_options={"lr": 0.02},
                 show_progress_bars=True, save_results=True, results_base_dir=root / "reports",
             )
@@ -145,6 +145,7 @@ class LightningPipelineTests(unittest.TestCase):
                 self.assertEqual(Path(subset["lightning_log_dir"]).name, f"subset_{number}")
                 self.assertTrue(Path(subset["best_checkpoint_path"]).is_file())
                 self.assertIn(f"subset_{number}.zip", subset["report_context"]["subset_name"])
+                self.assertEqual(subset["report_context"]["training_setup"]["data_loader_workers"], 1)
             self.assertEqual(len(list((root / "reports").rglob("subset_*_best_model.pt"))), 2)
             self.assertEqual(len(list((root / "reports").rglob("subset_*_epochs.csv"))), 2)
 

@@ -20,6 +20,7 @@ def run(*, dataset_id="cifar_rgb", zip_root=None, **kwargs):
 	kwargs.setdefault("create_circuits", False)
 	kwargs.setdefault("show_progress_bars", True)
 	kwargs.setdefault("precompute_workers", 16)
+	kwargs.setdefault("data_loader_workers", 16)
 	return run_direct_geqie(
 		encoding_id="mcqi",
 		model_id="direct_vqc_dense",

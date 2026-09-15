@@ -258,6 +258,7 @@ def pca_image_loaders(
 def matrix_loaders(
 	circuits_dir: Path,
 	batch_size: int,
+	data_loader_workers: int = 0,
 ) -> tuple[DataLoader, DataLoader, DataLoader]:
 	"""Load GEQIE-precomputed matrices stored in train/val/test directories."""
 	from geqie_qml import MatrixDataset
@@ -266,7 +267,10 @@ def matrix_loaders(
 		files = sorted((circuits_dir / split).glob("*.npz"))
 		if not files:
 			raise FileNotFoundError(f"No precomputed matrices found in {circuits_dir / split}.")
-		return DataLoader(MatrixDataset([str(file) for file in files]), batch_size=batch_size, shuffle=shuffle)
+		return DataLoader(
+			MatrixDataset([str(file) for file in files]), batch_size=batch_size,
+			shuffle=shuffle, num_workers=data_loader_workers,
+		)
 
 	return make_loader("train", True), make_loader("val", False), make_loader("test", False)
 
@@ -274,6 +278,7 @@ def matrix_loaders(
 def zip_matrix_loaders(
 	zip_path: Path,
 	batch_size: int,
+	data_loader_workers: int = 0,
 ) -> tuple[DataLoader, DataLoader, DataLoader]:
 	"""Load train/validation/test GEQIE matrices lazily from one ZIP archive."""
 	from geqie_qml import load_precomputed_zip_matrices
@@ -296,9 +301,9 @@ def zip_matrix_loaders(
 			)
 
 	return (
-		DataLoader(train_dataset, batch_size=batch_size, shuffle=True),
-		DataLoader(val_dataset, batch_size=batch_size, shuffle=False),
-		DataLoader(test_dataset, batch_size=batch_size, shuffle=False),
+		DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=data_loader_workers),
+		DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=data_loader_workers),
+		DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=data_loader_workers),
 	)
 
 
@@ -680,6 +685,7 @@ def train_geqie_first_subset(
 	use_sampler_ansatz: bool = False,
 	training_backend: str = "torch",
 	lightning_options: dict[str, Any] | None = None,
+	data_loader_workers: int = 0,
 ) -> dict[str, Any]:
 	"""Train from precomputed matrices; ``quantum_workers`` only applies to VQCLayer."""
 	if training_backend not in ("torch", "lightning"):
@@ -698,9 +704,9 @@ def train_geqie_first_subset(
 		use_sampler_ansatz=use_sampler_ansatz,
 	)
 	if zip_path is not None:
-		loaders = zip_matrix_loaders(zip_path, batch_size)
+		loaders = zip_matrix_loaders(zip_path, batch_size, data_loader_workers=data_loader_workers)
 	else:
-		loaders = matrix_loaders(circuits_dir, batch_size)
+		loaders = matrix_loaders(circuits_dir, batch_size, data_loader_workers=data_loader_workers)
 	if training_backend == "lightning":
 		from .lightning_training import train_model_lightning
 
