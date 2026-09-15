@@ -33,6 +33,45 @@ Unless `zip_root` is provided explicitly, direct-GEQIE archives are read from
 `/mnt/data02/mkordasz/circuits/<ENCODING>/<DATASET>`. The configured dataset
 directories are `MNIST_Digits`, `MNIST_Fashion`, `CIFAR-BW`, and `CIFAR-RGB`.
 
+## MCQI direct VQC training with Lightning
+
+The MCQI `direct_vqc_dense` entry point uses Lightning with the existing
+`default_vqc_ansatz` and unscaled `SamplerAnsatzLayer` probabilities. Install
+the experiment dependencies with `pip install -r experiments/QNN_integration/requirements.txt`.
+
+```python
+from experiments.QNN_integration.experimental_pipelines.experiment.geqie.mcqi import direct_vqc_dense
+
+if __name__ == "__main__":
+    direct_vqc_dense.run(
+        zip_root="/path/to/MCQI/CIFAR-RGB",
+        epochs=50,
+        batch_size=16,
+        max_workers=2,
+        lightning_options={"lr": 0.1, "patience": 10},
+        lightning_log_root="lightning_logs",
+    )
+```
+
+As in `examples/geqie_qml_training_precomputed.ipynb`, training uses NLL loss,
+Adam with one learning rate for the whole model (default `0.1`),
+`ReduceLROnPlateau(val_loss, factor=0.5, patience=3)`, and early stopping on
+`val_loss` (default patience `10`). Validation uses the existing ZIP `val/`
+split; it does not resplit the training data. Epoch loss is averaged over
+samples, including a smaller final batch.
+
+Each subset runs its own CPU Trainer (`devices=1`) in the existing process
+pool. Parent-process progress bars receive Lightning batch events. Each run
+and archive has a separate directory under
+`lightning_logs/<dataset>/<encoding>/<model>/<run>/<subset>/`, containing
+`metrics.csv`, hyperparameters, and best/last checkpoints. Test metrics and
+the returned model use the checkpoint with the lowest validation loss.
+The standard experiment reports and model exports remain available.
+
+FRQI, NEQR and adaptive variants retain their existing training defaults.
+The shared runner also accepts `training_backend="torch"` for the previous
+training loop.
+
 ## Console progress
 
 Subset training supports two mutually exclusive console modes:

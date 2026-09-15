@@ -13,3 +13,5 @@ torch
 qiskit-aer
 parquet
 tqdm
+lightning>=2.6,<3
+torchmetrics>=1.0,<2
