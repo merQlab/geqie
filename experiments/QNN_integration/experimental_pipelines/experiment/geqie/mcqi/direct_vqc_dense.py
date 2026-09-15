@@ -1,4 +1,4 @@
-"""MCQI -> direct VQC -> dense pipeline using the available subset ZIPs."""
+"""MCQI -> direct VQC -> dense, trained with Lightning on the available ZIPs."""
 
 from __future__ import annotations
 
@@ -15,7 +15,8 @@ from experiments.QNN_integration.experimental_pipelines.experiment.geqie.models.
 
 
 def run(*, dataset_id="cifar_rgb", zip_root=None, **kwargs):
-	kwargs.setdefault("quantum_workers", 32)
+	"""Use notebook defaults; customize with lightning_options={'lr': 0.1, 'patience': 10}."""
+	kwargs.setdefault("training_backend", "lightning")
 	kwargs.setdefault("create_circuits", False)
 	kwargs.setdefault("show_progress_bars", True)
 	kwargs.setdefault("precompute_workers", 16)

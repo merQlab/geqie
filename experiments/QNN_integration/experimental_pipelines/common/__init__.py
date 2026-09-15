@@ -678,8 +678,14 @@ def train_geqie_first_subset(
 	quantum_workers: int = 1,
 	progress_callback: ProgressCallback | None = None,
 	use_sampler_ansatz: bool = False,
+	training_backend: str = "torch",
+	lightning_options: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
 	"""Train from precomputed matrices; ``quantum_workers`` only applies to VQCLayer."""
+	if training_backend not in ("torch", "lightning"):
+		raise ValueError(f"Unknown training backend: {training_backend!r}.")
+	if training_backend == "lightning" and not use_sampler_ansatz:
+		raise ValueError("Lightning training currently requires SamplerAnsatzLayer.")
 	if (circuits_dir is None) == (zip_path is None):
 		raise ValueError("Provide exactly one of circuits_dir or zip_path.")
 	model = GEQIEFirstClassifier(
@@ -695,6 +701,16 @@ def train_geqie_first_subset(
 		loaders = zip_matrix_loaders(zip_path, batch_size)
 	else:
 		loaders = matrix_loaders(circuits_dir, batch_size)
+	if training_backend == "lightning":
+		from .lightning_training import train_model_lightning
+
+		return train_model_lightning(
+			model=model,
+			train_loader=loaders[0], val_loader=loaders[1], test_loader=loaders[2],
+			num_classes=num_classes, epochs=epochs, device=device, verbose=verbose,
+			report_context=report_context, progress_callback=progress_callback,
+			**(lightning_options or {}),
+		)
 	optimizer = Adam([{"params": model.vqc.parameters(), "lr": 1e-3}, {"params": model.head.parameters(), "lr": 1e-2}])
 	return train_model(
 		model=model,

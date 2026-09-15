@@ -4,9 +4,11 @@ from __future__ import annotations
 
 import importlib
 import re
+from datetime import datetime
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
+from uuid import uuid4
 
 import numpy as np
 
@@ -161,6 +163,8 @@ def train_one_subset(
 	report_context=None,
 	progress_callback=None,
 	quantum_workers=1,
+	training_backend="torch",
+	lightning_options=None,
 	**_,
 ):
 	"""Train one subset for any direct-GEQIE model variant."""
@@ -192,6 +196,8 @@ def train_one_subset(
 		interpret=variant.get("interpret"),
 		quantum_workers=quantum_workers,
 		use_sampler_ansatz=variant.get("use_sampler_ansatz", False),
+		training_backend=training_backend,
+		lightning_options=lightning_options,
 	)
 
 
@@ -208,6 +214,9 @@ def run_direct_geqie(
 	quantum_workers: int = 32,
 	num_qubits: int | None = None,
 	num_layers: int | None = None,
+	training_backend: str = "torch",
+	lightning_options: dict[str, Any] | None = None,
+	lightning_log_root: str | Path = "lightning_logs",
 	**overrides,
 ):
 	"""Train every existing subset_N.zip, independently of the raw dataset count.
@@ -215,6 +224,7 @@ def run_direct_geqie(
 	The raw dataset supplies the image shape and, only with create_circuits=True,
 	images to encode. Explicit precomputation runs before archive discovery.
 	Direct_vqc_dense ignores quantum_workers.
+	Lightning is opt-in; each archive gets a separate Trainer and log directory.
 	"""
 	encoding_id = str(encoding_id).strip().lower()
 	dataset_id = normalize_dataset_id(dataset_id)
@@ -222,6 +232,31 @@ def run_direct_geqie(
 		variant = MODEL_VARIANTS[model_id]
 	except KeyError as error:
 		raise ValueError(f"Unknown direct GEQIE model_id: {model_id!r}.") from error
+
+	if training_backend not in ("torch", "lightning"):
+		raise ValueError(f"Unknown training backend: {training_backend!r}.")
+	if training_backend == "lightning" and not variant.get("use_sampler_ansatz", False):
+		raise ValueError("Lightning training currently requires the direct_vqc_dense variant.")
+	lightning_options = dict(lightning_options or {})
+	training_setup = {"training_backend": training_backend}
+	if training_backend == "lightning":
+		lightning_options = {"lr": 0.1, "patience": 10, **lightning_options}
+		if set(lightning_options) - {"lr", "patience"}:
+			raise ValueError("lightning_options supports only 'lr' and 'patience'.")
+		if lightning_options["lr"] <= 0 or lightning_options["patience"] < 0:
+			raise ValueError("Lightning requires lr > 0 and patience >= 0.")
+		if str(overrides.get("device", "cpu")) != "cpu":
+			raise ValueError("The NumPy SamplerAnsatzLayer uses CPU; set device='cpu'.")
+		run_id = datetime.now().strftime("%Y%m%d_%H%M%S") + "_" + uuid4().hex[:8]
+		log_directory = Path(lightning_log_root).resolve() / dataset_id / encoding_id / model_id / run_id
+		lightning_options["log_dir"] = str(log_directory)
+		training_setup.update({
+			"qnn_lr": lightning_options["lr"], "head_lr": lightning_options["lr"],
+			"optimizer": "Adam", "scheduler": "ReduceLROnPlateau",
+			"scheduler_factor": 0.5, "scheduler_patience": 3,
+			"early_stopping_patience": lightning_options["patience"],
+			"lightning_log_dir": str(log_directory),
+		})
 
 	zip_root = (
 		Path(zip_root)
@@ -278,6 +313,7 @@ def run_direct_geqie(
 		"verbose": False,
 		"show_progress_bars": True,
 		"training_setup_extra": {
+			**training_setup,
 			"encoding_method": encoding_id,
 			"encoding_params": encoding_params,
 			"precompute_workers": precompute_workers,
@@ -292,6 +328,11 @@ def run_direct_geqie(
 			"zip_path": str(archives[index]),
 			"model_id": model_id,
 			"quantum_workers": quantum_workers,
+			"training_backend": training_backend,
+			"lightning_options": {
+				**lightning_options,
+				"log_dir": str(Path(lightning_options["log_dir"]) / archives[index].stem),
+			} if training_backend == "lightning" else None,
 		},
 	}
 	run_options.update(overrides)
