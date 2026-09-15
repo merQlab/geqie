@@ -621,20 +621,34 @@ class GEQIEFirstClassifier(nn.Module):
 		output_qubits: int | None = None,
 		interpret: Callable[[int], int] | None = None,
 		shots: int = 1024,
+		use_sampler_ansatz: bool = False,
 	) -> None:
 		super().__init__()
-		from geqie_qml import VQCLayer
+		if use_sampler_ansatz:
+			if output_qubits is not None or interpret is not None:
+				raise ValueError("SamplerAnsatzLayer currently requires full-register readout.")
+			from geqie_qml import SamplerAnsatzLayer, UnitaryInputLayer
 
-		self.vqc = VQCLayer(
-			num_qubits=num_qubits,
-			num_layers=num_layers,
-			shots=shots,
-			ansatz_factory=ansatz_factory,
-			output_qubits=output_qubits,
-			interpret=interpret,
-		)
+			ansatz = ansatz_factory(num_qubits, num_layers=num_layers, output_qubits=None)
+			self.vqc = nn.Sequential(
+				UnitaryInputLayer(num_qubits),
+				SamplerAnsatzLayer(num_qubits, ansatz),
+			)
+			output_size = 2 ** num_qubits
+		else:
+			from geqie_qml import VQCLayer
+
+			self.vqc = VQCLayer(
+				num_qubits=num_qubits,
+				num_layers=num_layers,
+				shots=shots,
+				ansatz_factory=ansatz_factory,
+				output_qubits=output_qubits,
+				interpret=interpret,
+			)
+			output_size = self.vqc.output_size
 		self.head = nn.Linear(
-			self.vqc.output_size,
+			output_size,
 			num_classes,
 		)
 		self.log_softmax = nn.LogSoftmax(dim=-1)
@@ -663,8 +677,9 @@ def train_geqie_first_subset(
 	interpret: Callable[[int], int] | None = None,
 	quantum_workers: int = 1,
 	progress_callback: ProgressCallback | None = None,
+	use_sampler_ansatz: bool = False,
 ) -> dict[str, Any]:
-	"""Train a GEQIE-first model from a matrix directory or a ZIP archive."""
+	"""Train from precomputed matrices; ``quantum_workers`` only applies to VQCLayer."""
 	if (circuits_dir is None) == (zip_path is None):
 		raise ValueError("Provide exactly one of circuits_dir or zip_path.")
 	model = GEQIEFirstClassifier(
@@ -674,6 +689,7 @@ def train_geqie_first_subset(
 		ansatz_factory=ansatz_factory,
 		output_qubits=output_qubits,
 		interpret=interpret,
+		use_sampler_ansatz=use_sampler_ansatz,
 	)
 	if zip_path is not None:
 		loaders = zip_matrix_loaders(zip_path, batch_size)
@@ -691,6 +707,9 @@ def train_geqie_first_subset(
 		device=device,
 		verbose=verbose,
 		report_context=report_context,
-		training_context=model.vqc.parallel_context(num_workers=quantum_workers),
+		training_context=(
+			nullcontext() if use_sampler_ansatz
+			else model.vqc.parallel_context(num_workers=quantum_workers)
+		),
 		progress_callback=progress_callback,
 	)

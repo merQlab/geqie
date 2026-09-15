@@ -1,7 +1,17 @@
 from qiskit import QuantumCircuit, ClassicalRegister, QuantumRegister
 from qiskit.circuit import ParameterVector
+from qiskit.circuit.library import real_amplitudes
 import numpy as np
 from itertools import combinations, pairwise
+
+
+def real_amplitudes_ansatz(num_qubits: int, num_layers: int, **_) -> QuantumCircuit:
+	"""Build the notebook's RealAmplitudes ansatz using the pipeline factory API.
+
+	``num_layers`` maps to Qiskit's ``reps``; the final rotation layer is kept.
+	The returned circuit can be passed directly to ``SamplerAnsatzLayer``.
+	"""
+	return real_amplitudes(num_qubits, reps=num_layers)
 
 
 def default_vqc_ansatz(num_qubits: int, num_layers: int, **_) -> QuantumCircuit:

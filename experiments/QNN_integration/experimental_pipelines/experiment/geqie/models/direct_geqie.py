@@ -26,11 +26,15 @@ from geqie_qml import QCNNOutputInterpret
 MODEL_VARIANTS = {
 	"direct_vqc_dense": {
 		"ansatz_factory": default_vqc_ansatz,
+		"use_sampler_ansatz": True,
 		"output_qubits": None,
 		"num_layers": 5,
 		"pipeline_name": "Direct GEQIE + VQC + dense",
 		"classifier_name": "GEQIE + VQC + dense",
-		"architecture": "GEQIE matrices -> VQCLayer(default VQC) -> Dense -> LogSoftmax",
+		"architecture": (
+			"GEQIE matrices -> UnitaryInputLayer -> SamplerAnsatzLayer(default VQC) "
+			"-> Dense -> LogSoftmax"
+		),
 	},
 	"adaptive_qnn_no_qnn_inspired_dense": {
 		"ansatz_factory": build_adaptive_qcnn_ansatz,
@@ -164,6 +168,7 @@ def train_one_subset(
 		output_qubits=variant["output_qubits"],
 		interpret=variant.get("interpret"),
 		quantum_workers=quantum_workers,
+		use_sampler_ansatz=variant.get("use_sampler_ansatz", False),
 	)
 
 
@@ -182,7 +187,7 @@ def run_direct_geqie(
 	num_layers: int | None = None,
 	**overrides,
 ):
-	"""Run a named direct-GEQIE architecture with a selected image encoding."""
+	"""Run a direct-GEQIE architecture; direct_vqc_dense ignores quantum_workers."""
 	encoding_id = str(encoding_id).strip().lower()
 	dataset_id = normalize_dataset_id(dataset_id)
 	try:
@@ -218,6 +223,9 @@ def run_direct_geqie(
 			encoding_params=encoding_params,
 		)
 
+	use_sampler_ansatz = variant.get("use_sampler_ansatz", False)
+	if use_sampler_ansatz:
+		quantum_workers = 1  # NumPy ansatz evaluation runs in the subset process.
 	run_options = {
 		"num_classes": 10,
 		"num_qubits": num_qubits,
@@ -232,6 +240,10 @@ def run_direct_geqie(
 			"encoding_params": encoding_params,
 			"precompute_workers": precompute_workers,
 			"quantum_workers": quantum_workers,
+			"quantum_layer": "SamplerAnsatzLayer" if use_sampler_ansatz else "VQCLayer",
+			"shots": None if use_sampler_ansatz else 1024,
+			"gradient_method": "parameter_shift" if use_sampler_ansatz else "SPSA",
+			"scale_output": not use_sampler_ansatz,
 		},
 		"subset_kwargs_factory": lambda index, _: {
 			"zip_path": str(zip_root / f"subset_{index + 1}.zip"),
