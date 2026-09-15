@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import importlib
+import re
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
 
 import numpy as np
@@ -14,6 +16,7 @@ from experiments.QNN_integration.experimental_pipelines.common import (
 	precompute_geqie_dataset,
 	run_subsets,
 	train_geqie_first_subset,
+	zip_matrix_loaders,
 )
 from geqie_qml.ansatze import (
 	build_adaptive_qcnn_ansatz,
@@ -131,6 +134,18 @@ def infer_direct_geqie_qubits(
 	return num_qubits
 
 
+def discover_subset_archives(zip_root: Path) -> list[Path]:
+	"""Find existing subset ZIPs, ordered numerically, allowing gaps in numbering."""
+	archives = [
+		path for path in zip_root.glob("subset_*.zip")
+		if path.is_file() and re.fullmatch(r"subset_0*[1-9][0-9]*\.zip", path.name)
+	]
+	archives.sort(key=lambda path: (int(path.stem.split("_")[1]), path.name))
+	if not archives:
+		raise FileNotFoundError(f"No subset_N.zip archives found in: {zip_root}")
+	return archives
+
+
 def train_one_subset(
 	subset_idx: int,
 	*,
@@ -153,6 +168,14 @@ def train_one_subset(
 		variant = MODEL_VARIANTS[model_id]
 	except KeyError as error:
 		raise ValueError(f"Unknown direct GEQIE model_id: {model_id!r}.") from error
+	if report_context is not None:
+		report_context = dict(report_context)
+		report_context["subset_name"] = (
+			f"{report_context.get('subset_name', subset_idx + 1)} ({Path(zip_path).name})"
+		)
+		report_context["training_setup"] = {
+			**report_context.get("training_setup", {}), "zip_path": str(zip_path),
+		}
 	return train_geqie_first_subset(
 		zip_path=Path(zip_path),
 		num_classes=num_classes,
@@ -187,7 +210,12 @@ def run_direct_geqie(
 	num_layers: int | None = None,
 	**overrides,
 ):
-	"""Run a direct-GEQIE architecture; direct_vqc_dense ignores quantum_workers."""
+	"""Train every existing subset_N.zip, independently of the raw dataset count.
+
+	The raw dataset supplies the image shape and, only with create_circuits=True,
+	images to encode. Explicit precomputation runs before archive discovery.
+	Direct_vqc_dense ignores quantum_workers.
+	"""
 	encoding_id = str(encoding_id).strip().lower()
 	dataset_id = normalize_dataset_id(dataset_id)
 	try:
@@ -195,12 +223,13 @@ def run_direct_geqie(
 	except KeyError as error:
 		raise ValueError(f"Unknown direct GEQIE model_id: {model_id!r}.") from error
 
-	dataset = dataset or load_dataset(dataset_id)
 	zip_root = (
 		Path(zip_root)
 		if zip_root is not None
 		else default_server_zip_root(dataset_id, encoding_id)
 	)
+	archives = discover_subset_archives(zip_root) if not create_circuits else []
+	dataset = dataset or load_dataset(dataset_id)
 	encoding_params = dict(encoding_params or {})
 	expected_qubits = infer_direct_geqie_qubits(
 		encoding_id,
@@ -222,6 +251,19 @@ def run_direct_geqie(
 			number_of_workers=precompute_workers,
 			encoding_params=encoding_params,
 		)
+		archives = discover_subset_archives(zip_root)
+
+	print(f"Training on {len(archives)} subset archive(s): " + ", ".join(p.name for p in archives), flush=True)
+	# The process runner only needs split lengths for reporting. Read those from
+	# ZIP indexes; do not send raw images or decoded matrices to the workers.
+	archive_blocks = []
+	for archive in archives:
+		loaders = zip_matrix_loaders(archive, batch_size=1)
+		archive_blocks.append(SimpleNamespace(**{
+			name: SimpleNamespace(X=range(len(loader.dataset)))
+			for name, loader in zip(("train", "val", "test"), loaders)
+		}))
+	archive_dataset = SimpleNamespace(subsets=archive_blocks)
 
 	use_sampler_ansatz = variant.get("use_sampler_ansatz", False)
 	if use_sampler_ansatz:
@@ -244,16 +286,17 @@ def run_direct_geqie(
 			"shots": None if use_sampler_ansatz else 1024,
 			"gradient_method": "parameter_shift" if use_sampler_ansatz else "SPSA",
 			"scale_output": not use_sampler_ansatz,
+			"subset_archives": [str(path) for path in archives],
 		},
 		"subset_kwargs_factory": lambda index, _: {
-			"zip_path": str(zip_root / f"subset_{index + 1}.zip"),
+			"zip_path": str(archives[index]),
 			"model_id": model_id,
 			"quantum_workers": quantum_workers,
 		},
 	}
 	run_options.update(overrides)
 	return run_subsets(
-		dataset=dataset,
+		dataset=archive_dataset,
 		trainer=train_one_subset,
 		dataset_id=dataset_id,
 		experiment_group="experiment",
