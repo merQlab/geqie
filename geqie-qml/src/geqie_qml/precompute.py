@@ -29,6 +29,7 @@ def compute_and_save_circuits(
     number_of_workers: int | None = None,
     geqie_encoding: str | ModuleType = "frqi",
     encoding_params: dict[str, Any] = {},
+    skip_existing: bool = True,
 ):
     """
     Encode a dataset of images into unitary matrices and save them as .npz files.
@@ -53,6 +54,11 @@ def compute_and_save_circuits(
         GEQIE encoding name, e.g. ``"frqi"``.
     encoding_params : dict
         Additional keyword arguments forwarded to the encoding function.
+    skip_existing : bool
+        If ``True`` (default), images whose output .npz file already exists in
+        ``save_dir`` are not recomputed. This makes the call safely resumable
+        after a crash or lost connection: re-running it only computes the
+        remaining images.
     """
     if number_of_workers is None:
         number_of_workers = max(1, cpu_count() - 1)
@@ -61,13 +67,28 @@ def compute_and_save_circuits(
     os.makedirs(save_dir, exist_ok=True)
     encoding_name = _normalize_encoding_name(geqie_encoding)
 
+    def _output_path(i: int) -> str:
+        return os.path.join(save_dir, f"{file_prefix}_{i}_label_{labels[i]}.npz")
+
+    if skip_existing:
+        pending_indices = [i for i in range(total_images) if not os.path.exists(_output_path(i))]
+        n_skipped = total_images - len(pending_indices)
+        if n_skipped:
+            tqdm.write(f"Skipping {n_skipped} already-computed image(s) found in '{save_dir}'.")
+    else:
+        pending_indices = list(range(total_images))
+
+    if not pending_indices:
+        tqdm.write(f"All {total_images} images already computed in '{save_dir}'.")
+        return
+
     logger.debug(f"Starting precompute with {number_of_workers} workers for encoding '{encoding_name}'")
     tqdm.write(
-        f"Precomputing {total_images} images with encoding '{encoding_name}' "
+        f"Precomputing {len(pending_indices)} image(s) with encoding '{encoding_name}' "
         f"using {number_of_workers} worker(s)."
     )
     if number_of_workers == 1:
-        for i in tqdm(range(total_images), total=total_images, desc="Processing images", unit="image"):
+        for i in tqdm(pending_indices, total=len(pending_indices), desc="Processing images", unit="image"):
             _compute_save_single(
                 image=data[i],
                 label=labels[i],
@@ -89,7 +110,7 @@ def compute_and_save_circuits(
                     file_prefix=file_prefix,
                     geqie_encoding=encoding_name,
                     encoding_params=encoding_params,
-                ) for i in tqdm(range(total_images), total=total_images, desc="Submitting images", unit="image")
+                ) for i in tqdm(pending_indices, total=len(pending_indices), desc="Submitting tasks", unit="tasks")
             ]
 
             for future in tqdm(
@@ -99,7 +120,7 @@ def compute_and_save_circuits(
                 unit="image",
             ):
                 future.result()
-    tqdm.write(f"Finished precomputing {total_images} images into '{save_dir}'.")
+    tqdm.write(f"Finished precomputing {len(pending_indices)} image(s) into '{save_dir}'.")
 
 
 # ---------------------------------------------------------------------------
@@ -168,7 +189,14 @@ def _compute_circuit_unitary(image, geqie_encoding: str = "frqi", encoding_param
 
 
 def _compute_save_single(image, label, sample_index, save_dir, file_prefix, geqie_encoding, encoding_params):
-    """Encode one image and save its unitary matrix to a .npz file."""
-    filename = os.path.join(save_dir, f"{file_prefix}_{sample_index}_label_{label}")
+    """Encode one image and atomically save its unitary matrix to a .npz file.
+
+    Writing to a temporary file and renaming it into place ensures a killed or
+    interrupted run never leaves a half-written .npz at the final path, which
+    would otherwise be mistaken for a completed result on resume.
+    """
+    final_path = os.path.join(save_dir, f"{file_prefix}_{sample_index}_label_{label}.npz")
+    tmp_path = os.path.join(save_dir, f"{file_prefix}_{sample_index}_label_{label}.tmp-{os.getpid()}.npz")
     unitary_matrix = _compute_circuit_unitary(image, geqie_encoding, encoding_params)
-    np.savez(file=filename, matrix=unitary_matrix, label=label, dtype=np.complex128)
+    np.savez(file=tmp_path, matrix=unitary_matrix, label=label, dtype=np.complex128)
+    os.replace(tmp_path, final_path)
