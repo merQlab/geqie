@@ -580,15 +580,31 @@ def precompute_geqie_dataset(
 	encoding_method: str,
 	number_of_workers: int = 1,
 	encoding_params: dict[str, Any] | None = None,
+	subset_numbers: Iterable[int] | None = None,
+	skip_existing: bool = True,
 ) -> None:
 	"""Precompute and package each subset as ``subset_N.zip``.
 
 	The ZIP root contains direct ``train/``, ``val/``, and ``test/`` folders,
 	which is the layout consumed by :func:`geqie_qml.load_precomputed_zip_matrices`.
+	``subset_numbers`` restricts the work to the given 1-based subset numbers.
 	"""
 	from geqie_qml import compute_and_save_circuits
 
+	selected = (
+		set(range(1, len(dataset.subsets) + 1))
+		if subset_numbers is None
+		else {int(number) for number in subset_numbers}
+	)
+	unknown = sorted(number for number in selected if not 1 <= number <= len(dataset.subsets))
+	if unknown:
+		raise ValueError(
+			f"Requested subset(s) {unknown} but the dataset has {len(dataset.subsets)} subset(s)."
+		)
+
 	for index, block in enumerate(dataset.subsets, start=1):
+		if index not in selected:
+			continue
 		subset_dir = circuits_root / f"subset_{index}"
 		for split_name in ("train", "val", "test"):
 			split = getattr(block, split_name)
@@ -599,19 +615,24 @@ def precompute_geqie_dataset(
 				geqie_encoding=encoding_method,
 				number_of_workers=number_of_workers,
 				encoding_params=encoding_params or {},
+				skip_existing=skip_existing,
 			)
 
 		zip_path = circuits_root / f"subset_{index}.zip"
+		# Build beside the final name so an interrupted run never leaves a
+		# truncated subset_N.zip that discovery would accept as complete.
+		partial_path = zip_path.with_suffix(".zip.partial")
 		with zipfile.ZipFile(
-			zip_path,
+			partial_path,
 			mode="w",
 			compression=zipfile.ZIP_DEFLATED,
 		) as archive:
-			for matrix_file in subset_dir.glob("*/*.npz"):
+			for matrix_file in sorted(subset_dir.glob("*/*.npz")):
 				archive.write(
 					matrix_file,
 					arcname=matrix_file.relative_to(subset_dir).as_posix(),
 				)
+		partial_path.replace(zip_path)
 
 
 class GEQIEFirstClassifier(nn.Module):
