@@ -26,6 +26,9 @@ class SamplerAnsatzLayer(nn.Module):
     avoids the ``assign_parameters_mapping`` bottleneck that makes backward
     passes prohibitively slow for large image encodings.
 
+    When input states require gradients (e.g. from a trainable CNN encoding),
+    an adjoint circuit pass propagates gradients back to those states.
+
     Parameters
     ----------
     n_qubits : int
@@ -118,8 +121,9 @@ class ParameterShiftFunction(torch.autograd.Function):
     each parameter-shift evaluation re-runs only the circuit *suffix* starting
     after the shifted gate, instead of the full circuit from scratch.
 
-    The gradient w.r.t. ``states`` is always ``None`` — these are
-    pre-computed image encodings, not trainable parameters.
+    For differentiable input encodings, the gradient w.r.t. ``states`` is
+    computed by applying the adjoint circuit to ``2 * grad_output * psi``.
+    Pre-computed GEQIE inputs do not require this additional pass.
     """
 
     @staticmethod
@@ -145,11 +149,14 @@ class ParameterShiftFunction(torch.autograd.Function):
         ctx.ops             = ops
         ctx.n_qubits        = n_qubits
         ctx.param_positions = param_positions
+        ctx.final_state = psi if ctx.needs_input_grad[0] else None
+        ctx.states_dtype = states.dtype
+        ctx.states_device = states.device
 
         return torch.as_tensor(probs, dtype=weights.dtype, device=weights.device)
 
     @staticmethod
-    def backward(ctx, grad_output: torch.Tensor) -> tuple[None, torch.Tensor, None, None]:
+    def backward(ctx, grad_output: torch.Tensor) -> tuple[torch.Tensor | None, torch.Tensor, None, None]:
         prefix_states   = ctx.prefix_states
         weights_np      = ctx.weights_np
         ops             = ctx.ops
@@ -180,12 +187,33 @@ class ParameterShiftFunction(torch.autograd.Function):
             weight_grad[param_idx] += float(np.sum(gradient_np * 0.5 * (p_plus - p_minus)))
 
         grad_weights = torch.as_tensor(
-            weight_grad.astype(np.float32),
+            weight_grad,
             dtype=grad_output.dtype,
             device=grad_output.device,
         )
+        grad_states = None
+        if ctx.needs_input_grad[0]:
+            # PyTorch's complex gradient convention: dL/dpsi = 2 * g * psi.
+            state_grad = 2.0 * gradient_np * ctx.final_state
+            for op in reversed(ops):
+                if op["type"] == "1q_param":
+                    matrix = param_1q(-float(weights_np[op["param_idx"]]), op["generator"])
+                    state_grad = apply_1q(state_grad, matrix, op["qubits"][0], n_qubits)
+                elif op["type"] == "1q_fixed":
+                    state_grad = apply_1q(
+                        state_grad, op["mat"].conj().T, op["qubits"][0], n_qubits
+                    )
+                else:
+                    state_grad = apply_2q(
+                        state_grad, op["mat"].conj().T, op["qubits"], n_qubits
+                    )
+            if not ctx.states_dtype.is_complex:
+                state_grad = state_grad.real
+            grad_states = torch.as_tensor(
+                state_grad, dtype=ctx.states_dtype, device=ctx.states_device
+            )
         # Gradients for: states, weights, ops (not a tensor), n_qubits (not a tensor)
-        return None, grad_weights, None, None
+        return grad_states, grad_weights, None, None
 
 
 # ---------------------------------------------------------------------------
