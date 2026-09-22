@@ -11,7 +11,6 @@ if __package__ in (None, ""):
 			sys.path.insert(0, str(candidate))
 			break
 
-import numpy as np
 import torch
 import torch.nn as nn
 from torch.optim import Adam
@@ -27,23 +26,11 @@ from experiments.QNN_integration.experimental_pipelines.common import (
 	train_model,
 )
 
+from experiments.QNN_integration.experimental_pipelines.baseline.quantum_without_geqie.statevector_encodings import (
+	RXFeatureMapStatevector,
+)
+from geqie_qml import SamplerAnsatzLayer
 from geqie_qml.ansatze import default_vqc_ansatz
-from qiskit import QuantumCircuit
-from qiskit.circuit import ParameterVector
-from qiskit.primitives import StatevectorSampler
-from qiskit_machine_learning.connectors import TorchConnector
-from qiskit_machine_learning.gradients import SPSASamplerGradient
-from qiskit_machine_learning.neural_networks import SamplerQNN
-
-
-def angle_embedding(
-	num_qubits: int,
-) -> QuantumCircuit:
-	circuit = QuantumCircuit(num_qubits)
-	parameters = ParameterVector("input", num_qubits)
-	for index, parameter in enumerate(parameters):
-		circuit.rx(parameter, index)
-	return circuit
 
 
 class CNNAngleVQCDenseSenokosov2024(nn.Module):
@@ -52,7 +39,6 @@ class CNNAngleVQCDenseSenokosov2024(nn.Module):
 		num_qubits: int = 9,
 		num_layers: int = 1,
 		num_classes: int = 10,
-		shots: int = 1024,
 		input_shape: tuple[int, int, int] = (1, 32, 32),
 	) -> None:
 		super().__init__()
@@ -75,30 +61,21 @@ class CNNAngleVQCDenseSenokosov2024(nn.Module):
 			nn.BatchNorm1d(num_qubits),
 			nn.ReLU(),
 		)
-		embedding = angle_embedding(num_qubits)
+		self.encoding = RXFeatureMapStatevector(num_qubits)
 		ansatz = default_vqc_ansatz(num_qubits, num_layers)
-		circuit = QuantumCircuit(num_qubits)
-		circuit.compose(embedding, inplace=True)
-		circuit.compose(ansatz, inplace=True)
-		sampler = StatevectorSampler(default_shots=shots)
-		gradient = SPSASamplerGradient(sampler=sampler)
-		qnn = SamplerQNN(
-			circuit=circuit,
-			input_params=list(embedding.parameters),
-			weight_params=list(ansatz.parameters),
-			sampler=sampler,
-			gradient=gradient,
+		self.qnn = SamplerAnsatzLayer(
+			num_qubits,
+			ansatz,
+			weight_init=torch.empty(ansatz.num_parameters).uniform_(-torch.pi, torch.pi),
 		)
-		initial_weights = np.random.uniform(-np.pi, np.pi, len(ansatz.parameters))
-		self.qnn = TorchConnector(qnn, initial_weights=initial_weights)
 		self.head = nn.Linear(2 ** num_qubits, num_classes)
 		self.log_softmax = nn.LogSoftmax(dim=-1)
 
 	def forward(self, x: torch.Tensor) -> torch.Tensor:
 		x = self.cnn(x)
 		x = self.feature_head(x)
+		x = self.encoding(x)
 		x = self.qnn(x)
-		x = x * (2 ** self.num_qubits)
 		x = self.head(x)
 		x = self.log_softmax(x)
 		return x
@@ -178,11 +155,19 @@ def run(
 		encoding_id="angle_embedding",
 		model_id="cnn_vqc_dense_senokosov2024",
 		pipeline_name="CNN + angle embedding + VQC + dense (Senokosov 2024)",
-		classifier_name="CNN + angle embedding + QNN + Dense",
+		classifier_name="CNN + angle embedding + SamplerAnsatzLayer + Dense",
 		model_architecture=(
 			f"{describe_image_shape(image_shape)} -> CNN(channels={image_shape[0]}) -> "
-			"Dense(qubits) -> Rx angle embedding -> VQC -> QNN -> Dense"
+			"Dense(qubits) -> Rx statevector -> SamplerAnsatzLayer(default VQC) -> Dense"
 		),
+		training_setup_extra={
+			**(run_options.pop("training_setup_extra", None) or {}),
+			"quantum_layer": "SamplerAnsatzLayer",
+			"shots": None,
+			"gradient_method": "parameter_shift",
+			"input_gradient_method": "adjoint",
+			"scale_output": False,
+		},
 		**run_options,
 	)
 

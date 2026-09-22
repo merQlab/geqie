@@ -33,6 +33,22 @@ Unless `zip_root` is provided explicitly, direct-GEQIE archives are read from
 `/mnt/data02/mkordasz/circuits/<ENCODING>/<DATASET>`. The configured dataset
 directories are `MNIST_Digits`, `MNIST_Fashion`, `CIFAR-BW`, and `CIFAR-RGB`.
 
+## Quantum baselines without GEQIE
+
+All three pipelines in `baseline/quantum_without_geqie` use
+`SamplerAnsatzLayer` with the existing `default_vqc_ansatz`. PCA/CNN features
+are converted into statevectors by differentiable Torch implementations of
+the one-repetition, fully entangled ZZ feature map or the RX angle embedding.
+The ansatz is simulated in NumPy on CPU and returns exact probabilities;
+there is no sampling, `shots` constructor argument, or output scaling by
+`2**num_qubits`.
+
+Ansatz weights use parameter-shift gradients. An adjoint pass through the
+ansatz supplies input-state gradients, allowing both CNN variants to train
+through their encodings. Precomputed GEQIE inputs skip this extra pass.
+The existing `run()` and `train_one_subset()` options remain available, and
+reports record the quantum layer, gradient method, and `shots=None`.
+
 ## MCQI direct VQC training with Lightning
 
 The MCQI `direct_vqc_dense` entry point uses Lightning with the existing

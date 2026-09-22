@@ -11,7 +11,6 @@ if __package__ in (None, ""):
 			sys.path.insert(0, str(candidate))
 			break
 
-import numpy as np
 import torch
 import torch.nn as nn
 from torch.optim import Adam
@@ -26,13 +25,11 @@ from experiments.QNN_integration.experimental_pipelines.common import (
 	train_model,
 )
 
+from experiments.QNN_integration.experimental_pipelines.baseline.quantum_without_geqie.statevector_encodings import (
+	ZZFeatureMapStatevector,
+)
+from geqie_qml import SamplerAnsatzLayer
 from geqie_qml.ansatze import default_vqc_ansatz
-from qiskit import QuantumCircuit
-from qiskit.circuit.library import zz_feature_map
-from qiskit.primitives import StatevectorSampler
-from qiskit_machine_learning.connectors import TorchConnector
-from qiskit_machine_learning.gradients import SPSASamplerGradient
-from qiskit_machine_learning.neural_networks import SamplerQNN
 
 
 class PCAZZVQCDenseClassifier(nn.Module):
@@ -41,38 +38,18 @@ class PCAZZVQCDenseClassifier(nn.Module):
 		num_qubits: int = 12,
 		num_layers: int = 1,
 		num_classes: int = 10,
-		shots: int = 1024,
 	) -> None:
 		super().__init__()
 		self.num_qubits = num_qubits
-		feature_map = zz_feature_map(
-			feature_dimension=num_qubits,
-			reps=1,
-		)
+		self.encoding = ZZFeatureMapStatevector(num_qubits)
 		ansatz = default_vqc_ansatz(
 			num_qubits,
 			num_layers,
 		)
-		circuit = QuantumCircuit(num_qubits)
-		circuit.compose(feature_map, inplace=True)
-		circuit.compose(ansatz, inplace=True)
-		sampler = StatevectorSampler(default_shots=shots)
-		gradient = SPSASamplerGradient(sampler=sampler)
-		qnn = SamplerQNN(
-			circuit=circuit,
-			input_params=list(feature_map.parameters),
-			weight_params=list(ansatz.parameters),
-			sampler=sampler,
-			gradient=gradient,
-		)
-		initial_weights = np.random.uniform(
-			-np.pi,
-			np.pi,
-			len(ansatz.parameters),
-		)
-		self.qnn = TorchConnector(
-			qnn,
-			initial_weights=initial_weights,
+		self.qnn = SamplerAnsatzLayer(
+			num_qubits,
+			ansatz,
+			weight_init=torch.empty(ansatz.num_parameters).uniform_(-torch.pi, torch.pi),
 		)
 		self.head = nn.Linear(
 			2 ** num_qubits,
@@ -81,8 +58,8 @@ class PCAZZVQCDenseClassifier(nn.Module):
 		self.log_softmax = nn.LogSoftmax(dim=-1)
 
 	def forward(self, x: torch.Tensor) -> torch.Tensor:
+		x = self.encoding(x)
 		x = self.qnn(x)
-		x = x * (2 ** self.num_qubits)
 		x = self.head(x)
 		x = self.log_softmax(x)
 		return x
@@ -158,11 +135,18 @@ def run(
 		encoding_id="zz_feature_map",
 		model_id="pca_vqc_dense",
 		pipeline_name="PCA + ZZ feature map + VQC + dense",
-		classifier_name="PCA + ZZFeatureMap + QNN + Dense",
+		classifier_name="PCA + ZZFeatureMap + SamplerAnsatzLayer + Dense",
 		model_architecture=(
 			f"{describe_image_shape(image_shape)} -> Flatten({input_features}) -> PCA(qubits) "
-			"-> ZZFeatureMap -> VQC -> QNN -> Dense"
+			"-> ZZFeatureMap statevector -> SamplerAnsatzLayer(default VQC) -> Dense"
 		),
+		training_setup_extra={
+			**(run_options.pop("training_setup_extra", None) or {}),
+			"quantum_layer": "SamplerAnsatzLayer",
+			"shots": None,
+			"gradient_method": "parameter_shift",
+			"scale_output": False,
+		},
 		**run_options,
 	)
 
