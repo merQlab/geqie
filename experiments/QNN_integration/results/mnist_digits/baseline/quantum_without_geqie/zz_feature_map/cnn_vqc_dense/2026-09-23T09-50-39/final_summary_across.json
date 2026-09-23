@@ -1,0 +1,18 @@
+{
+  "pipeline_name": "CNN + ZZ feature map + VQC + dense",
+  "dataset_id": "mnist_digits",
+  "experiment_group": "baseline",
+  "model_family": "quantum_without_geqie",
+  "encoding_id": "zz_feature_map",
+  "model_id": "cnn_vqc_dense",
+  "summary": {
+    "accuracy_mean": 0.9277777777777778,
+    "accuracy_std": 0.013784328639777218,
+    "precision_mean": 0.9340322322057641,
+    "precision_std": 0.0118132484001024,
+    "recall_mean": 0.9277777777777778,
+    "recall_std": 0.013784328639777218,
+    "f1_mean": 0.9285844205122105,
+    "f1_std": 0.013463119228767657
+  }
+}

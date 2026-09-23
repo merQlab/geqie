@@ -1,0 +1,22 @@
+=================================================================
+Layer (type:depth-idx)                   Param #
+=================================================================
+CNNZZVQCDenseClassifier                  --
+├─Sequential: 1-1                        --
+│    └─Conv2d: 2-1                       160
+│    └─ReLU: 2-2                         --
+│    └─MaxPool2d: 2-3                    --
+│    └─Conv2d: 2-4                       4,640
+│    └─ReLU: 2-5                         --
+│    └─MaxPool2d: 2-6                    --
+│    └─Flatten: 2-7                      --
+│    └─Linear: 2-8                       4,617
+├─ZZFeatureMapStatevector: 1-2           --
+├─SamplerAnsatzLayer: 1-3                27
+├─Linear: 1-4                            5,130
+├─LogSoftmax: 1-5                        --
+=================================================================
+Total params: 14,574
+Trainable params: 14,574
+Non-trainable params: 0
+=================================================================

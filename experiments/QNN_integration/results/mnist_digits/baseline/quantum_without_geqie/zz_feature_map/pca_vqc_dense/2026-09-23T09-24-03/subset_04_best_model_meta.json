@@ -1,0 +1,52 @@
+{
+  "pipeline_name": "PCA + ZZ feature map + VQC + dense",
+  "pipeline_slug": "pca_vqc_dense",
+  "dataset_id": "mnist_digits",
+  "experiment_group": "baseline",
+  "model_family": "quantum_without_geqie",
+  "encoding_id": "zz_feature_map",
+  "model_id": "pca_vqc_dense",
+  "subset_index": 4,
+  "subset_count": 5,
+  "saved_at": "2026-09-23T09:41:19",
+  "model": {
+    "class_name": "PCAZZVQCDenseClassifier",
+    "module": "__main__",
+    "repr": "PCAZZVQCDenseClassifier(\n  (encoding): ZZFeatureMapStatevector()\n  (qnn): SamplerAnsatzLayer(n_qubits=9, dim=512, weights=27, param_gates=27, fixed_gates=4)\n  (head): Linear(in_features=512, out_features=10, bias=True)\n  (log_softmax): LogSoftmax(dim=-1)\n)"
+  },
+  "torchinfo_summary": "=================================================================\nLayer (type:depth-idx)                   Param #\n=================================================================\nPCAZZVQCDenseClassifier                  --\n├─ZZFeatureMapStatevector: 1-1           --\n├─SamplerAnsatzLayer: 1-2                27\n├─Linear: 1-3                            5,130\n├─LogSoftmax: 1-4                        --\n=================================================================\nTotal params: 5,157\nTrainable params: 5,157\nNon-trainable params: 0\n=================================================================",
+  "report_context": {
+    "title": "EXPERIMENTAL PROTOCOL REPORT",
+    "dataset_name": "MNIST digits stratified",
+    "classifier_name": "PCA + ZZFeatureMap + SamplerAnsatzLayer + Dense",
+    "model_architecture": null,
+    "subset_name": "4/5",
+    "split_sizes": {
+      "train": 921,
+      "val": 231,
+      "test": 288
+    },
+    "training_setup": {
+      "epochs": 50,
+      "batch_size": 16,
+      "device": "cpu",
+      "qnn_lr": 0.001,
+      "head_lr": 0.01,
+      "dataset_id": "mnist_digits",
+      "experiment_group": "baseline",
+      "model_family": "quantum_without_geqie",
+      "encoding_id": "zz_feature_map",
+      "model_id": "pca_vqc_dense",
+      "quantum_layer": "SamplerAnsatzLayer",
+      "shots": null,
+      "gradient_method": "parameter_shift",
+      "scale_output": false
+    },
+    "model_setup": {
+      "num_classes": 10,
+      "num_qubits": 9,
+      "num_layers": 1
+    },
+    "torchinfo_summary": "=================================================================\nLayer (type:depth-idx)                   Param #\n=================================================================\nPCAZZVQCDenseClassifier                  --\n├─ZZFeatureMapStatevector: 1-1           --\n├─SamplerAnsatzLayer: 1-2                27\n├─Linear: 1-3                            5,130\n├─LogSoftmax: 1-4                        --\n=================================================================\nTotal params: 5,157\nTrainable params: 5,157\nNon-trainable params: 0\n================================================================="
+  }
+}
