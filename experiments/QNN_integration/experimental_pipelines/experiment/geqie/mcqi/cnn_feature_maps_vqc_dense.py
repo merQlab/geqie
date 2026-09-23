@@ -16,11 +16,9 @@ from experiments.QNN_integration.experimental_pipelines.experiment.geqie.models.
 )
 
 
-def run(**kwargs):
-	kwargs.setdefault(encoding_id="mcqi")
-	kwargs.setdefault(dataset_id="cifar_rgb")
+def run(dataset_id="cifar_rgb", **kwargs):
 	kwargs.setdefault("convolution_depth", 0) # Feature extraction only.
-	return run_cnn_feature_maps_vqc_dense(encoding_id="mcqi", dataset_id="cifar_rgb", **kwargs)
+	return run_cnn_feature_maps_vqc_dense(encoding_id="mcqi", dataset_id=dataset_id, **kwargs)
 
 
 if __name__ == "__main__":
