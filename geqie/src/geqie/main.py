@@ -33,28 +33,39 @@ def encode(
 
     R = int(np.ceil(np.log2(max(shape))))
     G = None
+    G_blocks = None
 
     for coords in np.ndindex(*shape):
         data_vector = data_function(*coords, R=R, image=image, **encoding_params)
         map_operator = map_function(*coords, R=R, image=image, **encoding_params)
-        product = data_vector.to_operator() ^ map_operator
 
         if logger.isEnabledFor(levels.STATE):
+            product = data_vector.to_operator() ^ map_operator
             logger.state(f"{coords=}")
             logger.state(f"{data_vector=}")
             logger.state(f"{map_operator=}")
             logger.state(f"{product=}")
             logger.state("===========")
+            del product
+
+        amplitudes = np.asarray(data_vector.data, dtype=complex)
+        map_matrix = np.asarray(map_operator.data, dtype=complex)
+        data_dim, map_dim = amplitudes.shape[0], map_matrix.shape[0]
 
         if G is None:
-            G = np.array(product.data, copy=True)
-        else:
-            G += product.data
+            G = np.zeros((data_dim * map_dim, data_dim * map_dim), dtype=complex)
+            G_blocks = G.reshape(data_dim, map_dim, data_dim, map_dim)
 
-    U, _ = np.linalg.qr(G)
+        conjugated = amplitudes.conj()
+        broadcast_map = map_matrix[:, None, :]
+        for row in np.flatnonzero(amplitudes):
+            G_blocks[row] += (amplitudes[row] * conjugated)[None, :, None] * broadcast_map
+
+    U = np.linalg.qr(G)[0]
     if logger.isEnabledFor(levels.MATH):
         logger.math(f"G=\n{tabulate_complex(G)}")
         logger.math(f"U=\n{tabulate_complex(U)}")
+    del G, G_blocks
 
     U_op = Operator(U)
     n_qubits = U_op.num_qubits
