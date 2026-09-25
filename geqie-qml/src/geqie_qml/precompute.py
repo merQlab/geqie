@@ -7,7 +7,6 @@ from typing import Any
 from types import ModuleType
 
 import numpy as np
-import threadpoolctl
 from concurrent import futures
 from multiprocessing import cpu_count
 from tqdm import tqdm
