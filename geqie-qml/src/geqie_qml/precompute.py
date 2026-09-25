@@ -2,7 +2,6 @@ import importlib
 import logging
 import os
 
-from itertools import islice
 from typing import Any
 from types import ModuleType
 
@@ -31,7 +30,6 @@ def compute_and_save_circuits(
     geqie_encoding: str | ModuleType = "frqi",
     encoding_params: dict[str, Any] = {},
     skip_existing: bool = True,
-    queued_per_worker: int = 2,
 ):
     """
     Encode a dataset of images into unitary matrices and save them as .npz files.
@@ -43,7 +41,9 @@ def compute_and_save_circuits(
     Parameters
     ----------
     data : array-like, shape (N, H, W)
-        Images to encode.
+        Images to encode. Indexing must be cheap: every pending task holds an
+        ``data[i]`` reference, which is a view for a numpy array but a full copy
+        for e.g. a memmap or a lazily-loaded container.
     labels : array-like, shape (N,)
         Integer class labels, one per image.
     save_dir : str
@@ -61,9 +61,6 @@ def compute_and_save_circuits(
         ``save_dir`` are not recomputed. This makes the call safely resumable
         after a crash or lost connection: re-running it only computes the
         remaining images.
-    queued_per_worker : int
-        How many tasks may be queued per worker. Caps how many images the parent
-        process holds in memory at once; raise it only if workers go idle.
     """
     if number_of_workers is None:
         number_of_workers = max(1, cpu_count() - 1)
@@ -104,10 +101,9 @@ def compute_and_save_circuits(
                 encoding_params=encoding_params
             )
     else:
-        max_queued = max(1, number_of_workers * queued_per_worker)
         with futures.ProcessPoolExecutor(max_workers=number_of_workers) as executor:
-            def _submit(i: int):
-                return executor.submit(
+            precompute_futures = [
+                executor.submit(
                     _compute_save_single,
                     image=data[i],
                     label=labels[i],
@@ -116,18 +112,11 @@ def compute_and_save_circuits(
                     file_prefix=file_prefix,
                     geqie_encoding=encoding_name,
                     encoding_params=encoding_params,
-                )
+                ) for i in tqdm(pending_indices, total=len(pending_indices), desc="Submitting tasks", unit="tasks")
+            ]
+            for future in tqdm(futures.as_completed(precompute_futures), total=len(precompute_futures), desc="Processing images", unit="image"):
+                future.result()
 
-            queue = iter(pending_indices)
-            queued_tasks = {_submit(i) for i in islice(queue, max_queued)}
-            with tqdm(total=len(pending_indices), desc="Processing images", unit="image") as progress:
-                while queued_tasks:
-                    done, queued_tasks = futures.wait(queued_tasks, return_when=futures.FIRST_COMPLETED)
-                    for future in done:
-                        future.result()
-                    progress.update(len(done))
-                    del done
-                    queued_tasks.update(_submit(i) for i in islice(queue, max_queued - len(queued_tasks)))
     tqdm.write(f"Finished precomputing {len(pending_indices)} image(s) into '{save_dir}'.")
 
 
