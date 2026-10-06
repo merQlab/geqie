@@ -1,3 +1,4 @@
+import inspect
 from typing import Any, Callable, Dict
 
 import numpy as np
@@ -10,6 +11,7 @@ from qiskit.result import Result
 from qiskit.quantum_info import Operator, Statevector
 
 import geqie.backends.ibm_qp as ibm_qp
+from geqie.logging_utils import levels
 from geqie.logging_utils.logger import setup_logger
 from geqie.logging_utils.tabulate import tabulate_complex
 
@@ -27,37 +29,49 @@ def encode(
     **_: Dict[Any, Any],
 ) -> QuantumCircuit:
     logger = setup_logger(logging_level, reset=True)
-
     shape = image.shape[:image_dimensionality]
 
     R = int(np.ceil(np.log2(max(shape))))
-
-    products, data_vectors, map_operators = [], [], []
+    G = None
+    G_blocks = None
 
     for coords in np.ndindex(*shape):
         data_vector = data_function(*coords, R=R, image=image, **encoding_params)
         map_operator = map_function(*coords, R=R, image=image, **encoding_params)
-        product = data_vector.to_operator() ^ map_operator
 
-        products.append(product)
-        data_vectors.append(data_vector)
-        map_operators.append(map_operator)
+        if logger.isEnabledFor(levels.STATE):
+            product = data_vector.to_operator() ^ map_operator
+            logger.state(f"{coords=}")
+            logger.state(f"{data_vector=}")
+            logger.state(f"{map_operator=}")
+            logger.state(f"{product=}")
+            logger.state("===========")
+            del product
 
-        logger.state(f"{coords=}")
-        logger.state(f"{data_vector=}")
-        logger.state(f"{map_operator=}")
-        logger.state(f"{product=}")
-        logger.state("===========")
+        amplitudes = np.asarray(data_vector.data, dtype=complex)
+        map_matrix = np.asarray(map_operator.data, dtype=complex)
+        data_dim, map_dim = amplitudes.shape[0], map_matrix.shape[0]
 
-    G = np.sum(products, axis=0)
-    U, _r = np.linalg.qr(G)
-    logger.math(f"G=\n{tabulate_complex(G)}")
-    logger.math(f"U=\n{tabulate_complex(U)}")
+        if G is None:
+            G = np.zeros((data_dim * map_dim, data_dim * map_dim), dtype=complex)
+            G_blocks = G.reshape(data_dim, map_dim, data_dim, map_dim)
+
+        conjugated = amplitudes.conj()
+        broadcast_map = map_matrix[:, None, :]
+        for row in np.flatnonzero(amplitudes):
+            G_blocks[row] += (amplitudes[row] * conjugated)[None, :, None] * broadcast_map
+
+    U = np.linalg.qr(G)[0]
+    if logger.isEnabledFor(levels.MATH):
+        logger.math(f"G=\n{tabulate_complex(G)}")
+        logger.math(f"U=\n{tabulate_complex(U)}")
+    del G, G_blocks
 
     U_op = Operator(U)
     n_qubits = U_op.num_qubits
     init_state = init_function(n_qubits, **encoding_params)
-    logger.state(f"{init_state=}")
+    if logger.isEnabledFor(levels.STATE):
+        logger.state(f"{init_state=}")
 
     circuit = QuantumCircuit(n_qubits)
     circuit.prepare_state(init_state, range(n_qubits), normalize=True)
@@ -65,7 +79,8 @@ def encode(
     if perform_measurement:
         circuit.measure_all()
 
-    logger.info("\n" + str(circuit.draw()))
+    if logger.isEnabledFor(levels.INFO):
+        logger.info("\n" + str(circuit.draw()))
 
     return circuit
 
