@@ -41,7 +41,9 @@ def compute_and_save_circuits(
     Parameters
     ----------
     data : array-like, shape (N, H, W)
-        Images to encode.
+        Images to encode. Indexing must be cheap: every pending task holds an
+        ``data[i]`` reference, which is a view for a numpy array but a full copy
+        for e.g. a memmap or a lazily-loaded container.
     labels : array-like, shape (N,)
         Integer class labels, one per image.
     save_dir : str
@@ -112,50 +114,28 @@ def compute_and_save_circuits(
                     encoding_params=encoding_params,
                 ) for i in tqdm(pending_indices, total=len(pending_indices), desc="Submitting tasks", unit="tasks")
             ]
-
-            for future in tqdm(
-                futures.as_completed(precompute_futures),
-                total=len(precompute_futures),
-                desc="Processing images",
-                unit="image",
-            ):
+            for future in tqdm(futures.as_completed(precompute_futures), total=len(precompute_futures), desc="Processing images", unit="image"):
                 future.result()
+
     tqdm.write(f"Finished precomputing {len(pending_indices)} image(s) into '{save_dir}'.")
-
-
-# ---------------------------------------------------------------------------
-# Worker initialiser — called once when each process in the pool starts
-# ---------------------------------------------------------------------------
-
-def _init_worker():
-    """
-    Per-process initializer for the precompute pool.
-
-    Pins each worker to a single OS thread to prevent thread over-subscription
-    when many worker processes run in parallel.
-    """
-    os.environ["OMP_NUM_THREADS"] = "1"
-    os.environ["MKL_NUM_THREADS"] = "1"
-    os.environ["OPENBLAS_NUM_THREADS"] = "1"
-    os.environ["NUMEXPR_NUM_THREADS"] = "1"
 
 
 # ---------------------------------------------------------------------------
 # Circuit encoding helpers
 # ---------------------------------------------------------------------------
 
-def _normalize_encoding_name(geqie_encoding: str) -> str:
-    """Return a lower-cased, stable encoding key from the given string."""
-    if not isinstance(geqie_encoding, str):
-        raise TypeError(f"geqie_encoding must be a string got {type(geqie_encoding).__name__}.")        
-    
-    return geqie_encoding.lower()
+def _compute_save_single(image, label, sample_index, save_dir, file_prefix, geqie_encoding, encoding_params):
+    """Encode one image and atomically save its unitary matrix to a .npz file.
 
-
-def _import_encoding_module(encoding_name: str):
-    """Import and return the ``geqie.encodings.<name>`` module for the given encoding key."""
-    normalized_name = _normalize_encoding_name(encoding_name)
-    return importlib.import_module(f"geqie.encodings.{normalized_name}")
+    Writing to a temporary file and renaming it into place ensures a killed or
+    interrupted run never leaves a half-written .npz at the final path, which
+    would otherwise be mistaken for a completed result on resume.
+    """
+    final_path = os.path.join(save_dir, f"{file_prefix}_{sample_index}_label_{label}.npz")
+    tmp_path = os.path.join(save_dir, f"{file_prefix}_{sample_index}_label_{label}.tmp-{os.getpid()}.npz")
+    unitary_matrix = _compute_circuit_unitary(image, geqie_encoding, encoding_params)
+    np.savez(file=tmp_path, matrix=unitary_matrix, label=label, dtype=np.complex128)
+    os.replace(tmp_path, final_path)
 
 
 def _compute_circuit_unitary(image, geqie_encoding: str = "frqi", encoding_params: dict[str, Any] = {}):
@@ -188,15 +168,15 @@ def _compute_circuit_unitary(image, geqie_encoding: str = "frqi", encoding_param
     return qiskit.quantum_info.Operator.from_circuit(circuit).to_matrix()
 
 
-def _compute_save_single(image, label, sample_index, save_dir, file_prefix, geqie_encoding, encoding_params):
-    """Encode one image and atomically save its unitary matrix to a .npz file.
+def _import_encoding_module(encoding_name: str):
+    """Import and return the ``geqie.encodings.<name>`` module for the given encoding key."""
+    normalized_name = _normalize_encoding_name(encoding_name)
+    return importlib.import_module(f"geqie.encodings.{normalized_name}")
 
-    Writing to a temporary file and renaming it into place ensures a killed or
-    interrupted run never leaves a half-written .npz at the final path, which
-    would otherwise be mistaken for a completed result on resume.
-    """
-    final_path = os.path.join(save_dir, f"{file_prefix}_{sample_index}_label_{label}.npz")
-    tmp_path = os.path.join(save_dir, f"{file_prefix}_{sample_index}_label_{label}.tmp-{os.getpid()}.npz")
-    unitary_matrix = _compute_circuit_unitary(image, geqie_encoding, encoding_params)
-    np.savez(file=tmp_path, matrix=unitary_matrix, label=label, dtype=np.complex128)
-    os.replace(tmp_path, final_path)
+
+def _normalize_encoding_name(geqie_encoding: str) -> str:
+    """Return a lower-cased, stable encoding key from the given string."""
+    if not isinstance(geqie_encoding, str):
+        raise TypeError(f"geqie_encoding must be a string got {type(geqie_encoding).__name__}.")        
+    
+    return geqie_encoding.lower()

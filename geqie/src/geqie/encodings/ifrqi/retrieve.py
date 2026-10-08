@@ -10,7 +10,7 @@ def retrieve(results: str, **_) -> np.ndarray:
                          and values are their respective occurrence counts.
 
     Returns:
-    np.ndarray: A NumPy array representing the decoded image.
+    np.ndarray: A NumPy array representing the decoded image, with unmeasured pixels set to zero.
     """
     state_length = len(next(iter(results)))
     color_qubits = 4
@@ -42,6 +42,8 @@ def retrieve(results: str, **_) -> np.ndarray:
             
     for x in range(reconstructed_image_counts_ones.shape[0]):
         for y in range(reconstructed_image_counts_ones.shape[1]):
+            if reconstructed_image_counts_total[x, y] == 0:
+                continue
             color_bit_string = ""
             for c in range(color_qubits):
                 coeff = reconstructed_image_counts_ones[x, y, c]/reconstructed_image_counts_total[x, y]
