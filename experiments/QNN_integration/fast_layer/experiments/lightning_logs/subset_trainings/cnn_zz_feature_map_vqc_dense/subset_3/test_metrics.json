@@ -1,0 +1,14 @@
+{
+  "model": "cnn_zz_feature_map_vqc_dense",
+  "subset": 3,
+  "status": "ok",
+  "log_dir": "/home/ODM/rpotempa/geqie/experiments/QNN_integration/lightning_logs/cnn_zz_feature_map_vqc_dense/subset_3",
+  "epochs": 8,
+  "fit_seconds": 1456.073,
+  "epoch_seconds_mean": 181.993,
+  "batch_seconds_mean": 3.1129,
+  "test_seconds": 1.737,
+  "total_seconds": 1457.994,
+  "test_loss": 2.316816568374634,
+  "test_acc": 0.1006944477558136
+}

@@ -1,0 +1,70 @@
+2026-10-07 13:16:11,277 INFO === dense / subset_4 ===
+2026-10-07 13:16:11,277 INFO Dataset: /mnt/data02/mkordasz/datasets_joblib/MNIST_Digits_5_subsets_train_val_test_16x16.joblib
+2026-10-07 13:16:11,282 INFO Train: 921, Val: 231, Test: 288
+2026-10-07 13:16:11,285 INFO ==========================================================================================
+Layer (type:depth-idx)                   Output Shape              Param #
+==========================================================================================
+Sequential                               [64, 10]                  --
+├─Flatten: 1-1                           [64, 256]                 --
+├─Linear: 1-2                            [64, 32]                  8,224
+├─Sigmoid: 1-3                           [64, 32]                  --
+├─Dropout: 1-4                           [64, 32]                  --
+├─Linear: 1-5                            [64, 10]                  330
+├─LogSoftmax: 1-6                        [64, 10]                  --
+==========================================================================================
+Total params: 8,554
+Trainable params: 8,554
+Non-trainable params: 0
+Total mult-adds (Units.MEGABYTES): 0.55
+==========================================================================================
+Input size (MB): 0.07
+Forward/backward pass size (MB): 0.02
+Params size (MB): 0.03
+Estimated Total Size (MB): 0.12
+==========================================================================================
+2026-10-07 13:16:11,314 INFO GPU available: False, used: False
+2026-10-07 13:16:11,315 INFO TPU available: False, using: 0 TPU cores
+2026-10-07 13:16:11,315 INFO 💡 Tip: For seamless cloud logging and experiment tracking, try installing [litlogger](https://pypi.org/project/litlogger/) to enable LitLogger, which logs metrics and artifacts automatically to the Lightning Experiments platform.
+2026-10-07 13:16:11,315 INFO 💡 Tip: For seamless cloud uploads and versioning, try installing [litmodels](https://pypi.org/project/litmodels/) to enable LitModelCheckpoint, which syncs automatically with the Lightning model registry.
+2026-10-07 13:16:11,316 WARNING /home/ODM/rpotempa/geqie/.venv/lib/python3.12/site-packages/lightning/pytorch/callbacks/model_checkpoint.py:881: Checkpoint directory /home/ODM/rpotempa/geqie/experiments/QNN_integration/lightning_logs/dense/subset_4/checkpoints exists and is not empty.
+
+2026-10-07 13:16:11,318 INFO 
+  | Name      | Type               | Params | Mode  | FLOPs
+-----------------------------------------------------------------
+0 | model     | Sequential         | 8.6 K  | train | 0    
+1 | train_acc | MulticlassAccuracy | 0      | train | 0    
+2 | val_acc   | MulticlassAccuracy | 0      | train | 0    
+3 | test_acc  | MulticlassAccuracy | 0      | train | 0    
+-----------------------------------------------------------------
+8.6 K     Trainable params
+0         Non-trainable params
+8.6 K     Total params
+0.034     Total estimated model params size (MB)
+10        Modules in train mode
+0         Modules in eval mode
+0         Total Flops
+2026-10-07 13:16:11,321 WARNING /home/ODM/rpotempa/geqie/.venv/lib/python3.12/site-packages/lightning/pytorch/utilities/_pytree.py:21: `isinstance(treespec, LeafSpec)` is deprecated, use `isinstance(treespec, TreeSpec) and treespec.is_leaf()` instead.
+
+2026-10-07 13:16:11,321 WARNING /home/ODM/rpotempa/geqie/.venv/lib/python3.12/site-packages/lightning/pytorch/trainer/connectors/data_connector.py:434: The 'train_dataloader' does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` to `num_workers=63` in the `DataLoader` to improve performance.
+
+2026-10-07 13:16:11,322 WARNING /home/ODM/rpotempa/geqie/.venv/lib/python3.12/site-packages/lightning/pytorch/trainer/connectors/data_connector.py:434: The 'val_dataloader' does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` to `num_workers=63` in the `DataLoader` to improve performance.
+
+2026-10-07 13:16:11,479 INFO epoch 0 | lr=0.1000 train_acc=0.3507 train_loss=1.9362 val_acc=0.6104 val_loss=1.2053 | epoch 0.15s (train 0.11s, val 0.02s) | batch mean 0.007s max 0.013s (15 batches)
+2026-10-07 13:16:11,635 INFO epoch 1 | lr=0.1000 train_acc=0.6493 train_loss=1.0810 val_acc=0.7619 val_loss=0.7789 | epoch 0.15s (train 0.10s, val 0.02s) | batch mean 0.007s max 0.007s (15 batches)
+2026-10-07 13:16:11,790 INFO epoch 2 | lr=0.1000 train_acc=0.7405 train_loss=0.7876 val_acc=0.7965 val_loss=0.6230 | epoch 0.15s (train 0.10s, val 0.02s) | batch mean 0.007s max 0.007s (15 batches)
+2026-10-07 13:16:11,945 INFO epoch 3 | lr=0.1000 train_acc=0.7904 train_loss=0.6069 val_acc=0.8052 val_loss=0.5789 | epoch 0.15s (train 0.10s, val 0.02s) | batch mean 0.007s max 0.007s (15 batches)
+2026-10-07 13:16:12,099 INFO epoch 4 | lr=0.1000 train_acc=0.8274 train_loss=0.5434 val_acc=0.7879 val_loss=0.5844 | epoch 0.15s (train 0.10s, val 0.02s) | batch mean 0.007s max 0.007s (15 batches)
+2026-10-07 13:16:12,254 INFO epoch 5 | lr=0.1000 train_acc=0.8252 train_loss=0.5066 val_acc=0.8355 val_loss=0.5455 | epoch 0.15s (train 0.10s, val 0.02s) | batch mean 0.007s max 0.007s (15 batches)
+2026-10-07 13:16:12,408 INFO epoch 6 | lr=0.1000 train_acc=0.8458 train_loss=0.4357 val_acc=0.8268 val_loss=0.5623 | epoch 0.15s (train 0.10s, val 0.02s) | batch mean 0.007s max 0.007s (15 batches)
+2026-10-07 13:16:12,563 INFO epoch 7 | lr=0.1000 train_acc=0.8762 train_loss=0.3823 val_acc=0.8398 val_loss=0.5349 | epoch 0.15s (train 0.10s, val 0.02s) | batch mean 0.007s max 0.007s (15 batches)
+2026-10-07 13:16:12,717 INFO epoch 8 | lr=0.1000 train_acc=0.8784 train_loss=0.3654 val_acc=0.8225 val_loss=0.6053 | epoch 0.15s (train 0.10s, val 0.02s) | batch mean 0.007s max 0.007s (15 batches)
+2026-10-07 13:16:12,873 INFO epoch 9 | lr=0.1000 train_acc=0.8914 train_loss=0.3455 val_acc=0.8225 val_loss=0.5936 | epoch 0.15s (train 0.10s, val 0.02s) | batch mean 0.007s max 0.007s (15 batches)
+2026-10-07 13:16:13,028 INFO epoch 10 | lr=0.1000 train_acc=0.8990 train_loss=0.3240 val_acc=0.8442 val_loss=0.5465 | epoch 0.15s (train 0.10s, val 0.02s) | batch mean 0.007s max 0.008s (15 batches)
+2026-10-07 13:16:13,183 INFO epoch 11 | lr=0.1000 train_acc=0.8686 train_loss=0.4194 val_acc=0.8225 val_loss=0.6321 | epoch 0.15s (train 0.10s, val 0.02s) | batch mean 0.007s max 0.007s (15 batches)
+2026-10-07 13:16:13,337 INFO epoch 12 | lr=0.0500 train_acc=0.8697 train_loss=0.3880 val_acc=0.8442 val_loss=0.5885 | epoch 0.15s (train 0.10s, val 0.02s) | batch mean 0.007s max 0.007s (15 batches)
+2026-10-07 13:16:13,357 WARNING /home/ODM/rpotempa/geqie/.venv/lib/python3.12/site-packages/lightning/pytorch/utilities/_pytree.py:21: `isinstance(treespec, LeafSpec)` is deprecated, use `isinstance(treespec, TreeSpec) and treespec.is_leaf()` instead.
+
+2026-10-07 13:16:13,357 WARNING /home/ODM/rpotempa/geqie/.venv/lib/python3.12/site-packages/lightning/pytorch/trainer/connectors/data_connector.py:434: The 'test_dataloader' does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` to `num_workers=63` in the `DataLoader` to improve performance.
+
+2026-10-07 13:16:13,483 INFO Finished: {'test_loss': 0.39095863699913025, 'test_acc': 0.8819444179534912}
+2026-10-07 13:16:13,483 INFO Timing: total 2.1s (fit 2.0s, test 0.0s) | epoch mean 0.15s | batch mean 0.007s

@@ -1,0 +1,86 @@
+2026-10-07 13:16:17,550 INFO === cnn / subset_1 ===
+2026-10-07 13:16:17,551 INFO Dataset: /mnt/data02/mkordasz/datasets_joblib/MNIST_Digits_5_subsets_train_val_test_16x16.joblib
+2026-10-07 13:16:17,558 INFO Train: 921, Val: 231, Test: 288
+2026-10-07 13:16:17,567 INFO ==========================================================================================
+Layer (type:depth-idx)                   Output Shape              Param #
+==========================================================================================
+CNNClassifier                            [64, 10]                  --
+├─Sequential: 1-1                        [64, 32, 4, 4]            --
+│    └─Conv2d: 2-1                       [64, 16, 16, 16]          160
+│    └─ReLU: 2-2                         [64, 16, 16, 16]          --
+│    └─MaxPool2d: 2-3                    [64, 16, 8, 8]            --
+│    └─Conv2d: 2-4                       [64, 32, 8, 8]            4,640
+│    └─ReLU: 2-5                         [64, 32, 8, 8]            --
+│    └─MaxPool2d: 2-6                    [64, 32, 4, 4]            --
+├─Sequential: 1-2                        [64, 10]                  --
+│    └─Flatten: 2-7                      [64, 512]                 --
+│    └─Linear: 2-8                       [64, 64]                  32,832
+│    └─ReLU: 2-9                         [64, 64]                  --
+│    └─Linear: 2-10                      [64, 10]                  650
+│    └─LogSoftmax: 2-11                  [64, 10]                  --
+==========================================================================================
+Total params: 38,282
+Trainable params: 38,282
+Non-trainable params: 0
+Total mult-adds (Units.MEGABYTES): 23.77
+==========================================================================================
+Input size (MB): 0.07
+Forward/backward pass size (MB): 3.18
+Params size (MB): 0.15
+Estimated Total Size (MB): 3.40
+==========================================================================================
+2026-10-07 13:16:17,596 INFO GPU available: False, used: False
+2026-10-07 13:16:17,597 INFO TPU available: False, using: 0 TPU cores
+2026-10-07 13:16:17,597 INFO 💡 Tip: For seamless cloud logging and experiment tracking, try installing [litlogger](https://pypi.org/project/litlogger/) to enable LitLogger, which logs metrics and artifacts automatically to the Lightning Experiments platform.
+2026-10-07 13:16:17,597 INFO 💡 Tip: For seamless cloud uploads and versioning, try installing [litmodels](https://pypi.org/project/litmodels/) to enable LitModelCheckpoint, which syncs automatically with the Lightning model registry.
+2026-10-07 13:16:17,598 WARNING /home/ODM/rpotempa/geqie/.venv/lib/python3.12/site-packages/lightning/pytorch/callbacks/model_checkpoint.py:881: Checkpoint directory /home/ODM/rpotempa/geqie/experiments/QNN_integration/lightning_logs/cnn/subset_1/checkpoints exists and is not empty.
+
+2026-10-07 13:16:17,601 INFO 
+  | Name      | Type               | Params | Mode  | FLOPs
+-----------------------------------------------------------------
+0 | model     | CNNClassifier      | 38.3 K | train | 0    
+1 | train_acc | MulticlassAccuracy | 0      | train | 0    
+2 | val_acc   | MulticlassAccuracy | 0      | train | 0    
+3 | test_acc  | MulticlassAccuracy | 0      | train | 0    
+-----------------------------------------------------------------
+38.3 K    Trainable params
+0         Non-trainable params
+38.3 K    Total params
+0.153     Total estimated model params size (MB)
+17        Modules in train mode
+0         Modules in eval mode
+0         Total Flops
+2026-10-07 13:16:17,603 WARNING /home/ODM/rpotempa/geqie/.venv/lib/python3.12/site-packages/lightning/pytorch/utilities/_pytree.py:21: `isinstance(treespec, LeafSpec)` is deprecated, use `isinstance(treespec, TreeSpec) and treespec.is_leaf()` instead.
+
+2026-10-07 13:16:17,603 WARNING /home/ODM/rpotempa/geqie/.venv/lib/python3.12/site-packages/lightning/pytorch/trainer/connectors/data_connector.py:434: The 'train_dataloader' does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` to `num_workers=63` in the `DataLoader` to improve performance.
+
+2026-10-07 13:16:17,604 WARNING /home/ODM/rpotempa/geqie/.venv/lib/python3.12/site-packages/lightning/pytorch/trainer/connectors/data_connector.py:434: The 'val_dataloader' does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` to `num_workers=63` in the `DataLoader` to improve performance.
+
+2026-10-07 13:16:17,908 INFO epoch 0 | lr=0.0100 train_acc=0.1802 train_loss=2.2089 val_acc=0.4632 val_loss=1.7459 | epoch 0.30s (train 0.25s, val 0.03s) | batch mean 0.017s max 0.049s (15 batches)
+2026-10-07 13:16:18,181 INFO epoch 1 | lr=0.0100 train_acc=0.5223 train_loss=1.3577 val_acc=0.6710 val_loss=0.9518 | epoch 0.26s (train 0.21s, val 0.03s) | batch mean 0.014s max 0.014s (15 batches)
+2026-10-07 13:16:18,457 INFO epoch 2 | lr=0.0100 train_acc=0.7058 train_loss=0.8101 val_acc=0.7922 val_loss=0.6214 | epoch 0.26s (train 0.21s, val 0.03s) | batch mean 0.014s max 0.015s (15 batches)
+2026-10-07 13:16:18,728 INFO epoch 3 | lr=0.0100 train_acc=0.8317 train_loss=0.5356 val_acc=0.8139 val_loss=0.5484 | epoch 0.26s (train 0.21s, val 0.03s) | batch mean 0.014s max 0.016s (15 batches)
+2026-10-07 13:16:18,998 INFO epoch 4 | lr=0.0100 train_acc=0.8643 train_loss=0.4215 val_acc=0.8874 val_loss=0.3995 | epoch 0.26s (train 0.21s, val 0.03s) | batch mean 0.014s max 0.015s (15 batches)
+2026-10-07 13:16:19,264 INFO epoch 5 | lr=0.0100 train_acc=0.9142 train_loss=0.2916 val_acc=0.9091 val_loss=0.3696 | epoch 0.25s (train 0.20s, val 0.03s) | batch mean 0.014s max 0.014s (15 batches)
+2026-10-07 13:16:19,533 INFO epoch 6 | lr=0.0100 train_acc=0.9316 train_loss=0.2110 val_acc=0.9004 val_loss=0.3306 | epoch 0.26s (train 0.21s, val 0.03s) | batch mean 0.014s max 0.015s (15 batches)
+2026-10-07 13:16:19,801 INFO epoch 7 | lr=0.0100 train_acc=0.9490 train_loss=0.1693 val_acc=0.9307 val_loss=0.2607 | epoch 0.26s (train 0.21s, val 0.03s) | batch mean 0.014s max 0.015s (15 batches)
+2026-10-07 13:16:20,066 INFO epoch 8 | lr=0.0100 train_acc=0.9587 train_loss=0.1329 val_acc=0.9048 val_loss=0.3777 | epoch 0.25s (train 0.20s, val 0.03s) | batch mean 0.013s max 0.014s (15 batches)
+2026-10-07 13:16:20,335 INFO epoch 9 | lr=0.0100 train_acc=0.9609 train_loss=0.1256 val_acc=0.9264 val_loss=0.3010 | epoch 0.26s (train 0.21s, val 0.03s) | batch mean 0.014s max 0.014s (15 batches)
+2026-10-07 13:16:20,612 INFO epoch 10 | lr=0.0100 train_acc=0.9772 train_loss=0.0838 val_acc=0.9264 val_loss=0.2707 | epoch 0.27s (train 0.21s, val 0.03s) | batch mean 0.014s max 0.015s (15 batches)
+2026-10-07 13:16:20,883 INFO epoch 11 | lr=0.0100 train_acc=0.9805 train_loss=0.0616 val_acc=0.9394 val_loss=0.2588 | epoch 0.26s (train 0.21s, val 0.03s) | batch mean 0.014s max 0.015s (15 batches)
+2026-10-07 13:16:21,153 INFO epoch 12 | lr=0.0100 train_acc=0.9902 train_loss=0.0416 val_acc=0.9307 val_loss=0.3021 | epoch 0.26s (train 0.21s, val 0.03s) | batch mean 0.014s max 0.015s (15 batches)
+2026-10-07 13:16:21,420 INFO epoch 13 | lr=0.0100 train_acc=0.9870 train_loss=0.0490 val_acc=0.9437 val_loss=0.2610 | epoch 0.26s (train 0.20s, val 0.03s) | batch mean 0.014s max 0.015s (15 batches)
+2026-10-07 13:16:21,736 INFO epoch 14 | lr=0.0100 train_acc=0.9761 train_loss=0.0730 val_acc=0.9221 val_loss=0.2970 | epoch 0.31s (train 0.25s, val 0.03s) | batch mean 0.017s max 0.034s (15 batches)
+2026-10-07 13:16:22,011 INFO epoch 15 | lr=0.0100 train_acc=0.9891 train_loss=0.0365 val_acc=0.9177 val_loss=0.3131 | epoch 0.26s (train 0.21s, val 0.03s) | batch mean 0.014s max 0.017s (15 batches)
+2026-10-07 13:16:22,286 INFO epoch 16 | lr=0.0050 train_acc=0.9957 train_loss=0.0223 val_acc=0.9610 val_loss=0.2272 | epoch 0.26s (train 0.21s, val 0.03s) | batch mean 0.014s max 0.017s (15 batches)
+2026-10-07 13:16:22,552 INFO epoch 17 | lr=0.0050 train_acc=1.0000 train_loss=0.0114 val_acc=0.9437 val_loss=0.2617 | epoch 0.25s (train 0.20s, val 0.03s) | batch mean 0.014s max 0.015s (15 batches)
+2026-10-07 13:16:22,814 INFO epoch 18 | lr=0.0050 train_acc=1.0000 train_loss=0.0071 val_acc=0.9567 val_loss=0.2420 | epoch 0.25s (train 0.20s, val 0.03s) | batch mean 0.013s max 0.014s (15 batches)
+2026-10-07 13:16:23,079 INFO epoch 19 | lr=0.0050 train_acc=1.0000 train_loss=0.0049 val_acc=0.9524 val_loss=0.2581 | epoch 0.25s (train 0.20s, val 0.03s) | batch mean 0.014s max 0.014s (15 batches)
+2026-10-07 13:16:23,346 INFO epoch 20 | lr=0.0050 train_acc=1.0000 train_loss=0.0041 val_acc=0.9567 val_loss=0.2544 | epoch 0.25s (train 0.20s, val 0.03s) | batch mean 0.014s max 0.015s (15 batches)
+2026-10-07 13:16:23,623 INFO epoch 21 | lr=0.0025 train_acc=1.0000 train_loss=0.0034 val_acc=0.9567 val_loss=0.2548 | epoch 0.27s (train 0.21s, val 0.03s) | batch mean 0.014s max 0.017s (15 batches)
+2026-10-07 13:16:23,648 WARNING /home/ODM/rpotempa/geqie/.venv/lib/python3.12/site-packages/lightning/pytorch/utilities/_pytree.py:21: `isinstance(treespec, LeafSpec)` is deprecated, use `isinstance(treespec, TreeSpec) and treespec.is_leaf()` instead.
+
+2026-10-07 13:16:23,648 WARNING /home/ODM/rpotempa/geqie/.venv/lib/python3.12/site-packages/lightning/pytorch/trainer/connectors/data_connector.py:434: The 'test_dataloader' does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` to `num_workers=63` in the `DataLoader` to improve performance.
+
+2026-10-07 13:16:23,787 INFO Finished: {'test_loss': 0.22623008489608765, 'test_acc': 0.9305555820465088}
+2026-10-07 13:16:23,787 INFO Timing: total 6.1s (fit 6.0s, test 0.0s) | epoch mean 0.26s | batch mean 0.014s

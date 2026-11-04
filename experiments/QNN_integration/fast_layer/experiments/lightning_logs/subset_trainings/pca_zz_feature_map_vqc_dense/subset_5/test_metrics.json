@@ -1,0 +1,14 @@
+{
+  "model": "pca_zz_feature_map_vqc_dense",
+  "subset": 5,
+  "status": "ok",
+  "log_dir": "/home/ODM/rpotempa/geqie/experiments/QNN_integration/lightning_logs/pca_zz_feature_map_vqc_dense/subset_5",
+  "epochs": 47,
+  "fit_seconds": 7975.342,
+  "epoch_seconds_mean": 169.676,
+  "batch_seconds_mean": 2.9008,
+  "test_seconds": 1.59,
+  "total_seconds": 7977.239,
+  "test_loss": 1.8425252437591553,
+  "test_acc": 0.3784722089767456
+}

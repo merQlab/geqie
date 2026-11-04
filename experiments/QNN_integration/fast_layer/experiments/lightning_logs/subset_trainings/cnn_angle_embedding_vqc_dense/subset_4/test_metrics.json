@@ -1,0 +1,14 @@
+{
+  "model": "cnn_angle_embedding_vqc_dense",
+  "subset": 4,
+  "status": "ok",
+  "log_dir": "/home/ODM/rpotempa/geqie/experiments/QNN_integration/lightning_logs/cnn_angle_embedding_vqc_dense/subset_4",
+  "epochs": 18,
+  "fit_seconds": 271.229,
+  "epoch_seconds_mean": 15.051,
+  "batch_seconds_mean": 0.2545,
+  "test_seconds": 0.291,
+  "total_seconds": 271.627,
+  "test_loss": 0.10802260786294937,
+  "test_acc": 0.96875
+}

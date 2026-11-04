@@ -1,0 +1,14 @@
+{
+  "model": "frqi_direct_vqc_dense",
+  "subset": 5,
+  "status": "ok",
+  "log_dir": "/home/ODM/rpotempa/geqie/experiments/QNN_integration/lightning_logs/frqi_direct_vqc_dense/subset_5",
+  "epochs": 49,
+  "fit_seconds": 13849.191,
+  "epoch_seconds_mean": 282.619,
+  "batch_seconds_mean": 9.021,
+  "test_seconds": 6.71,
+  "total_seconds": 13856.172,
+  "test_loss": 0.5061169266700745,
+  "test_acc": 0.8645833134651184
+}

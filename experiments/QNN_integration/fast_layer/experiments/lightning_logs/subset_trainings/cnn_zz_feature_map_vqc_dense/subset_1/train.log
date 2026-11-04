@@ -1,0 +1,70 @@
+2026-10-08 00:39:20,591 INFO === cnn_zz_feature_map_vqc_dense / subset_1 ===
+2026-10-08 00:39:20,591 INFO Dataset: /mnt/data02/mkordasz/datasets_joblib/MNIST_Digits_5_subsets_train_val_test_16x16.joblib
+2026-10-08 00:39:20,626 INFO Train: 921, Val: 231, Test: 288
+2026-10-08 00:39:20,729 INFO ==========================================================================================
+Layer (type:depth-idx)                   Output Shape              Param #
+==========================================================================================
+CNNZZVQCDenseClassifier                  [16, 10]                  --
+├─Sequential: 1-1                        [16, 12]                  --
+│    └─Conv2d: 2-1                       [16, 16, 16, 16]          160
+│    └─ReLU: 2-2                         [16, 16, 16, 16]          --
+│    └─MaxPool2d: 2-3                    [16, 16, 8, 8]            --
+│    └─Conv2d: 2-4                       [16, 32, 8, 8]            4,640
+│    └─ReLU: 2-5                         [16, 32, 8, 8]            --
+│    └─MaxPool2d: 2-6                    [16, 32, 4, 4]            --
+│    └─Flatten: 2-7                      [16, 512]                 --
+│    └─Linear: 2-8                       [16, 12]                  6,156
+├─ZZFeatureMapStatevector: 1-2           [16, 4096]                --
+├─SamplerAnsatzLayer: 1-3                [16, 4096]                36
+├─Linear: 1-4                            [16, 10]                  40,970
+├─LogSoftmax: 1-5                        [16, 10]                  --
+==========================================================================================
+Total params: 51,962
+Trainable params: 51,962
+Non-trainable params: 0
+Total mult-adds (Units.MEGABYTES): 8.52
+==========================================================================================
+Input size (MB): 0.02
+Forward/backward pass size (MB): 1.31
+Params size (MB): 0.21
+Estimated Total Size (MB): 1.54
+==========================================================================================
+2026-10-08 00:39:20,760 INFO GPU available: False, used: False
+2026-10-08 00:39:20,760 INFO TPU available: False, using: 0 TPU cores
+2026-10-08 00:39:20,760 INFO 💡 Tip: For seamless cloud logging and experiment tracking, try installing [litlogger](https://pypi.org/project/litlogger/) to enable LitLogger, which logs metrics and artifacts automatically to the Lightning Experiments platform.
+2026-10-08 00:39:20,760 INFO 💡 Tip: For seamless cloud uploads and versioning, try installing [litmodels](https://pypi.org/project/litmodels/) to enable LitModelCheckpoint, which syncs automatically with the Lightning model registry.
+2026-10-08 00:39:20,764 INFO 
+  | Name      | Type                    | Params | Mode  | FLOPs
+----------------------------------------------------------------------
+0 | model     | CNNZZVQCDenseClassifier | 52.0 K | train | 0    
+1 | train_acc | MulticlassAccuracy      | 0      | train | 0    
+2 | val_acc   | MulticlassAccuracy      | 0      | train | 0    
+3 | test_acc  | MulticlassAccuracy      | 0      | train | 0    
+----------------------------------------------------------------------
+52.0 K    Trainable params
+0         Non-trainable params
+52.0 K    Total params
+0.208     Total estimated model params size (MB)
+17        Modules in train mode
+0         Modules in eval mode
+0         Total Flops
+2026-10-08 00:39:20,766 WARNING /home/ODM/rpotempa/geqie/.venv/lib/python3.12/site-packages/lightning/pytorch/utilities/_pytree.py:21: `isinstance(treespec, LeafSpec)` is deprecated, use `isinstance(treespec, TreeSpec) and treespec.is_leaf()` instead.
+
+2026-10-08 00:39:20,766 WARNING /home/ODM/rpotempa/geqie/.venv/lib/python3.12/site-packages/lightning/pytorch/trainer/connectors/data_connector.py:434: The 'train_dataloader' does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` to `num_workers=63` in the `DataLoader` to improve performance.
+
+2026-10-08 00:39:20,767 WARNING /home/ODM/rpotempa/geqie/.venv/lib/python3.12/site-packages/lightning/pytorch/trainer/connectors/data_connector.py:434: The 'val_dataloader' does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` to `num_workers=63` in the `DataLoader` to improve performance.
+
+2026-10-08 00:42:10,736 INFO epoch 0 | lr=0.1000 train_acc=0.0858 train_loss=2.3563 val_acc=0.0996 val_loss=2.3216 | epoch 169.97s (train 168.57s, val 1.32s) | batch mean 2.906s max 3.031s (58 batches)
+2026-10-08 00:45:00,296 INFO epoch 1 | lr=0.1000 train_acc=0.1042 train_loss=2.3240 val_acc=0.0996 val_loss=2.3698 | epoch 169.54s (train 168.04s, val 1.43s) | batch mean 2.897s max 3.282s (58 batches)
+2026-10-08 00:47:50,211 INFO epoch 2 | lr=0.1000 train_acc=0.0955 train_loss=2.3342 val_acc=0.0996 val_loss=2.3074 | epoch 169.90s (train 168.49s, val 1.35s) | batch mean 2.905s max 3.382s (58 batches)
+2026-10-08 00:50:40,990 INFO epoch 3 | lr=0.1000 train_acc=0.0803 train_loss=2.3283 val_acc=0.0996 val_loss=2.3285 | epoch 170.76s (train 169.36s, val 1.33s) | batch mean 2.920s max 3.314s (58 batches)
+2026-10-08 00:53:29,985 INFO epoch 4 | lr=0.1000 train_acc=0.0934 train_loss=2.3312 val_acc=0.0996 val_loss=2.3394 | epoch 168.98s (train 167.60s, val 1.31s) | batch mean 2.890s max 2.991s (58 batches)
+2026-10-08 00:56:22,339 INFO epoch 5 | lr=0.1000 train_acc=0.0988 train_loss=2.3390 val_acc=0.0996 val_loss=2.3257 | epoch 172.34s (train 170.96s, val 1.32s) | batch mean 2.948s max 3.174s (58 batches)
+2026-10-08 00:59:13,215 INFO epoch 6 | lr=0.1000 train_acc=0.0814 train_loss=2.3348 val_acc=0.0996 val_loss=2.3222 | epoch 170.86s (train 168.98s, val 1.81s) | batch mean 2.913s max 3.375s (58 batches)
+2026-10-08 01:02:04,535 INFO epoch 7 | lr=0.0500 train_acc=0.0966 train_loss=2.3194 val_acc=0.0996 val_loss=2.3138 | epoch 171.31s (train 169.85s, val 1.38s) | batch mean 2.928s max 3.205s (58 batches)
+2026-10-08 01:02:04,565 WARNING /home/ODM/rpotempa/geqie/.venv/lib/python3.12/site-packages/lightning/pytorch/utilities/_pytree.py:21: `isinstance(treespec, LeafSpec)` is deprecated, use `isinstance(treespec, TreeSpec) and treespec.is_leaf()` instead.
+
+2026-10-08 01:02:04,565 WARNING /home/ODM/rpotempa/geqie/.venv/lib/python3.12/site-packages/lightning/pytorch/trainer/connectors/data_connector.py:434: The 'test_dataloader' does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` to `num_workers=63` in the `DataLoader` to improve performance.
+
+2026-10-08 01:02:06,379 INFO Finished: {'test_loss': 2.314511299133301, 'test_acc': 0.1006944477558136}
+2026-10-08 01:02:06,379 INFO Timing: total 1365.7s (fit 1363.8s, test 1.7s) | epoch mean 170.46s | batch mean 2.913s

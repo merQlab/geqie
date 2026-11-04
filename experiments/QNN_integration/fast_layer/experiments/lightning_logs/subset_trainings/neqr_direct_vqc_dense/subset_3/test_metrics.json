@@ -1,0 +1,14 @@
+{
+  "model": "neqr_direct_vqc_dense",
+  "subset": 3,
+  "status": "ok",
+  "log_dir": "/home/ODM/rpotempa/geqie/experiments/QNN_integration/lightning_logs/neqr_direct_vqc_dense/subset_3",
+  "epochs": 50,
+  "fit_seconds": 246897.412,
+  "epoch_seconds_mean": 4937.934,
+  "batch_seconds_mean": 127.6406,
+  "test_seconds": 318.495,
+  "total_seconds": 247217.374,
+  "test_loss": 0.5831102728843689,
+  "test_acc": 0.8368055820465088
+}

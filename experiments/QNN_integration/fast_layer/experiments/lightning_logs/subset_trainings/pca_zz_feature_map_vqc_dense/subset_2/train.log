@@ -1,0 +1,100 @@
+2026-10-07 15:43:49,251 INFO === pca_zz_feature_map_vqc_dense / subset_2 ===
+2026-10-07 15:43:49,251 INFO Dataset: /mnt/data02/mkordasz/datasets_joblib/MNIST_Digits_5_subsets_train_val_test_16x16.joblib
+2026-10-07 15:43:49,361 INFO Train: 921, Val: 231, Test: 288
+2026-10-07 15:43:49,495 INFO ==========================================================================================
+Layer (type:depth-idx)                   Output Shape              Param #
+==========================================================================================
+PCAZZVQCDenseClassifier                  [16, 10]                  --
+├─ZZFeatureMapStatevector: 1-1           [16, 4096]                --
+├─SamplerAnsatzLayer: 1-2                [16, 4096]                36
+├─Linear: 1-3                            [16, 10]                  40,970
+├─LogSoftmax: 1-4                        [16, 10]                  --
+==========================================================================================
+Total params: 41,006
+Trainable params: 41,006
+Non-trainable params: 0
+Total mult-adds (Units.MEGABYTES): 3.01
+==========================================================================================
+Input size (MB): 0.00
+Forward/backward pass size (MB): 0.53
+Params size (MB): 0.16
+Estimated Total Size (MB): 0.69
+==========================================================================================
+2026-10-07 15:43:49,526 INFO GPU available: False, used: False
+2026-10-07 15:43:49,526 INFO TPU available: False, using: 0 TPU cores
+2026-10-07 15:43:49,527 INFO 💡 Tip: For seamless cloud logging and experiment tracking, try installing [litlogger](https://pypi.org/project/litlogger/) to enable LitLogger, which logs metrics and artifacts automatically to the Lightning Experiments platform.
+2026-10-07 15:43:49,527 INFO 💡 Tip: For seamless cloud uploads and versioning, try installing [litmodels](https://pypi.org/project/litmodels/) to enable LitModelCheckpoint, which syncs automatically with the Lightning model registry.
+2026-10-07 15:43:49,530 INFO 
+  | Name      | Type                    | Params | Mode  | FLOPs
+----------------------------------------------------------------------
+0 | model     | PCAZZVQCDenseClassifier | 41.0 K | train | 0    
+1 | train_acc | MulticlassAccuracy      | 0      | train | 0    
+2 | val_acc   | MulticlassAccuracy      | 0      | train | 0    
+3 | test_acc  | MulticlassAccuracy      | 0      | train | 0    
+----------------------------------------------------------------------
+41.0 K    Trainable params
+0         Non-trainable params
+41.0 K    Total params
+0.164     Total estimated model params size (MB)
+8         Modules in train mode
+0         Modules in eval mode
+0         Total Flops
+2026-10-07 15:43:49,533 WARNING /home/ODM/rpotempa/geqie/.venv/lib/python3.12/site-packages/lightning/pytorch/utilities/_pytree.py:21: `isinstance(treespec, LeafSpec)` is deprecated, use `isinstance(treespec, TreeSpec) and treespec.is_leaf()` instead.
+
+2026-10-07 15:43:49,533 WARNING /home/ODM/rpotempa/geqie/.venv/lib/python3.12/site-packages/lightning/pytorch/trainer/connectors/data_connector.py:434: The 'train_dataloader' does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` to `num_workers=63` in the `DataLoader` to improve performance.
+
+2026-10-07 15:43:49,534 WARNING /home/ODM/rpotempa/geqie/.venv/lib/python3.12/site-packages/lightning/pytorch/trainer/connectors/data_connector.py:434: The 'val_dataloader' does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` to `num_workers=63` in the `DataLoader` to improve performance.
+
+2026-10-07 15:46:51,728 INFO epoch 0 | lr=0.1000 train_acc=0.0999 train_loss=2.3279 val_acc=0.1169 val_loss=2.2932 | epoch 182.19s (train 180.71s, val 1.40s) | batch mean 3.116s max 3.485s (58 batches)
+2026-10-07 15:49:53,635 INFO epoch 1 | lr=0.1000 train_acc=0.2530 train_loss=2.2064 val_acc=0.1818 val_loss=2.2703 | epoch 181.90s (train 180.43s, val 1.39s) | batch mean 3.111s max 3.417s (58 batches)
+2026-10-07 15:52:56,353 INFO epoch 2 | lr=0.1000 train_acc=0.3931 train_loss=2.0794 val_acc=0.2121 val_loss=2.2496 | epoch 182.71s (train 181.25s, val 1.38s) | batch mean 3.125s max 3.589s (58 batches)
+2026-10-07 15:55:55,967 INFO epoch 3 | lr=0.1000 train_acc=0.5592 train_loss=1.9566 val_acc=0.2684 val_loss=2.2070 | epoch 179.60s (train 178.14s, val 1.39s) | batch mean 3.071s max 3.333s (58 batches)
+2026-10-07 15:58:54,971 INFO epoch 4 | lr=0.1000 train_acc=0.7514 train_loss=1.8269 val_acc=0.2511 val_loss=2.1865 | epoch 178.99s (train 177.50s, val 1.42s) | batch mean 3.060s max 3.126s (58 batches)
+2026-10-07 16:01:54,450 INFO epoch 5 | lr=0.1000 train_acc=0.7872 train_loss=1.7108 val_acc=0.1861 val_loss=2.2051 | epoch 179.47s (train 177.97s, val 1.43s) | batch mean 3.068s max 3.322s (58 batches)
+2026-10-07 16:04:53,517 INFO epoch 6 | lr=0.1000 train_acc=0.8165 train_loss=1.6312 val_acc=0.2771 val_loss=2.1440 | epoch 179.05s (train 177.58s, val 1.40s) | batch mean 3.062s max 3.407s (58 batches)
+2026-10-07 16:08:00,335 INFO epoch 7 | lr=0.1000 train_acc=0.9207 train_loss=1.5070 val_acc=0.2771 val_loss=2.1332 | epoch 186.81s (train 184.97s, val 1.75s) | batch mean 3.189s max 3.540s (58 batches)
+2026-10-07 16:10:51,732 INFO epoch 8 | lr=0.1000 train_acc=0.9164 train_loss=1.4286 val_acc=0.2554 val_loss=2.1243 | epoch 171.39s (train 169.99s, val 1.32s) | batch mean 2.931s max 3.282s (58 batches)
+2026-10-07 16:13:37,850 INFO epoch 9 | lr=0.1000 train_acc=0.9577 train_loss=1.3294 val_acc=0.2987 val_loss=2.1028 | epoch 166.11s (train 164.68s, val 1.35s) | batch mean 2.839s max 3.124s (58 batches)
+2026-10-07 16:16:23,554 INFO epoch 10 | lr=0.1000 train_acc=0.9859 train_loss=1.2428 val_acc=0.2381 val_loss=2.1004 | epoch 165.69s (train 164.30s, val 1.32s) | batch mean 2.833s max 3.034s (58 batches)
+2026-10-07 16:19:08,384 INFO epoch 11 | lr=0.1000 train_acc=0.9794 train_loss=1.1682 val_acc=0.3247 val_loss=2.0736 | epoch 164.82s (train 163.39s, val 1.36s) | batch mean 2.817s max 2.873s (58 batches)
+2026-10-07 16:21:52,653 INFO epoch 12 | lr=0.1000 train_acc=0.9946 train_loss=1.0881 val_acc=0.3247 val_loss=2.0619 | epoch 164.26s (train 162.88s, val 1.31s) | batch mean 2.808s max 2.867s (58 batches)
+2026-10-07 16:24:40,241 INFO epoch 13 | lr=0.1000 train_acc=0.9957 train_loss=1.0259 val_acc=0.3377 val_loss=2.0537 | epoch 167.58s (train 166.10s, val 1.40s) | batch mean 2.864s max 3.154s (58 batches)
+2026-10-07 16:27:25,976 INFO epoch 14 | lr=0.1000 train_acc=0.9902 train_loss=0.9632 val_acc=0.2857 val_loss=2.0558 | epoch 165.72s (train 164.31s, val 1.34s) | batch mean 2.833s max 3.152s (58 batches)
+2026-10-07 16:30:10,627 INFO epoch 15 | lr=0.1000 train_acc=0.9924 train_loss=0.9066 val_acc=0.2900 val_loss=2.0517 | epoch 164.64s (train 163.26s, val 1.31s) | batch mean 2.815s max 3.155s (58 batches)
+2026-10-07 16:32:54,961 INFO epoch 16 | lr=0.1000 train_acc=0.9978 train_loss=0.8471 val_acc=0.2900 val_loss=2.0316 | epoch 164.32s (train 162.92s, val 1.34s) | batch mean 2.809s max 2.861s (58 batches)
+2026-10-07 16:35:39,798 INFO epoch 17 | lr=0.1000 train_acc=0.9967 train_loss=0.7988 val_acc=0.3203 val_loss=2.0190 | epoch 164.83s (train 163.44s, val 1.32s) | batch mean 2.818s max 3.104s (58 batches)
+2026-10-07 16:38:25,614 INFO epoch 18 | lr=0.1000 train_acc=0.9967 train_loss=0.7484 val_acc=0.3160 val_loss=2.0197 | epoch 165.80s (train 164.38s, val 1.34s) | batch mean 2.834s max 3.094s (58 batches)
+2026-10-07 16:41:10,410 INFO epoch 19 | lr=0.1000 train_acc=0.9967 train_loss=0.7033 val_acc=0.3074 val_loss=2.0257 | epoch 164.78s (train 163.32s, val 1.40s) | batch mean 2.816s max 3.004s (58 batches)
+2026-10-07 16:43:55,385 INFO epoch 20 | lr=0.1000 train_acc=0.9978 train_loss=0.6668 val_acc=0.3463 val_loss=2.0041 | epoch 164.96s (train 163.56s, val 1.33s) | batch mean 2.820s max 3.228s (58 batches)
+2026-10-07 16:46:42,542 INFO epoch 21 | lr=0.1000 train_acc=0.9989 train_loss=0.6286 val_acc=0.3420 val_loss=1.9983 | epoch 167.14s (train 165.72s, val 1.34s) | batch mean 2.857s max 3.221s (58 batches)
+2026-10-07 16:49:27,429 INFO epoch 22 | lr=0.1000 train_acc=0.9989 train_loss=0.5888 val_acc=0.3420 val_loss=1.9999 | epoch 164.88s (train 163.46s, val 1.35s) | batch mean 2.818s max 2.889s (58 batches)
+2026-10-07 16:52:12,868 INFO epoch 23 | lr=0.1000 train_acc=1.0000 train_loss=0.5574 val_acc=0.3247 val_loss=1.9970 | epoch 165.43s (train 164.04s, val 1.32s) | batch mean 2.828s max 3.131s (58 batches)
+2026-10-07 16:55:00,636 INFO epoch 24 | lr=0.1000 train_acc=0.9989 train_loss=0.5241 val_acc=0.3030 val_loss=2.0077 | epoch 167.76s (train 166.07s, val 1.61s) | batch mean 2.863s max 3.232s (58 batches)
+2026-10-07 16:57:45,679 INFO epoch 25 | lr=0.1000 train_acc=1.0000 train_loss=0.4943 val_acc=0.3117 val_loss=1.9940 | epoch 165.03s (train 163.65s, val 1.31s) | batch mean 2.821s max 2.999s (58 batches)
+2026-10-07 17:00:30,956 INFO epoch 26 | lr=0.1000 train_acc=1.0000 train_loss=0.4621 val_acc=0.3074 val_loss=2.0038 | epoch 165.26s (train 163.88s, val 1.32s) | batch mean 2.825s max 3.020s (58 batches)
+2026-10-07 17:03:15,547 INFO epoch 27 | lr=0.1000 train_acc=1.0000 train_loss=0.4388 val_acc=0.3333 val_loss=1.9865 | epoch 164.58s (train 163.20s, val 1.32s) | batch mean 2.814s max 2.891s (58 batches)
+2026-10-07 17:06:01,656 INFO epoch 28 | lr=0.1000 train_acc=1.0000 train_loss=0.4180 val_acc=0.3247 val_loss=1.9886 | epoch 166.10s (train 164.69s, val 1.34s) | batch mean 2.839s max 3.160s (58 batches)
+2026-10-07 17:08:46,714 INFO epoch 29 | lr=0.1000 train_acc=1.0000 train_loss=0.3933 val_acc=0.3290 val_loss=1.9859 | epoch 165.05s (train 163.66s, val 1.32s) | batch mean 2.822s max 3.236s (58 batches)
+2026-10-07 17:11:32,097 INFO epoch 30 | lr=0.1000 train_acc=1.0000 train_loss=0.3713 val_acc=0.3203 val_loss=1.9900 | epoch 165.37s (train 163.96s, val 1.35s) | batch mean 2.827s max 3.151s (58 batches)
+2026-10-07 17:14:17,946 INFO epoch 31 | lr=0.1000 train_acc=1.0000 train_loss=0.3560 val_acc=0.3160 val_loss=1.9787 | epoch 165.84s (train 164.44s, val 1.32s) | batch mean 2.835s max 3.156s (58 batches)
+2026-10-07 17:17:03,617 INFO epoch 32 | lr=0.1000 train_acc=1.0000 train_loss=0.3358 val_acc=0.3160 val_loss=1.9754 | epoch 165.66s (train 164.21s, val 1.37s) | batch mean 2.831s max 3.106s (58 batches)
+2026-10-07 17:19:48,098 INFO epoch 33 | lr=0.1000 train_acc=1.0000 train_loss=0.3208 val_acc=0.3506 val_loss=1.9635 | epoch 164.47s (train 163.04s, val 1.36s) | batch mean 2.811s max 2.857s (58 batches)
+2026-10-07 17:22:34,144 INFO epoch 34 | lr=0.1000 train_acc=1.0000 train_loss=0.3022 val_acc=0.3333 val_loss=1.9695 | epoch 166.03s (train 164.56s, val 1.40s) | batch mean 2.837s max 3.228s (58 batches)
+2026-10-07 17:25:19,306 INFO epoch 35 | lr=0.1000 train_acc=1.0000 train_loss=0.2891 val_acc=0.3377 val_loss=1.9705 | epoch 165.15s (train 163.77s, val 1.32s) | batch mean 2.824s max 3.118s (58 batches)
+2026-10-07 17:28:05,030 INFO epoch 36 | lr=0.1000 train_acc=1.0000 train_loss=0.2727 val_acc=0.3247 val_loss=1.9593 | epoch 165.71s (train 164.32s, val 1.32s) | batch mean 2.833s max 3.154s (58 batches)
+2026-10-07 17:30:52,109 INFO epoch 37 | lr=0.1000 train_acc=1.0000 train_loss=0.2591 val_acc=0.3290 val_loss=1.9729 | epoch 167.07s (train 165.56s, val 1.43s) | batch mean 2.854s max 3.331s (58 batches)
+2026-10-07 17:33:37,661 INFO epoch 38 | lr=0.1000 train_acc=1.0000 train_loss=0.2486 val_acc=0.3506 val_loss=1.9640 | epoch 165.54s (train 164.09s, val 1.39s) | batch mean 2.829s max 3.051s (58 batches)
+2026-10-07 17:36:23,087 INFO epoch 39 | lr=0.1000 train_acc=1.0000 train_loss=0.2382 val_acc=0.3506 val_loss=1.9584 | epoch 165.41s (train 164.01s, val 1.33s) | batch mean 2.828s max 3.128s (58 batches)
+2026-10-07 17:39:08,173 INFO epoch 40 | lr=0.1000 train_acc=1.0000 train_loss=0.2251 val_acc=0.3333 val_loss=1.9647 | epoch 165.07s (train 163.69s, val 1.32s) | batch mean 2.822s max 3.277s (58 batches)
+2026-10-07 17:41:52,994 INFO epoch 41 | lr=0.1000 train_acc=1.0000 train_loss=0.2140 val_acc=0.3506 val_loss=1.9580 | epoch 164.81s (train 163.34s, val 1.40s) | batch mean 2.816s max 2.879s (58 batches)
+2026-10-07 17:44:43,659 INFO epoch 42 | lr=0.1000 train_acc=1.0000 train_loss=0.2044 val_acc=0.3290 val_loss=1.9718 | epoch 170.65s (train 169.27s, val 1.31s) | batch mean 2.918s max 3.220s (58 batches)
+2026-10-07 17:47:30,892 INFO epoch 43 | lr=0.1000 train_acc=1.0000 train_loss=0.1959 val_acc=0.3247 val_loss=1.9584 | epoch 167.22s (train 165.36s, val 1.78s) | batch mean 2.851s max 3.157s (58 batches)
+2026-10-07 17:50:15,962 INFO epoch 44 | lr=0.1000 train_acc=1.0000 train_loss=0.1879 val_acc=0.3420 val_loss=1.9750 | epoch 165.06s (train 163.65s, val 1.34s) | batch mean 2.821s max 2.925s (58 batches)
+2026-10-07 17:53:01,125 INFO epoch 45 | lr=0.1000 train_acc=1.0000 train_loss=0.1790 val_acc=0.3506 val_loss=1.9583 | epoch 165.15s (train 163.49s, val 1.59s) | batch mean 2.819s max 3.156s (58 batches)
+2026-10-07 17:55:49,383 INFO epoch 46 | lr=0.0500 train_acc=1.0000 train_loss=0.1689 val_acc=0.3377 val_loss=1.9616 | epoch 168.24s (train 166.67s, val 1.50s) | batch mean 2.874s max 3.401s (58 batches)
+2026-10-07 17:55:49,432 WARNING /home/ODM/rpotempa/geqie/.venv/lib/python3.12/site-packages/lightning/pytorch/utilities/_pytree.py:21: `isinstance(treespec, LeafSpec)` is deprecated, use `isinstance(treespec, TreeSpec) and treespec.is_leaf()` instead.
+
+2026-10-07 17:55:49,433 WARNING /home/ODM/rpotempa/geqie/.venv/lib/python3.12/site-packages/lightning/pytorch/trainer/connectors/data_connector.py:434: The 'test_dataloader' does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` to `num_workers=63` in the `DataLoader` to improve performance.
+
+2026-10-07 17:55:51,403 INFO Finished: {'test_loss': 1.9839532375335693, 'test_acc': 0.3020833432674408}
+2026-10-07 17:55:51,404 INFO Timing: total 7922.0s (fit 7919.9s, test 1.9s) | epoch mean 168.50s | batch mean 2.880s

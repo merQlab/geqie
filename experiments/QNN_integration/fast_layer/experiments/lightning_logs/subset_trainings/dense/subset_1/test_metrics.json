@@ -1,0 +1,14 @@
+{
+  "model": "dense",
+  "subset": 1,
+  "status": "ok",
+  "log_dir": "/home/ODM/rpotempa/geqie/experiments/QNN_integration/lightning_logs/dense/subset_1",
+  "epochs": 20,
+  "fit_seconds": 3.221,
+  "epoch_seconds_mean": 0.152,
+  "batch_seconds_mean": 0.0073,
+  "test_seconds": 0.036,
+  "total_seconds": 3.349,
+  "test_loss": 0.4926334619522095,
+  "test_acc": 0.8506944179534912
+}

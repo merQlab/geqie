@@ -1,0 +1,14 @@
+{
+  "model": "cnn",
+  "subset": 1,
+  "status": "ok",
+  "log_dir": "/home/ODM/rpotempa/geqie/experiments/QNN_integration/lightning_logs/cnn/subset_1",
+  "epochs": 22,
+  "fit_seconds": 6.039,
+  "epoch_seconds_mean": 0.262,
+  "batch_seconds_mean": 0.0141,
+  "test_seconds": 0.046,
+  "total_seconds": 6.141,
+  "test_loss": 0.22623008489608765,
+  "test_acc": 0.9305555820465088
+}

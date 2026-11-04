@@ -1,0 +1,85 @@
+2026-10-09 21:37:37,752 INFO === cnn_frqi_feature_maps_sampler_ansatz_dense / subset_3 ===
+2026-10-09 21:37:37,752 INFO Dataset: /mnt/data02/mkordasz/datasets_joblib/MNIST_Digits_5_subsets_train_val_test_16x16.joblib
+2026-10-09 21:37:37,926 INFO Train: 921, Val: 231, Test: 288
+2026-10-09 21:38:02,002 INFO ==========================================================================================
+Layer (type:depth-idx)                   Output Shape              Param #
+==========================================================================================
+CNNFRQISamplerAnsatzDenseClassifier      [16, 10]                  --
+├─Sequential: 1-1                        [16, 16, 4, 4]            --
+│    └─Conv2d: 2-1                       [16, 8, 16, 16]           80
+│    └─BatchNorm2d: 2-2                  [16, 8, 16, 16]           16
+│    └─ReLU: 2-3                         [16, 8, 16, 16]           --
+│    └─MaxPool2d: 2-4                    [16, 8, 8, 8]             --
+│    └─Conv2d: 2-5                       [16, 16, 8, 8]            1,168
+│    └─BatchNorm2d: 2-6                  [16, 16, 8, 8]            32
+│    └─ReLU: 2-7                         [16, 16, 8, 8]            --
+│    └─MaxPool2d: 2-8                    [16, 16, 4, 4]            --
+├─GEQIELayer: 1-2                        [256, 32]                 --
+├─ModuleList: 1-3                        --                        --
+│    └─SamplerAnsatzLayer: 2-9           [16, 32]                  15
+│    └─SamplerAnsatzLayer: 2-10          [16, 32]                  15
+│    └─SamplerAnsatzLayer: 2-11          [16, 32]                  15
+│    └─SamplerAnsatzLayer: 2-12          [16, 32]                  15
+│    └─SamplerAnsatzLayer: 2-13          [16, 32]                  15
+│    └─SamplerAnsatzLayer: 2-14          [16, 32]                  15
+│    └─SamplerAnsatzLayer: 2-15          [16, 32]                  15
+│    └─SamplerAnsatzLayer: 2-16          [16, 32]                  15
+│    └─SamplerAnsatzLayer: 2-17          [16, 32]                  15
+│    └─SamplerAnsatzLayer: 2-18          [16, 32]                  15
+│    └─SamplerAnsatzLayer: 2-19          [16, 32]                  15
+│    └─SamplerAnsatzLayer: 2-20          [16, 32]                  15
+│    └─SamplerAnsatzLayer: 2-21          [16, 32]                  15
+│    └─SamplerAnsatzLayer: 2-22          [16, 32]                  15
+│    └─SamplerAnsatzLayer: 2-23          [16, 32]                  15
+│    └─SamplerAnsatzLayer: 2-24          [16, 32]                  15
+├─Flatten: 1-4                           [16, 512]                 --
+├─Linear: 1-5                            [16, 10]                  5,130
+├─LogSoftmax: 1-6                        [16, 10]                  --
+==========================================================================================
+Total params: 6,666
+Trainable params: 6,666
+Non-trainable params: 0
+Total mult-adds (Units.MEGABYTES): 1.73
+==========================================================================================
+Input size (MB): 0.02
+Forward/backward pass size (MB): 0.85
+Params size (MB): 0.03
+Estimated Total Size (MB): 0.90
+==========================================================================================
+2026-10-09 21:38:02,035 INFO GPU available: False, used: False
+2026-10-09 21:38:02,035 INFO TPU available: False, using: 0 TPU cores
+2026-10-09 21:38:02,035 INFO 💡 Tip: For seamless cloud logging and experiment tracking, try installing [litlogger](https://pypi.org/project/litlogger/) to enable LitLogger, which logs metrics and artifacts automatically to the Lightning Experiments platform.
+2026-10-09 21:38:02,035 INFO 💡 Tip: For seamless cloud uploads and versioning, try installing [litmodels](https://pypi.org/project/litmodels/) to enable LitModelCheckpoint, which syncs automatically with the Lightning model registry.
+2026-10-09 21:38:02,040 INFO 
+  | Name      | Type                                | Params | Mode  | FLOPs
+----------------------------------------------------------------------------------
+0 | model     | CNNFRQISamplerAnsatzDenseClassifier | 6.7 K  | train | 0    
+1 | train_acc | MulticlassAccuracy                  | 0      | train | 0    
+2 | val_acc   | MulticlassAccuracy                  | 0      | train | 0    
+3 | test_acc  | MulticlassAccuracy                  | 0      | train | 0    
+----------------------------------------------------------------------------------
+6.7 K     Trainable params
+0         Non-trainable params
+6.7 K     Total params
+0.027     Total estimated model params size (MB)
+34        Modules in train mode
+0         Modules in eval mode
+0         Total Flops
+2026-10-09 21:38:02,043 WARNING /home/ODM/rpotempa/geqie/.venv/lib/python3.12/site-packages/lightning/pytorch/utilities/_pytree.py:21: `isinstance(treespec, LeafSpec)` is deprecated, use `isinstance(treespec, TreeSpec) and treespec.is_leaf()` instead.
+
+2026-10-09 21:38:02,043 WARNING /home/ODM/rpotempa/geqie/.venv/lib/python3.12/site-packages/lightning/pytorch/trainer/connectors/data_connector.py:434: The 'train_dataloader' does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` to `num_workers=63` in the `DataLoader` to improve performance.
+
+2026-10-09 21:38:02,044 WARNING /home/ODM/rpotempa/geqie/.venv/lib/python3.12/site-packages/lightning/pytorch/trainer/connectors/data_connector.py:434: The 'val_dataloader' does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` to `num_workers=63` in the `DataLoader` to improve performance.
+
+2026-10-09 22:31:58,601 INFO epoch 0 | lr=0.1000 train_acc=0.2434 train_loss=30.2128 val_acc=0.4242 val_loss=10.1165 | epoch 3236.55s (train 2886.97s, val 349.47s) | batch mean 50.649s max 51.449s (57 batches)
+2026-10-09 23:25:53,726 INFO epoch 1 | lr=0.1000 train_acc=0.4112 train_loss=11.6634 val_acc=0.4416 val_loss=13.6625 | epoch 3235.11s (train 2884.87s, val 350.12s) | batch mean 50.612s max 51.422s (57 batches)
+2026-10-10 00:19:51,083 INFO epoch 2 | lr=0.1000 train_acc=0.4496 train_loss=13.5211 val_acc=0.3636 val_loss=15.4696 | epoch 3237.33s (train 2887.28s, val 349.94s) | batch mean 50.654s max 51.584s (57 batches)
+2026-10-10 01:13:44,759 INFO epoch 3 | lr=0.1000 train_acc=0.3509 train_loss=14.3148 val_acc=0.4632 val_loss=14.0256 | epoch 3233.66s (train 2882.39s, val 351.16s) | batch mean 50.568s max 51.598s (57 batches)
+2026-10-10 02:07:40,400 INFO epoch 4 | lr=0.1000 train_acc=0.1732 train_loss=39.8190 val_acc=0.0996 val_loss=54.6284 | epoch 3235.62s (train 2884.37s, val 351.13s) | batch mean 50.603s max 51.599s (57 batches)
+2026-10-10 03:01:42,322 INFO epoch 5 | lr=0.0500 train_acc=0.1151 train_loss=22.4810 val_acc=0.0996 val_loss=14.7557 | epoch 3241.90s (train 2891.83s, val 349.96s) | batch mean 50.734s max 51.698s (57 batches)
+2026-10-10 03:01:42,358 WARNING /home/ODM/rpotempa/geqie/.venv/lib/python3.12/site-packages/lightning/pytorch/utilities/_pytree.py:21: `isinstance(treespec, LeafSpec)` is deprecated, use `isinstance(treespec, TreeSpec) and treespec.is_leaf()` instead.
+
+2026-10-10 03:01:42,359 WARNING /home/ODM/rpotempa/geqie/.venv/lib/python3.12/site-packages/lightning/pytorch/trainer/connectors/data_connector.py:434: The 'test_dataloader' does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` to `num_workers=63` in the `DataLoader` to improve performance.
+
+2026-10-10 03:08:41,936 INFO Finished: {'test_loss': 14.706089973449707, 'test_acc': 0.1006944477558136}
+2026-10-10 03:08:41,937 INFO Timing: total 19864.1s (fit 19420.3s, test 419.5s) | epoch mean 3236.69s | batch mean 50.637s

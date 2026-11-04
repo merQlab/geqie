@@ -1,0 +1,14 @@
+{
+  "model": "cnn_frqi_feature_maps_sampler_ansatz_dense",
+  "subset": 1,
+  "status": "ok",
+  "log_dir": "/home/ODM/rpotempa/geqie/experiments/QNN_integration/lightning_logs/cnn_frqi_feature_maps_sampler_ansatz_dense/subset_1",
+  "epochs": 7,
+  "fit_seconds": 22685.452,
+  "epoch_seconds_mean": 3240.757,
+  "batch_seconds_mean": 50.693,
+  "test_seconds": 421.261,
+  "total_seconds": 23130.327,
+  "test_loss": 14.971095085144043,
+  "test_acc": 0.2743055522441864
+}
