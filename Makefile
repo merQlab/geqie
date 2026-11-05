@@ -64,6 +64,11 @@ install-requirements-ci:
 	uv pip install ./geqie[dev] --system
 # 	uv pip install ./geqie-qml --system
 
-test:
-	pytest geqie/tests geqie-qml/tests -W ignore::DeprecationWarning
-	pytest geqie-qml/tests -W ignore::DeprecationWarning
+test: test-geqie test-geqie-qml
+
+test-geqie:
+	pytest geqie/tests -W ignore::DeprecationWarning
+
+# Exit code 5 means "no tests collected"; tolerate it while geqie-qml has no tests.
+test-geqie-qml:
+	pytest geqie-qml/tests -W ignore::DeprecationWarning || [ $$? -eq 5 ]
