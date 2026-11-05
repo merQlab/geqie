@@ -17,9 +17,9 @@ GEQIE (from General Equation of Quantum Image Encoding [[1](#references)]) is a 
     - [GEQIE](#geqie)
     - [GEQIE QML](#geqie-qml)
   - [CLI usage](#cli-usage)
-- [Playground (GUI)](#playground-gui)
 - [Citation](#citation)
 - [Related research](#related-research)
+- [Web Playground](#web-playground)
 - [Acknowledgements](#acknowledgements)
 - [References](#references)
 
@@ -27,12 +27,6 @@ Related documentation:
 - [`geqie/README.md`](geqie/README.md)
 - [`geqie-qml/README.md`](geqie-qml/README.md)
 - [`gui/README.md`](gui/README.md)
-
-
-
-The repository includes the core library with CLI, quantum machine learning (QML) extensions, and a web-based GUI playground.
-
-![geqie_diagram](assets/geqie_diagram.png)
 
 
 ## Packages
@@ -83,15 +77,6 @@ See the [`examples/`](examples/) directory for iPython notebooks:
 See [geqie/README.md](geqie/README.md) for full CLI reference.
 
 
-## Playground (GUI)
-
-Public GUI access: [https://web-staging-eb84.up.railway.app](https://web-staging-eb84.up.railway.app/) (Pending deployment on the university infrastructure).
-
-![geqie_gui_gif](assets/geqie_gui.gif)
-
-See the [gui/README.md](gui/README.md) for instructions on running the GEQIE GUI locally.
-
-
 ## Citation
 
 If you use this code in your research, please cite the main paper:
@@ -103,6 +88,16 @@ If you use this code in your research, please cite the main paper:
 
 - [Main paper - GEQIE Framework for Rapid Quantum Image Encoding](https://arxiv.org/abs/2512.24973)
 - [ICCS 2024 Poster](https://www.researchgate.net/publication/383184874_General_Quantum_Image_Representation_Model_and_Framework)
+
+
+## Web Playground
+
+Public GUI access: [https://web-staging-eb84.up.railway.app](https://web-staging-eb84.up.railway.app/) (Pending deployment on the university infrastructure).
+
+![geqie_gui_gif](assets/geqie_gui.gif)
+
+See the [gui/README.md](gui/README.md) for instructions on running the GEQIE GUI locally.
+
 
 ## Acknowledgements
 
