@@ -1,0 +1,51 @@
+<svg width="900" height="500" viewBox="0 0 900 500" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="GEQIE ket logo">
+  <rect width="900" height="500" fill="white"/>
+
+  <!-- Colors -->
+  <!-- cyan:   #16C5E5 -->
+  <!-- blue:   #1F6BFF -->
+
+  <!-- Ket vertical bar -->
+  <rect x="410" y="85" width="34" height="330" rx="17" fill="#1a1a1a"/>
+
+  <!-- Lowercase g -->
+  <text x="490" y="350"
+        font-family="'Bell MT'"
+        font-size="350"
+        font-style="italic"
+        font-weight="bold"
+        fill="#1a1a1a"
+        stroke="#1a1a1a"
+        stroke-width="10"
+        stroke-linejoin="round">g</text>
+
+  <!-- Ket bracket -->
+  <path d="M705 95 L800 250 L705 405"
+        fill="none"
+        stroke="#1a1a1a"
+        stroke-width="34"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+
+  <!-- Pixel grid -->
+  <g transform="translate(80,120)">
+    <!-- left column -->
+    <rect x="0"   y="0"   width="70" height="70" rx="8" fill="#16C5E5"/>
+    <rect x="0"   y="95"  width="70" height="70" rx="8" fill="#16C5E5"/>
+    <rect x="0"   y="190" width="70" height="70" rx="8" fill="#16C5E5"/>
+
+    <!-- middle column -->
+    <rect x="95"  y="0"   width="70" height="70" rx="8" fill="#1F6BFF"/>
+    <rect x="95"  y="95"  width="70" height="70" rx="8" fill="#1F6BFF"/>
+    <rect x="95"  y="190" width="70" height="70" rx="8" fill="#1F6BFF"/>
+
+    <!-- top connection -->
+    <path d="M165 35 H240" stroke="#1F6BFF" stroke-width="18" stroke-linecap="round" fill="none"/>
+    <circle cx="275" cy="35" r="28" fill="none" stroke="#1F6BFF" stroke-width="18"/>
+
+    <!-- lower connection -->
+    <path d="M165 225 H225 L265 130 H390" stroke="#1F6BFF" stroke-width="18" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <!-- short blue segment crossing near ket bar -->
+    <path d="M300 130 H390" stroke="#1F6BFF" stroke-width="18" stroke-linecap="round" fill="none"/>
+  </g>
+</svg>
