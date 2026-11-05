@@ -1,0 +1,76 @@
+# Builds the geqie package and publishes it via PyPI Trusted Publishing (OIDC).
+# - Push a tag `geqie-v<version>` (matching geqie/pyproject.toml) -> publish to PyPI.
+# - Run manually (workflow_dispatch) -> publish to TestPyPI.
+
+name: Publish geqie
+
+on:
+  push:
+    tags: [ "geqie-v*" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+    - name: Install build tools
+      run: python -m pip install -U build twine
+    - name: Verify tag matches package version
+      if: github.event_name == 'push'
+      run: |
+        version=$(python -c "import tomllib; print(tomllib.load(open('geqie/pyproject.toml', 'rb'))['project']['version'])")
+        if [ "${GITHUB_REF_NAME}" != "geqie-v${version}" ]; then
+          echo "::error::Tag ${GITHUB_REF_NAME} does not match geqie/pyproject.toml version ${version} (expected geqie-v${version})"
+          exit 1
+        fi
+    - name: Build sdist and wheel
+      run: python -m build geqie --outdir dist
+    - name: Check distributions
+      run: python -m twine check --strict dist/*
+    - uses: actions/upload-artifact@v4
+      with:
+        name: geqie-dist
+        path: dist/
+
+  publish-pypi:
+    if: github.event_name == 'push'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/geqie
+    permissions:
+      id-token: write
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        name: geqie-dist
+        path: dist/
+    - uses: pypa/gh-action-pypi-publish@release/v1
+
+  publish-testpypi:
+    if: github.event_name == 'workflow_dispatch'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/geqie
+    permissions:
+      id-token: write
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        name: geqie-dist
+        path: dist/
+    - uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        repository-url: https://test.pypi.org/legacy/
+        skip-existing: true
