@@ -1,6 +1,6 @@
 [project]
 name = "geqie"
-version = "1.0"
+version = "1.0.0"
 description = "General Equation of Quantum Image Encoding Framework"
 readme = "README.md"
 requires-python = ">=3.10"
