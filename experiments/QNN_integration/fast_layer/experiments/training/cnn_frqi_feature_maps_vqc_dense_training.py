@@ -14,29 +14,33 @@ import training_common as common
 from training_common import IMAGE_SIZE, N_CLASSES, ModelSpec, SubsetContext, TrainingSetup
 
 BATCH_SIZE = 16
-FEATURE_MAPS = 16  # CNN output channels (also the number of independent ansatz layers)
-N_QUBITS = 5  # FRQI on a 4x4 feature map: 2*ceil(log2(4)) + 1
-N_LAYERS = 1  # default_vqc_ansatz repetitions, per feature map
-LEARNING_RATE = 0.1
+CONV1_CHANNELS = 8  # CNN channels after first conv layer 
+FEATURE_MAPS = 8  # CNN output channels (also the number of independent ansatz layers)
+N_QUBITS = 7  # FRQI on a 4x4 feature map: 2*ceil(log2(4)) + 1, on 8x8 feature map: 2*ceil(log2(8)) + 1
+N_QUANTUM_LAYERS = 1  # default_vqc_ansatz repetitions, per feature map
+N_POOLING_LAYERS = 1 
+LEARNING_RATE = 0.001
 
 
 class CNNFRQISamplerAnsatzDenseClassifier(nn.Module):
     def __init__(
-        self, num_qubits: int, num_layers: int, num_classes: int, feature_maps: int, scale_output: bool = True
+        self, num_qubits: int, num_layers: int, num_classes: int, feature_maps: int, conv1_channels: int, num_pooling_layers: int, scale_output: bool = True
     ):
         super().__init__()
         self.num_qubits = num_qubits
         self.scale_output = scale_output
         self.cnn = nn.Sequential(
-            nn.Conv2d(1, 8, kernel_size=3, padding=1),
-            nn.BatchNorm2d(8),
+            nn.Conv2d(in_channels=1, out_channels=conv1_channels, kernel_size=3, padding=1),
+            nn.BatchNorm2d(conv1_channels),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2),
-            nn.Conv2d(8, feature_maps, kernel_size=3, padding=1),
+            nn.Conv2d(in_channels=conv1_channels, out_channels=feature_maps, kernel_size=3, padding=1),
             nn.BatchNorm2d(feature_maps),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2),
         )
+        if num_pooling_layers > 1:
+            self.cnn.add_module("maxpool2", nn.MaxPool2d(kernel_size=2, stride=2))
+    
         self.encoder = GEQIELayer(geqie_encoding="frqi")
         self.vqcs = nn.ModuleList([
             SamplerAnsatzLayer(num_qubits, default_vqc_ansatz(num_qubits, num_layers=num_layers), seed=i)
@@ -60,7 +64,7 @@ class CNNFRQISamplerAnsatzDenseClassifier(nn.Module):
 
 def build(context: SubsetContext) -> TrainingSetup:
     train_loader, val_loader, test_loader = common.image_loaders(context.data_block, BATCH_SIZE, drop_last_train=True)
-    model = CNNFRQISamplerAnsatzDenseClassifier(N_QUBITS, N_LAYERS, N_CLASSES, FEATURE_MAPS)
+    model = CNNFRQISamplerAnsatzDenseClassifier(N_QUBITS, N_QUANTUM_LAYERS, N_CLASSES, FEATURE_MAPS, CONV1_CHANNELS, N_POOLING_LAYERS)
     return TrainingSetup(model, train_loader, val_loader, test_loader, (BATCH_SIZE, 1, IMAGE_SIZE, IMAGE_SIZE))
 
 
