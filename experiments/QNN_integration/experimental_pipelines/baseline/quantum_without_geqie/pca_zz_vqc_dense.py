@@ -35,7 +35,7 @@ from geqie_qml.ansatze import default_vqc_ansatz
 class PCAZZVQCDenseClassifier(nn.Module):
 	def __init__(
 		self,
-		num_qubits: int = 12,
+		num_qubits: int = 9,
 		num_layers: int = 1,
 		num_classes: int = 10,
 	) -> None:
@@ -69,7 +69,7 @@ def train_one_subset(
 	data_block: DataBlock,
 	*,
 	num_classes=10,
-	num_qubits=12,
+	num_qubits=9,
 	num_layers=1,
 	epochs=50,
 	batch_size=16,
@@ -110,12 +110,12 @@ def train_one_subset(
 def run(
 	dataset=None,
 	*,
-	dataset_id="mnist_digits",
+	dataset_id="mnist_fashion",
 	**overrides,
 ):
 	run_options = {
 		"num_classes": 10,
-		"num_qubits": 12,
+		"num_qubits": 9,
 		"num_layers": 1,
 		"epochs": 50,
 		"batch_size": 16,

@@ -1,0 +1,18 @@
+{
+  "pipeline_name": "CNN + ZZ feature map + VQC + dense",
+  "dataset_id": "mnist_fashion",
+  "experiment_group": "baseline",
+  "model_family": "quantum_without_geqie",
+  "encoding_id": "zz_feature_map",
+  "model_id": "cnn_vqc_dense",
+  "summary": {
+    "accuracy_mean": 0.7798611111111111,
+    "accuracy_std": 0.014665772279126986,
+    "precision_mean": 0.7896593899056294,
+    "precision_std": 0.01694344884843907,
+    "recall_mean": 0.7798611111111111,
+    "recall_std": 0.014665772279126986,
+    "f1_mean": 0.7797972135028698,
+    "f1_std": 0.015012151934249672
+  }
+}

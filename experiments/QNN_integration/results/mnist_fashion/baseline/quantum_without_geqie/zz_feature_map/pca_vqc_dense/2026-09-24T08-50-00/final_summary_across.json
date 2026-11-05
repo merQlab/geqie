@@ -1,0 +1,18 @@
+{
+  "pipeline_name": "PCA + ZZ feature map + VQC + dense",
+  "dataset_id": "mnist_fashion",
+  "experiment_group": "baseline",
+  "model_family": "quantum_without_geqie",
+  "encoding_id": "zz_feature_map",
+  "model_id": "pca_vqc_dense",
+  "summary": {
+    "accuracy_mean": 0.26319444444444445,
+    "accuracy_std": 0.009160351359911736,
+    "precision_mean": 0.2658783546193886,
+    "precision_std": 0.013565874815574197,
+    "recall_mean": 0.26319444444444445,
+    "recall_std": 0.009160351359911736,
+    "f1_mean": 0.25800524719608786,
+    "f1_std": 0.008675802156994254
+  }
+}
