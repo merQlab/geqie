@@ -2,7 +2,9 @@
 name = "geqie-qml"
 version = "0.4.0"
 description = "GEQIE QML extension"
+readme = "README.md"
 requires-python = ">=3.10"
+license = {text = "Apache-2.0"}
 dynamic = ["dependencies", "optional-dependencies"]
 
 [build-system]
@@ -18,3 +20,4 @@ optional-dependencies.dev = {file = ["./requirements/requirements_dev.txt"]}
 
 [tool.setuptools.packages.find]
 where = ["src"]
+exclude = ["tests*"]

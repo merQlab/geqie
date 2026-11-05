@@ -187,3 +187,13 @@ def execute(
         return {**counts_padded, **counts}
     else:
         return counts
+
+
+def retrieve(
+    retrieve_function: Callable[..., np.ndarray],
+    results: Dict[str, int],
+    image_dimensionality: int = 2,
+    encoding_params: Dict[str, Any] = {},
+    **_: Dict[Any, Any],
+) -> np.ndarray:
+    return retrieve_function(results, image_dimensionality=image_dimensionality, **encoding_params)

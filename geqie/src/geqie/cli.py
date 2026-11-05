@@ -104,13 +104,9 @@ def execute_options(func) -> Callable:
 
 
 def retrieve_options(func) -> Callable:
-    @cloup.option(
-        "--encoding",
-        required=True,
-        type=str,
-        help="Name of the encoding from 'encodings' directory.",
-    )
+    @cloup.option("--encoding", required=True, type=str, help="Name of the encoding from 'encodings' directory.")
     @cloup.option("--result", required=True, type=str, help="Result from simulation")
+    @cloup.option("--bitrate", type=int, default=8, show_default=True, help="Number of color bits for encodings that support it")
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         return func(*args, **kwargs)

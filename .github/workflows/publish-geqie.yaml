@@ -1,0 +1,96 @@
+# Builds the geqie package and publishes it via PyPI Trusted Publishing (OIDC).
+# - Publish a GitHub Release tagged `geqie-v<version>` (matching geqie/pyproject.toml) -> publish to PyPI and attach dists to the release.
+# - Run manually (workflow_dispatch) -> publish to TestPyPI.
+
+name: Publish geqie
+
+on:
+  release:
+    types: [ published ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.event.release.tag_name, 'geqie-v')
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+    - name: Install build tools
+      run: python -m pip install -U build twine
+    - name: Verify tag matches package version
+      if: github.event_name == 'release'
+      env:
+        TAG: ${{ github.event.release.tag_name }}
+      run: |
+        version=$(python -c "import tomllib; print(tomllib.load(open('geqie/pyproject.toml', 'rb'))['project']['version'])")
+        if [ "${TAG}" != "geqie-v${version}" ]; then
+          echo "::error::Tag ${TAG} does not match geqie/pyproject.toml version ${version} (expected geqie-v${version})"
+          exit 1
+        fi
+    - name: Build sdist and wheel
+      run: python -m build geqie --outdir dist
+    - name: Check distributions
+      run: python -m twine check --strict dist/*
+    - uses: actions/upload-artifact@v4
+      with:
+        name: geqie-dist
+        path: dist/
+
+  publish-pypi:
+    if: github.event_name == 'release'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/geqie
+    permissions:
+      id-token: write
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        name: geqie-dist
+        path: dist/
+    - uses: pypa/gh-action-pypi-publish@release/v1
+
+  upload-release-assets:
+    if: github.event_name == 'release'
+    needs: publish-pypi
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        name: geqie-dist
+        path: dist/
+    - name: Attach distributions to the GitHub Release
+      env:
+        GH_TOKEN: ${{ github.token }}
+        TAG: ${{ github.event.release.tag_name }}
+      run: gh release upload "${TAG}" dist/* --repo "${{ github.repository }}" --clobber
+
+  publish-testpypi:
+    if: github.event_name == 'workflow_dispatch'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/geqie
+    permissions:
+      id-token: write
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        name: geqie-dist
+        path: dist/
+    - uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        repository-url: https://test.pypi.org/legacy/
+        skip-existing: true
