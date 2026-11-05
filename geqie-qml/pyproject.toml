@@ -18,3 +18,4 @@ optional-dependencies.dev = {file = ["./requirements/requirements_dev.txt"]}
 
 [tool.setuptools.packages.find]
 where = ["src"]
+exclude = ["tests*"]

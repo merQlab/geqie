@@ -65,4 +65,5 @@ install-requirements-ci:
 # 	uv pip install ./geqie-qml --system
 
 test:
-	pytest tests -W ignore::DeprecationWarning
+	pytest geqie/tests geqie-qml/tests -W ignore::DeprecationWarning
+	pytest geqie-qml/tests -W ignore::DeprecationWarning
