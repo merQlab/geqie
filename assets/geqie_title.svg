@@ -2,11 +2,12 @@
   <rect width="1400" height="500" fill="white"/>
 
   <!-- Colors -->
+  <!-- charcoal: #1A1A1A -->
   <!-- cyan:   #16C5E5 -->
   <!-- blue:   #1F6BFF -->
 
   <!-- Ket vertical bar -->
-  <rect x="410" y="85" width="34" height="330" rx="17" fill="#1a1a1a"/>
+  <rect x="410" y="85" width="34" height="330" rx="17" fill="#1A1A1A"/>
 
   <!-- Lowercase g -->
   <text x="490" y="350"
@@ -14,15 +15,15 @@
         font-size="350"
         font-style="italic"
         font-weight="bold"
-        fill="#1a1a1a"
-        stroke="#1a1a1a"
+        fill="#1A1A1A"
+        stroke="#1A1A1A"
         stroke-width="10"
         stroke-linejoin="round">g</text>
 
   <!-- Ket bracket -->
   <path d="M705 95 L800 250 L705 405"
         fill="none"
-        stroke="#1a1a1a"
+        stroke="#1A1A1A"
         stroke-width="34"
         stroke-linecap="round"
         stroke-linejoin="round"/>
@@ -33,8 +34,8 @@
         font-size="350"
         font-style="italic"
         font-weight="bold"
-        fill="#1a1a1a"
-        stroke="#1a1a1a"
+        fill="#1A1A1A"
+        stroke="#1A1A1A"
         stroke-width="10"
         stroke-linejoin="round">eqie</text>
 
