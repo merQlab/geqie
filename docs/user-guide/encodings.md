@@ -65,7 +65,7 @@ def map(u: int, v: int, R: int, image: np.ndarray, **_) -> Operator:
     ])
 
 
-image = np.asarray(Image.open("assets/test_images/grayscale/test_image_4x4.png"))
+image = np.asarray(Image.open("assets/test_images/grayscale/test_image_4x4.png").convert("L"))
 circuit = geqie.encode(init, data, map, image)
 ```
 
