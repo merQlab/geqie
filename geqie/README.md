@@ -1,6 +1,6 @@
 # geqie <!-- omit in toc -->
 
-Core quantum image encoding library.
+Core quantum image encoding library. Full documentation: [https://merqlab.github.io/geqie](https://merqlab.github.io/geqie/).
 
 ## Table of contents <!-- omit in toc -->
 
@@ -133,7 +133,7 @@ geqie.execute(
 | `dry_run`              | Set up the backend and transpile, but don't submit the job (returns `None`)         |
 | `api_token`            | IBM Quantum API token (used with `instance_crn`)                                    |
 | `instance_crn`         | IBM Quantum instance CRN                                                            |
-| `credentials_name`     | Name of saved `QiskitRuntimeService` credentials (alternative to `api_token`)       |
+| `credentials_name`     | Name of saved `QiskitRuntimeService` credentials (alternative to `api_token`); if neither is given, the default saved account is used |
 | `backend`              | Backend name; if empty, the least busy backend with enough qubits is selected      |
 | `channel`              | Qiskit Runtime channel                                                              |
 | `ibm_qp_runtime_args`  | Extra keyword arguments for `QiskitRuntimeService`                                  |
@@ -232,6 +232,14 @@ Options:
   --return-padded-counts BOOLEAN  Return state counts including zero-count
                                   states  [default: False]
   --output-path TEXT              Path to where the results will be written
+  --credentials-name TEXT         Name of saved IBM Quantum credentials; if no
+                                  credentials are given, the default saved
+                                  account is used
+  --api-token TEXT                IBM Quantum API token (used with --instance-
+                                  crn)
+  --instance-crn TEXT             IBM Quantum instance CRN
+  --channel TEXT                  Qiskit Runtime channel  [default:
+                                  ibm_quantum_platform]
   -e, --encoding-params KEY=VALUE
                                   Arbitrary extra parameters as key=value
                                   pairs. May be repeated, e.g.,

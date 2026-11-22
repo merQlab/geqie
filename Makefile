@@ -20,15 +20,9 @@ down:
 
 ## Installation Targets
 install-requirements:
-	pip install -r requirements/requirements.in
-
-install-requirements-dev:
-	pip install -r requirements/requirements_dev.in
-
-install-requirements-uv:
 	uv pip install -r requirements/requirements.in
 
-install-requirements-uv-dev:
+install-requirements-dev:
 	uv pip install -r requirements/requirements_dev.in
 
 
@@ -54,21 +48,45 @@ regenerate-requirements-geqie-qml:
 		geqie-qml/requirements/requirements_dev.in \
 		-o geqie-qml/requirements/requirements_dev.txt
 
-regenerate-requirements: regenerate-requirements-geqie regenerate-requirements-geqie-qml
+# Constrained by the geqie dev lock so both can be installed into one environment.
+regenerate-requirements-docs:
+	uv pip compile \
+		docs/requirements/requirements.in \
+		-c geqie/requirements/requirements_dev.txt \
+		-o docs/requirements/requirements.txt
+
+regenerate-requirements: regenerate-requirements-geqie regenerate-requirements-geqie-qml regenerate-requirements-docs
 
 
-## CI Targets
+## Documentation
+install-requirements-docs:
+	uv pip install -r docs/requirements/requirements.txt
 
-install-requirements-ci:
-	pip install -U uv
-	uv pip install ./geqie[dev] --system
-# 	uv pip install ./geqie-qml --system
+docs-serve:
+	zensical serve
 
-test: test-geqie test-geqie-qml
+docs-build:
+	zensical build --clean --strict
+
+
+## Tests
+test: test-geqie test-geqie-qml test-docs
 
 test-geqie:
 	pytest geqie/tests -W ignore::DeprecationWarning
 
+test-docs:
+	pytest docs --markdown-docs --markdown-docs-syntax=superfences -W ignore::DeprecationWarning
+
 # Exit code 5 means "no tests collected"; tolerate it while geqie-qml has no tests.
 test-geqie-qml:
 	pytest geqie-qml/tests -W ignore::DeprecationWarning || [ $$? -eq 5 ]
+
+
+## CI Setup
+install-requirements-ci:
+	pip install -U uv
+	uv pip install --system \
+		"./geqie[dev]" \
+		-r docs/requirements/requirements.txt
+# 	uv pip install ./geqie-qml --system

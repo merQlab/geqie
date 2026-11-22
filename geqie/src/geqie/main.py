@@ -28,6 +28,33 @@ def encode(
     encoding_params: Dict[str, str] = {},
     **_: Dict[Any, Any],
 ) -> QuantumCircuit:
+    """
+    Build a quantum circuit encoding the image using the provided encoding functions.
+
+    Parameters
+    ----------
+    init_function : Callable[..., Statevector]
+        Function ``(n_qubits, **encoding_params)`` returning the initial state of the circuit.
+    data_function : Callable[..., Statevector]
+        Function ``(*coords, R, image, **encoding_params)`` returning the data (pixel position) state for a pixel.
+    map_function : Callable[..., Operator]
+        Function ``(*coords, R, image, **encoding_params)`` returning the map (pixel value) operator for a pixel.
+    image : np.ndarray
+        Image to encode.
+    image_dimensionality : int
+        Number of leading image axes treated as spatial coordinates (the remaining axes are e.g. channels).
+    perform_measurement : bool
+        Append measurement of all qubits to the circuit.
+    logging_level : int | None
+        Logging level (see ``geqie.logging_utils.levels``).
+    encoding_params : dict
+        Extra keyword arguments passed to the encoding functions (e.g. ``{"bitrate": 4}``).
+
+    Returns
+    -------
+    QuantumCircuit
+        Circuit preparing the initial state followed by the encoding unitary.
+    """
     logger = setup_logger(logging_level, reset=True)
     shape = image.shape[:image_dimensionality]
 
@@ -96,6 +123,33 @@ def simulate(
     logging_level: int | None = None,
     **_: Dict[Any, Any],
 ) -> Result | Dict[str, int]:
+    """
+    Simulate the circuit locally with Qiskit Aer.
+
+    Parameters
+    ----------
+    circuit : QuantumCircuit
+        Circuit returned by [`encode`][geqie.main.encode].
+    n_shots : int
+        Number of simulation shots.
+    return_qiskit_result : bool
+        Return the raw Qiskit ``Result`` instead of counts.
+    return_padded_counts : bool
+        Include zero-count states in the returned counts.
+    device : str
+        Aer simulator device (``"CPU"`` or ``"GPU"``).
+    method : str
+        Aer simulation method (e.g. ``"automatic"``, ``"statevector"``).
+    noise_model : NoiseModel | None
+        Optional Qiskit Aer noise model.
+    logging_level : int | None
+        Logging level (see ``geqie.logging_utils.levels``).
+
+    Returns
+    -------
+    dict[str, int] | Result
+        Measurement counts keyed by bitstring, or the raw Qiskit ``Result``.
+    """
     logger = setup_logger(logging_level, reset=True)
 
     simulator = AerSimulator(device=device, method=method)
@@ -134,6 +188,45 @@ def execute(
     logging_level: int | None = None,
     **_: Dict[Any, Any],
 ) -> Result | Dict[str, int] | None:
+    """
+    Execute the circuit on hardware via IBM Quantum Platform (Qiskit Runtime ``SamplerV2``).
+
+    Parameters
+    ----------
+    circuit : QuantumCircuit
+        Circuit returned by [`encode`][geqie.main.encode].
+    n_shots : int
+        Number of shots.
+    circuit_param_values : dict
+        Values for parametrized circuits.
+    return_qiskit_result : bool
+        Return the raw Qiskit Runtime result instead of counts.
+    return_padded_counts : bool
+        Include zero-count states in the returned counts.
+    dry_run : bool
+        Set up the backend and transpile, but don't submit the job (returns ``None``).
+    api_token : str
+        IBM Quantum API token (used with ``instance_crn``).
+    instance_crn : str
+        IBM Quantum instance CRN.
+    credentials_name : str
+        Name of saved ``QiskitRuntimeService`` credentials (alternative to ``api_token``). If neither is given, the default saved account is used.
+    backend : str
+        Backend name; if empty, the least busy backend with enough qubits is selected.
+    channel : str
+        Qiskit Runtime channel.
+    ibm_qp_runtime_args : dict
+        Extra keyword arguments for ``QiskitRuntimeService``.
+    transpiler_args : dict
+        Extra keyword arguments for ``qiskit.transpile``.
+    logging_level : int | None
+        Logging level (see ``geqie.logging_utils.levels``).
+
+    Returns
+    -------
+    dict[str, int] | PrimitiveResult | None
+        Measurement counts keyed by bitstring, the raw Qiskit Runtime result, or ``None`` on a dry run.
+    """
     logger = setup_logger(logging_level, reset=True)
 
     logger.info("Setting up IBM Quantum backend...")
@@ -196,4 +289,23 @@ def retrieve(
     encoding_params: Dict[str, Any] = {},
     **_: Dict[Any, Any],
 ) -> np.ndarray:
+    """
+    Reconstruct the image from measurement counts using the encoding's retrieve function.
+
+    Parameters
+    ----------
+    retrieve_function : Callable[..., np.ndarray]
+        Encoding's ``retrieve_function`` (e.g. ``frqi.retrieve_function``).
+    results : dict[str, int]
+        Measurement counts returned by [`simulate`][geqie.main.simulate] or [`execute`][geqie.main.execute].
+    image_dimensionality : int
+        Number of spatial image dimensions (used by encodings that support it, e.g. ``mfrqi``).
+    encoding_params : dict
+        Extra keyword arguments passed to the retrieve function (e.g. ``{"bitrate": 4}``).
+
+    Returns
+    -------
+    np.ndarray
+        Reconstructed image.
+    """
     return retrieve_function(results, image_dimensionality=image_dimensionality, **encoding_params)

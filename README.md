@@ -10,6 +10,7 @@ GEQIE (from General Equation of Quantum Image Encoding [[1](#references)]) is a 
 
 ## Table of contents <!-- omit in toc -->
 
+- [Documentation](#documentation)
 - [Packages](#packages)
 - [Installation](#installation)
 - [Examples](#examples)
@@ -27,6 +28,16 @@ Related documentation:
 - [`geqie/README.md`](geqie/README.md)
 - [`geqie-qml/README.md`](geqie-qml/README.md)
 - [`gui/README.md`](gui/README.md)
+
+
+## Documentation
+
+Full documentation is available at [https://merqlab.github.io/geqie](https://merqlab.github.io/geqie/). To build it locally:
+
+```bash
+make install-requirements-docs
+make docs-serve
+```
 
 
 ## Packages

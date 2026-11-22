@@ -12,24 +12,14 @@ def get_ibm_quantum_backend(
         iqp_runtime_args: Dict[str, Any] = {},
         min_num_qubits: int | None = None,
 ) -> Any:
-
-    if credentials_name == "" and api_token == "":
-        raise ValueError("Either 'credentials_name' or 'api_token' + 'instance_name' must be provided.")
-    
-    if credentials_name != "":
-        ibm_qp_service = QiskitRuntimeService(
-            credentials_name, 
-            channel=channel,
-            **iqp_runtime_args,
-        )
-    else:
-        ibm_qp_service = QiskitRuntimeService(
-            channel=channel,
-            token=api_token,
-            instance=instance_crn,
-            **iqp_runtime_args,
-        )
-
+    ibm_qp_service = QiskitRuntimeService(
+        # A named account determines its own channel.
+        channel=None if credentials_name else channel,
+        token=api_token or None,
+        instance=instance_crn or None,
+        name=credentials_name or None,
+        **iqp_runtime_args,
+    )
     
     if backend != "":
         return ibm_qp_service.backend(backend)

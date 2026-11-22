@@ -42,8 +42,12 @@ iniconfig==2.3.0
     # via pytest
 kiwisolver==1.5.0
     # via matplotlib
+markdown-it-py==3.0.0
+    # via pytest-markdown-docs
 matplotlib==3.11.1
     # via -r geqie/requirements/requirements.in
+mdurl==0.1.2
+    # via markdown-it-py
 numpy==2.4.6
     # via
     #   -r geqie/requirements/requirements.in
@@ -94,6 +98,10 @@ pyparsing==3.3.2
 pyspnego==0.12.1
     # via requests-ntlm
 pytest==9.1.1
+    # via
+    #   -r geqie/requirements/requirements_dev.in
+    #   pytest-markdown-docs
+pytest-markdown-docs==0.9.2
     # via -r geqie/requirements/requirements_dev.in
 python-dateutil==2.9.0.post0
     # via
