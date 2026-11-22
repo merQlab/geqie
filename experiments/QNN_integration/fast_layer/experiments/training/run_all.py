@@ -22,25 +22,37 @@ import sys
 
 import training_common as common
 import cnn_angle_embedding_vqc_dense_training
+import cnn_angle_embedding_vqc_pauliz_dense_training
 import cnn_frqi_feature_maps_vqc_dense_training
+import cnn_frqi_feature_maps_vqc_pauliz_dense_training
 import cnn_training
 import cnn_zz_feature_map_vqc_dense_training
+import cnn_zz_feature_map_vqc_pauliz_dense_training
 import dense_training
 import frqi_direct_vqc_dense_training
+import frqi_direct_vqc_pauliz_dense_training
 import neqr_direct_vqc_dense_training
+import neqr_direct_vqc_pauliz_dense_training
 import pca_zz_feature_map_vqc_dense_training
+import pca_zz_feature_map_vqc_pauliz_dense_training
 
 SPECS = {
     spec.name: spec
     for spec in (
-        dense_training.SPEC,
-        cnn_training.SPEC,
-        pca_zz_feature_map_vqc_dense_training.SPEC,
-        cnn_zz_feature_map_vqc_dense_training.SPEC,
-        cnn_angle_embedding_vqc_dense_training.SPEC,
-        cnn_frqi_feature_maps_vqc_dense_training.SPEC,
-        frqi_direct_vqc_dense_training.SPEC,
-        neqr_direct_vqc_dense_training.SPEC,
+        # dense_training.SPEC,
+        # cnn_training.SPEC,
+        # pca_zz_feature_map_vqc_dense_training.SPEC,
+        # cnn_zz_feature_map_vqc_dense_training.SPEC,
+        # cnn_angle_embedding_vqc_dense_training.SPEC,
+        # cnn_frqi_feature_maps_vqc_dense_training.SPEC,
+        # frqi_direct_vqc_dense_training.SPEC,
+        # neqr_direct_vqc_dense_training.SPEC,
+        pca_zz_feature_map_vqc_pauliz_dense_training.SPEC,
+        cnn_zz_feature_map_vqc_pauliz_dense_training.SPEC,
+        cnn_angle_embedding_vqc_pauliz_dense_training.SPEC,
+        cnn_frqi_feature_maps_vqc_pauliz_dense_training.SPEC,
+        frqi_direct_vqc_pauliz_dense_training.SPEC,
+        neqr_direct_vqc_pauliz_dense_training.SPEC,
     )
 }
 

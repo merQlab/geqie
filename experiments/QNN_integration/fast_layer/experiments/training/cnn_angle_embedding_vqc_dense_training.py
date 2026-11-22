@@ -5,7 +5,7 @@ Image → CNN → Linear(qubits) → RX angle embedding → SamplerAnsatzLayer(V
 
 import torch
 import torch.nn as nn
-from geqie_qml import SamplerAnsatzLayer
+from geqie_qml import PauliZExpectationLayer, SamplerAnsatzLayer
 from geqie_qml.ansatze import default_vqc_ansatz
 
 import training_common as common
@@ -19,7 +19,14 @@ LEARNING_RATE = 0.1
 
 
 class CNNAngleVQCDenseClassifier(nn.Module):
-    def __init__(self, num_qubits: int, num_layers: int, num_classes: int, input_shape: tuple[int, int, int]):
+    def __init__(
+        self,
+        num_qubits: int,
+        num_layers: int,
+        num_classes: int,
+        input_shape: tuple[int, int, int],
+        pauli_z_readout: bool = False,
+    ):
         super().__init__()
         self.cnn = nn.Sequential(
             nn.Conv2d(input_shape[0], 16, 5, padding=2),
@@ -46,7 +53,8 @@ class CNNAngleVQCDenseClassifier(nn.Module):
             ansatz,
             weight_init=torch.empty(ansatz.num_parameters).uniform_(-torch.pi, torch.pi),
         )
-        self.head = nn.Linear(2 ** num_qubits, num_classes)
+        self.readout = PauliZExpectationLayer(num_qubits) if pauli_z_readout else nn.Identity()
+        self.head = nn.Linear(num_qubits if pauli_z_readout else 2 ** num_qubits, num_classes)
         self.log_softmax = nn.LogSoftmax(dim=-1)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -54,6 +62,7 @@ class CNNAngleVQCDenseClassifier(nn.Module):
         x = self.feature_head(x)
         x = self.encoding(x)
         x = self.qnn(x)
+        x = self.readout(x)
         x = self.head(x)
         return self.log_softmax(x)
 

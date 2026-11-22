@@ -2,7 +2,7 @@ import logging
 import os
 
 from .layer import VQCLayer, MatrixDataset, QCNNOutputInterpret
-from .layers import UnitaryInputLayer, SamplerAnsatzLayer, GEQIELayer
+from .layers import UnitaryInputLayer, SamplerAnsatzLayer, GEQIELayer, PauliZExpectationLayer
 
 from .dataset.zip_unitary_dataset import load_precomputed_zip_matrices, ZipUnitaryDataset
 from .precompute import compute_and_save_circuits

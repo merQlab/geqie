@@ -7,7 +7,7 @@ There is no precompute step: the feature maps change every training step, so the
 
 import torch
 import torch.nn as nn
-from geqie_qml import GEQIELayer, SamplerAnsatzLayer
+from geqie_qml import GEQIELayer, PauliZExpectationLayer, SamplerAnsatzLayer
 from geqie_qml.ansatze import default_vqc_ansatz
 
 import training_common as common
@@ -24,7 +24,7 @@ LEARNING_RATE = 0.001
 
 class CNNFRQISamplerAnsatzDenseClassifier(nn.Module):
     def __init__(
-        self, num_qubits: int, num_layers: int, num_classes: int, feature_maps: int, conv1_channels: int, num_pooling_layers: int, scale_output: bool = True
+        self, num_qubits: int, num_layers: int, num_classes: int, feature_maps: int, conv1_channels: int, num_pooling_layers: int, scale_output: bool = True, pauli_z_readout: bool = False
     ):
         super().__init__()
         self.num_qubits = num_qubits
@@ -46,8 +46,9 @@ class CNNFRQISamplerAnsatzDenseClassifier(nn.Module):
             SamplerAnsatzLayer(num_qubits, default_vqc_ansatz(num_qubits, num_layers=num_layers), seed=i)
             for i in range(feature_maps)
         ])
+        self.readout = PauliZExpectationLayer(num_qubits) if pauli_z_readout else nn.Identity()
         self.flatten = nn.Flatten()
-        self.head = nn.Linear(feature_maps * (2 ** num_qubits), num_classes)
+        self.head = nn.Linear(feature_maps * (num_qubits if pauli_z_readout else 2 ** num_qubits), num_classes)
         self.log_softmax = nn.LogSoftmax(dim=-1)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -57,6 +58,7 @@ class CNNFRQISamplerAnsatzDenseClassifier(nn.Module):
         x = torch.stack([vqc(states[:, i]) for i, vqc in enumerate(self.vqcs)], dim=1)
         if self.scale_output:
             x = x * 2 ** self.num_qubits
+        x = self.readout(x)  # (B, F, 2**n) -> (B, F, n) with the PauliZ read-out
         x = self.flatten(x)
         x = self.head(x)
         return self.log_softmax(x)

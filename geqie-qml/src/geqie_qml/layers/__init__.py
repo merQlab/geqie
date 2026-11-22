@@ -1,3 +1,4 @@
 from .geqie_layer import GEQIELayer
+from .pauli_z_expectation_layer import PauliZExpectationLayer
 from .sampler_ansatz_layer import SamplerAnsatzLayer
 from .unitary_input_layer import UnitaryInputLayer
