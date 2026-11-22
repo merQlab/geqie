@@ -94,9 +94,10 @@ def simulate_options(func) -> Callable:
 
 
 def execute_options(func) -> Callable:
-    @cloup.option("--n-shots", type=int, help="Number of simulation shots")
-    @cloup.option("--return-qiskit-result", type=cloup.BOOL, default=False, show_default=True, help="Return results directly from qiskit")
-    @cloup.option("--return-padded-counts", type=cloup.BOOL, default=False, show_default=True, help="Return state counts including zero-count states")
+    @cloup.option("--credentials-name", default="", help="Name of saved IBM Quantum credentials; if no credentials are given, the default saved account is used")
+    @cloup.option("--api-token", default="", help="IBM Quantum API token (used with --instance-crn)")
+    @cloup.option("--instance-crn", default="", help="IBM Quantum instance CRN")
+    @cloup.option("--channel", default="ibm_quantum_platform", show_default=True, help="Qiskit Runtime channel")
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         return func(*args, **kwargs)
