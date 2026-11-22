@@ -54,7 +54,23 @@ regenerate-requirements-geqie-qml:
 		geqie-qml/requirements/requirements_dev.in \
 		-o geqie-qml/requirements/requirements_dev.txt
 
-regenerate-requirements: regenerate-requirements-geqie regenerate-requirements-geqie-qml
+regenerate-requirements-docs:
+	uv pip compile \
+		docs/requirements/requirements.in \
+		-o docs/requirements/requirements.txt
+
+regenerate-requirements: regenerate-requirements-geqie regenerate-requirements-geqie-qml regenerate-requirements-docs
+
+
+## Documentation
+install-requirements-docs:
+	uv pip install -r docs/requirements/requirements.txt
+
+docs-serve:
+	zensical serve
+
+docs-build:
+	zensical build --clean --strict
 
 
 ## CI Targets
@@ -64,10 +80,14 @@ install-requirements-ci:
 	uv pip install ./geqie[dev] --system
 # 	uv pip install ./geqie-qml --system
 
-test: test-geqie test-geqie-qml
+test: test-geqie test-geqie-qml test-docs
 
 test-geqie:
 	pytest geqie/tests -W ignore::DeprecationWarning
+
+# Runs Python code blocks in the docs; mark non-runnable ones with {.python notest}.
+test-docs:
+	pytest docs --markdown-docs --markdown-docs-syntax=superfences -W ignore::DeprecationWarning
 
 # Exit code 5 means "no tests collected"; tolerate it while geqie-qml has no tests.
 test-geqie-qml:

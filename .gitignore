@@ -16,3 +16,6 @@ logs
 circuits/
 experiments/results
 lightning_logs/
+
+# MkDocs build output
+/site/

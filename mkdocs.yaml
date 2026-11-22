@@ -1,0 +1,92 @@
+site_name: GEQIE
+site_description: General Equation of Quantum Image Encoding - a framework for rapid prototyping, simulation, and evaluation of quantum image encodings.
+site_url: https://merqlab.github.io/geqie/
+repo_url: https://github.com/merQlab/geqie
+repo_name: merQlab/geqie
+edit_uri: edit/main/docs/
+copyright: Copyright &copy; merQlab. Licensed under Apache-2.0.
+
+exclude_docs: |
+  requirements/
+
+theme:
+  name: material
+  logo: https://raw.githubusercontent.com/merQlab/geqie/main/assets/geqie_logo.svg
+  favicon: https://raw.githubusercontent.com/merQlab/geqie/main/assets/geqie_logo.png
+  icon:
+    repo: fontawesome/brands/github
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - content.code.copy
+    - content.action.edit
+    - navigation.instant
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - search.highlight
+    - toc.follow
+
+nav:
+  - Home: index.md
+  - Getting started: getting-started.md
+  - User guide:
+      - Encodings: user-guide/encodings.md
+      - CLI: user-guide/cli.md
+      - Running on IBM Quantum: user-guide/ibm-quantum.md
+      - QML integration: user-guide/qml.md
+      - Web GUI: user-guide/gui.md
+  - Examples: examples.md
+  - API reference:
+      - geqie: api/geqie.md
+      - geqie-qml: api/geqie-qml.md
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [geqie/src, geqie-qml/src]
+          options:
+            docstring_style: numpy
+            docstring_section_style: table
+            filters: ["!^_"]
+            heading_level: 2
+            members_order: source
+            merge_init_into_class: true
+            separate_signature: true
+            show_root_heading: true
+            show_root_full_path: false
+            show_signature_annotations: true
+            show_source: true
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+            signature_crossrefs: true
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
