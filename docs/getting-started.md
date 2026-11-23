@@ -66,11 +66,11 @@ reconstructed = geqie.retrieve(neqr.retrieve_function, counts, encoding_params={
 
 Pass `logging_level` to any API function to inspect what GEQIE is doing. Besides the standard `logging` levels, GEQIE defines more verbose ones in `geqie.logging_utils.levels`: `MATH` (encoding matrices), `STATE` (per-pixel states and operators), and `TRACE`.
 
-```{.python continuation}
+```{.python notest}
 from geqie.logging_utils import levels
 
 circuit = geqie.encode(
     frqi.init_function, frqi.data_function, frqi.map_function, image,
-    logging_level=levels.STATE,
+    logging_level=levels.INFO,
 )
 ```

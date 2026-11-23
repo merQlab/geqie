@@ -80,7 +80,7 @@ test-docs:
 
 # Exit code 5 means "no tests collected"; tolerate it while geqie-qml has no tests.
 test-geqie-qml:
-	pytest geqie-qml/tests -W ignore::DeprecationWarning || [ $$? -eq 5 ]
+	pytest geqie-qml/tests -W ignore::DeprecationWarning
 
 
 ## CI Setup
