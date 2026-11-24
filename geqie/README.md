@@ -16,6 +16,7 @@ Core quantum image encoding library. Full documentation: [https://merqlab.github
   - [`geqie list-encodings`](#geqie-list-encodings)
   - [`geqie simulate`](#geqie-simulate)
   - [`geqie execute`](#geqie-execute)
+- [Citation](#citation)
 
 
 ## API
@@ -251,4 +252,20 @@ Options:
 
 ```bash
 geqie execute --encoding frqi --image-path assets/test_image.png --n-shots 1024
+```
+
+## Citation
+
+If you use GEQIE in your research, please cite the main paper:
+
+```bibtex
+@misc{potempa2025geqieframeworkrapidquantum,
+  title         = {GEQIE Framework for Rapid Quantum Image Encoding},
+  author        = {Rafał Potempa and Michał Kordasz and Józef P. Cyran and Kamil Wereszczyński and Krzysztof Simiński},
+  year          = {2025},
+  eprint        = {2512.24973},
+  archivePrefix = {arXiv},
+  primaryClass  = {quant-ph},
+  url           = {https://arxiv.org/abs/2512.24973}
+}
 ```
