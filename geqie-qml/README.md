@@ -4,11 +4,17 @@ QML integration extensions for [geqie](../geqie/README.md).
 
 ## Installation
 
+Pre-release from PyPI:
+
+```bash
+pip install --pre geqie-qml
+```
+
+From source:
+
 ```bash
 pip install .
 ```
-
-Requires `geqie` to be installed first.
 
 ## Examples
 

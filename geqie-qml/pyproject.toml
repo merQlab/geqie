@@ -1,6 +1,6 @@
 [project]
 name = "geqie-qml"
-version = "0.4.0"
+version = "0.4.0a1"
 description = "GEQIE QML extension"
 readme = "README.md"
 requires-python = ">=3.10"

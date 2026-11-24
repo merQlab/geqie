@@ -1,0 +1,53 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata from this file."
+type: software
+title: "GEQIE: General Equation of Quantum Image Encoding"
+abstract: "GEQIE is an open-source Python framework that unifies quantum image representation methods of the Quantum Lattice family using a common model based on position and value maps. Each method is specified by four Python functions, from which a unitary encoding gate is constructed and transpiled by Qiskit for simulators or IBM quantum hardware."
+authors:
+  - given-names: Rafał
+    family-names: Potempa
+    email: rafal.potempa@polsl.pl
+    orcid: "https://orcid.org/0000-0002-0813-0606"
+    affiliation: "Department of Algorithms and Software, Silesian University of Technology"
+  - given-names: Michał
+    family-names: Kordasz
+    orcid: "https://orcid.org/0000-0003-4193-9244"
+    affiliation: "MerQlab, Department of Computer Graphics, Vision and Digital Systems, Silesian University of Technology"
+  - given-names: Józef
+    family-names: Cyran
+    orcid: "https://orcid.org/0009-0006-5205-8986"
+    affiliation: "MerQlab, Department of Computer Graphics, Vision and Digital Systems, Silesian University of Technology"
+  - given-names: Kamil
+    family-names: Wereszczyński
+    orcid: "https://orcid.org/0000-0003-1686-472X"
+    affiliation: "MerQlab, Department of Computer Graphics, Vision and Digital Systems, Silesian University of Technology"
+  - given-names: Krzysztof
+    family-names: Simiński
+    orcid: "https://orcid.org/0000-0002-6118-606X"
+    affiliation: "Department of Algorithms and Software, Silesian University of Technology"
+repository-code: "https://github.com/merQlab/geqie"
+license: Apache-2.0
+preferred-citation:
+  type: article
+  title: "GEQIE Framework for Rapid Quantum Image Encoding"
+  authors:
+    - given-names: Rafał
+      family-names: Potempa
+    - given-names: Michał
+      family-names: Kordasz
+    - given-names: Józef P.
+      family-names: Cyran
+    - given-names: Kamil
+      family-names: Wereszczyński
+    - given-names: Krzysztof
+      family-names: Simiński
+  journal: "arXiv preprint"
+  year: 2025
+  doi: "10.48550/arXiv.2512.24973"
+  url: "https://arxiv.org/abs/2512.24973"
+keywords:
+  - quantum computing
+  - quantum image representation
+  - image encoding
+  - Qiskit
+  - Python

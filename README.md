@@ -94,6 +94,18 @@ If you use this code in your research, please cite the main paper:
 
 *GEQIE Framework for Rapid Quantum Image Encoding* at https://arxiv.org/abs/2512.24973
 
+```bibtex
+@misc{potempa2025geqie,
+  title         = {GEQIE Framework for Rapid Quantum Image Encoding},
+  author        = {Rafał Potempa and Michał Kordasz and Józef P. Cyran and Kamil Wereszczyński and Krzysztof Simiński},
+  year          = {2025},
+  eprint        = {2512.24973},
+  archivePrefix = {arXiv},
+  primaryClass  = {quant-ph},
+  url           = {https://arxiv.org/abs/2512.24973}
+}
+```
+
 
 ## Related research
 

@@ -3,49 +3,63 @@
 annotated-types==0.8.0
     # via
     #   -r geqie/requirements/requirements.txt
+    #   geqie
     #   pydantic
 antlr4-python3-runtime==4.13.2
     # via
     #   -r geqie/requirements/requirements.txt
+    #   geqie
     #   openqasm3
 certifi==2026.7.22
     # via
     #   -r geqie/requirements/requirements.txt
+    #   geqie
     #   requests
 cffi==2.1.0
     # via
     #   -r geqie/requirements/requirements.txt
     #   cryptography
+    #   geqie
 charset-normalizer==3.4.9
     # via
     #   -r geqie/requirements/requirements.txt
+    #   geqie
     #   requests
 click==8.4.2
     # via
     #   -r geqie/requirements/requirements.txt
     #   cloup
+    #   geqie
 cloup==3.1.0
-    # via -r geqie/requirements/requirements.txt
+    # via
+    #   -r geqie/requirements/requirements.txt
+    #   geqie
 colorama==0.4.6
     # via
     #   -r geqie/requirements/requirements.txt
     #   click
+    #   geqie
+    #   tqdm
 contourpy==1.3.3
     # via
     #   -r geqie/requirements/requirements.txt
+    #   geqie
     #   matplotlib
 cryptography==49.0.0
     # via
     #   -r geqie/requirements/requirements.txt
+    #   geqie
     #   pyspnego
     #   requests-ntlm
 cycler==0.12.1
     # via
     #   -r geqie/requirements/requirements.txt
+    #   geqie
     #   matplotlib
 dill==0.4.1
     # via
     #   -r geqie/requirements/requirements.txt
+    #   geqie
     #   qiskit
     #   qiskit-machine-learning
 filelock==3.32.2
@@ -53,24 +67,31 @@ filelock==3.32.2
 fonttools==4.63.0
     # via
     #   -r geqie/requirements/requirements.txt
+    #   geqie
     #   matplotlib
 fsspec==2026.7.0
     # via torch
+geqie==1.0.1
+    # via -r geqie-qml/requirements/requirements.in
 ibm-cloud-sdk-core==3.26.0
     # via
     #   -r geqie/requirements/requirements.txt
+    #   geqie
     #   ibm-platform-services
 ibm-platform-services==0.77.0
     # via
     #   -r geqie/requirements/requirements.txt
+    #   geqie
     #   qiskit-ibm-runtime
 ibm-quantum-schemas==0.10.20260723
     # via
     #   -r geqie/requirements/requirements.txt
+    #   geqie
     #   qiskit-ibm-runtime
 idna==3.18
     # via
     #   -r geqie/requirements/requirements.txt
+    #   geqie
     #   requests
 jinja2==3.1.6
     # via torch
@@ -79,11 +100,14 @@ joblib==1.5.3
 kiwisolver==1.5.0
     # via
     #   -r geqie/requirements/requirements.txt
+    #   geqie
     #   matplotlib
 markupsafe==3.0.3
     # via jinja2
 matplotlib==3.11.1
-    # via -r geqie/requirements/requirements.txt
+    # via
+    #   -r geqie/requirements/requirements.txt
+    #   geqie
 mpmath==1.3.0
     # via sympy
 narwhals==2.24.0
@@ -93,7 +117,9 @@ networkx==3.6.1
 numpy==2.4.6
     # via
     #   -r geqie/requirements/requirements.txt
+    #   -r geqie-qml/requirements/requirements.in
     #   contourpy
+    #   geqie
     #   ibm-quantum-schemas
     #   matplotlib
     #   qiskit
@@ -107,26 +133,32 @@ numpy==2.4.6
 openqasm3==1.0.1
     # via
     #   -r geqie/requirements/requirements.txt
+    #   geqie
     #   qiskit-qasm3-import
 orjson==3.11.9
     # via
     #   -r geqie/requirements/requirements.txt
+    #   geqie
     #   samplomatic
 packaging==26.2
     # via
     #   -r geqie/requirements/requirements.txt
+    #   geqie
     #   matplotlib
 pillow==12.0.0
     # via
     #   -r geqie/requirements/requirements.txt
+    #   geqie
     #   matplotlib
 psutil==7.2.2
     # via
     #   -r geqie/requirements/requirements.txt
+    #   geqie
     #   qiskit-aer
 pybase64==1.4.3
     # via
     #   -r geqie/requirements/requirements.txt
+    #   geqie
     #   ibm-quantum-schemas
     #   qiskit-ibm-runtime
     #   samplomatic
@@ -134,30 +166,37 @@ pycparser==3.0
     # via
     #   -r geqie/requirements/requirements.txt
     #   cffi
+    #   geqie
 pydantic==2.13.4
     # via
     #   -r geqie/requirements/requirements.txt
+    #   geqie
     #   ibm-quantum-schemas
     #   qiskit-ibm-runtime
 pydantic-core==2.46.4
     # via
     #   -r geqie/requirements/requirements.txt
+    #   geqie
     #   pydantic
 pyjwt==2.13.0
     # via
     #   -r geqie/requirements/requirements.txt
+    #   geqie
     #   ibm-cloud-sdk-core
 pyparsing==3.3.2
     # via
     #   -r geqie/requirements/requirements.txt
+    #   geqie
     #   matplotlib
 pyspnego==0.12.1
     # via
     #   -r geqie/requirements/requirements.txt
+    #   geqie
     #   requests-ntlm
 python-dateutil==2.9.0.post0
     # via
     #   -r geqie/requirements/requirements.txt
+    #   geqie
     #   ibm-cloud-sdk-core
     #   matplotlib
     #   qiskit-aer
@@ -165,6 +204,8 @@ python-dateutil==2.9.0.post0
 qiskit==2.5.1
     # via
     #   -r geqie/requirements/requirements.txt
+    #   -r geqie-qml/requirements/requirements.in
+    #   geqie
     #   ibm-quantum-schemas
     #   qiskit-aer
     #   qiskit-ibm-runtime
@@ -172,33 +213,42 @@ qiskit==2.5.1
     #   qiskit-qasm3-import
     #   samplomatic
 qiskit-aer==0.17.2
-    # via -r geqie/requirements/requirements.txt
+    # via
+    #   -r geqie/requirements/requirements.txt
+    #   geqie
 qiskit-ibm-runtime==0.48.0
-    # via -r geqie/requirements/requirements.txt
+    # via
+    #   -r geqie/requirements/requirements.txt
+    #   geqie
 qiskit-machine-learning==0.9.0
     # via -r geqie-qml/requirements/requirements.in
 qiskit-qasm3-import==0.6.0
     # via
     #   -r geqie/requirements/requirements.txt
+    #   geqie
     #   ibm-quantum-schemas
 requests==2.34.2
     # via
     #   -r geqie/requirements/requirements.txt
+    #   geqie
     #   ibm-cloud-sdk-core
     #   qiskit-ibm-runtime
     #   requests-ntlm
 requests-ntlm==1.3.0
     # via
     #   -r geqie/requirements/requirements.txt
+    #   geqie
     #   qiskit-ibm-runtime
 rustworkx==0.18.1
     # via
     #   -r geqie/requirements/requirements.txt
+    #   geqie
     #   qiskit
     #   samplomatic
 samplomatic==0.20.0
     # via
     #   -r geqie/requirements/requirements.txt
+    #   geqie
     #   ibm-quantum-schemas
     #   qiskit-ibm-runtime
 scikit-learn==1.9.0
@@ -206,6 +256,7 @@ scikit-learn==1.9.0
 scipy==1.15.3
     # via
     #   -r geqie/requirements/requirements.txt
+    #   geqie
     #   qiskit
     #   qiskit-aer
     #   qiskit-ibm-runtime
@@ -218,29 +269,37 @@ setuptools==83.0.0
 six==1.17.0
     # via
     #   -r geqie/requirements/requirements.txt
+    #   geqie
     #   python-dateutil
 sspilib==0.5.0
     # via
     #   -r geqie/requirements/requirements.txt
+    #   geqie
     #   pyspnego
 stevedore==5.9.0
     # via
     #   -r geqie/requirements/requirements.txt
+    #   geqie
     #   qiskit
 sympy==1.14.0
     # via torch
 tabulate==0.10.0
-    # via -r geqie/requirements/requirements.txt
+    # via
+    #   -r geqie/requirements/requirements.txt
+    #   geqie
 threadpoolctl==3.6.0
     # via scikit-learn
 torch==2.13.0
     # via
     #   -r geqie-qml/requirements/requirements.in
     #   qiskit-machine-learning
+tqdm==4.70.1
+    # via -r geqie-qml/requirements/requirements.in
 typing-extensions==4.16.0
     # via
     #   -r geqie/requirements/requirements.txt
     #   -r geqie-qml/requirements/requirements.in
+    #   geqie
     #   pydantic
     #   pydantic-core
     #   qiskit
@@ -249,10 +308,12 @@ typing-extensions==4.16.0
 typing-inspection==0.4.2
     # via
     #   -r geqie/requirements/requirements.txt
+    #   geqie
     #   pydantic
 urllib3==2.7.0
     # via
     #   -r geqie/requirements/requirements.txt
+    #   geqie
     #   ibm-cloud-sdk-core
     #   qiskit-ibm-runtime
     #   requests
