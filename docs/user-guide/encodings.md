@@ -9,13 +9,13 @@ Each built-in encoding lives in `geqie.encodings.<name>`:
 | Name | Encoding | Image type | Example |
 |---|---|---|---|
 | `frqi` | Flexible Representation of Quantum Images ([Le et al., 2011](https://link.springer.com/article/10.1007/s11128-010-0177-y)) | Grayscale | [frqi.ipynb](https://github.com/merQlab/geqie/blob/main/examples/encodings/frqi.ipynb) |
-| `ifrqi` | Improved FRQI | Grayscale | [ifrqi.ipynb](https://github.com/merQlab/geqie/blob/main/examples/encodings/ifrqi.ipynb) |
-| `neqr` | Novel Enhanced Quantum Representation | Grayscale | [neqr.ipynb](https://github.com/merQlab/geqie/blob/main/examples/encodings/neqr.ipynb) |
-| `qualpi` | Quantum Log-Polar Image | Grayscale | [qualpi.ipynb](https://github.com/merQlab/geqie/blob/main/examples/encodings/qualpi.ipynb) |
+| `ifrqi` | Improved FRQI ([Khan, 2019](https://link.springer.com/article/10.1007/s11128-019-2306-6)) | Grayscale | [ifrqi.ipynb](https://github.com/merQlab/geqie/blob/main/examples/encodings/ifrqi.ipynb) |
+| `neqr` | Novel Enhanced Quantum Representation ([Zhang et al., 2013](https://link.springer.com/article/10.1007/s11128-013-0567-z)) | Grayscale | [neqr.ipynb](https://github.com/merQlab/geqie/blob/main/examples/encodings/neqr.ipynb) |
+| `qualpi` | Quantum Log-Polar Image ([Zhang et al., 2013](https://link.springer.com/article/10.1007/s11128-013-0587-8)) | Grayscale | [qualpi.ipynb](https://github.com/merQlab/geqie/blob/main/examples/encodings/qualpi.ipynb) |
 | `frqci` | Flexible Representation of Quantum Color Images ([Li et al., 2016](https://link.springer.com/article/10.1007/s11128-016-1413-x)) | RGB | [frqci.ipynb](https://github.com/merQlab/geqie/blob/main/examples/encodings/frqci.ipynb) |
-| `mcqi` | Multi-Channel Quantum Images | RGB | [mcqi.ipynb](https://github.com/merQlab/geqie/blob/main/examples/encodings/mcqi.ipynb) |
-| `ncqi` | Novel quantum representation of Color Images | RGB | [ncqi.ipynb](https://github.com/merQlab/geqie/blob/main/examples/encodings/ncqi.ipynb) |
-| `qrci` | Quantum Representation of Color Images | RGB | [qrci.ipynb](https://github.com/merQlab/geqie/blob/main/examples/encodings/qrci.ipynb) |
+| `mcqi` | Multi-Channel Quantum Images ([Sun et al., 2013](https://doi.org/10.20965/jaciii.2013.p0404)) | RGB | [mcqi.ipynb](https://github.com/merQlab/geqie/blob/main/examples/encodings/mcqi.ipynb) |
+| `ncqi` | Novel quantum representation of Color Images ([Sang et al., 2017](https://link.springer.com/article/10.1007/s11128-016-1463-0)) | RGB | [ncqi.ipynb](https://github.com/merQlab/geqie/blob/main/examples/encodings/ncqi.ipynb) |
+| `qrci` | Quantum Representation of Color Images ([Wang et al., 2019](https://doi.org/10.1016/j.optcom.2019.01.015)) | RGB | [qrci.ipynb](https://github.com/merQlab/geqie/blob/main/examples/encodings/qrci.ipynb) |
 | `mfrqi` | Multidimensional FRQI ([Li et al., 2014](https://link.springer.com/article/10.1007/s11128-013-0705-7)) | N-dimensional | [mfrqi.ipynb](https://github.com/merQlab/geqie/blob/main/examples/encodings/mfrqi.ipynb) |
 
 Grayscale encodings accept color images too: they convert them with [`ensure_grayscale`][geqie.encodings.ensure_grayscale] using the `grayscale_strategy` encoding parameter (`"luminance"` by default, `"first_channel"`, or `"average"`).

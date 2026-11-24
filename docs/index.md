@@ -20,7 +20,7 @@ Each encoding is defined by a small set of functions (`init`, `data`, `map`, and
 - [Getting started](getting-started.md) - install GEQIE and encode your first image.
 - [Encodings](user-guide/encodings.md) - built-in encodings and how to write your own.
 - [CLI](user-guide/cli.md) - encode and simulate images from the command line.
-- [Examples](examples.md) - Jupyter notebooks.
+- [Examples](examples.md) - examples from the paper and Jupyter notebooks.
 - [API reference](api/geqie.md) - full Python API.
 
 ## Citation
