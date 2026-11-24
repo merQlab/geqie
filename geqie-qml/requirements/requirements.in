@@ -1,3 +1,7 @@
+geqie>=1.0.1
+numpy
+qiskit>=2.0.0
 qiskit-machine-learning[torch]
 torch>=2.11
+tqdm
 typing_extensions
