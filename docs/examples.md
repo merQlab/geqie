@@ -76,7 +76,7 @@ import numpy as np
 import geqie
 from geqie.encodings import mfrqi
 
-density = np.random.default_rng(0).lognormal(size=(2, 2, 2))  # 16x16x16 voxel grid in the paper
+density = np.random.default_rng(0).lognormal(size=(2, 2, 2))
 
 scale = np.median(density)
 normalized = 1 - np.exp(-density / scale)
@@ -84,7 +84,7 @@ circuit = geqie.encode(
     mfrqi.init_function, mfrqi.data_function, mfrqi.map_function, normalized,
     image_dimensionality=3,
 )
-counts = geqie.simulate(circuit, n_shots=2**14)  # 2**20 in the paper
+counts = geqie.simulate(circuit, n_shots=2**14)
 retrieved = mfrqi.retrieve_function(counts, image_dimensionality=3)
 density_retrieved = -scale * np.log(1 - retrieved + 1e-60)
 ```
