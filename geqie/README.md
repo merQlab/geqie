@@ -54,7 +54,7 @@ Each encoding lives in `geqie.encodings.<name>` (e.g., `frqi`, `neqr`, `mcqi`) a
 
 Builds a quantum circuit encoding the image using the provided encoding functions.
 
-```python
+```python notest
 geqie.encode(
     init_function, data_function, map_function, image,
     image_dimensionality=2,
@@ -79,7 +79,7 @@ geqie.encode(
 
 Simulates the circuit locally with Qiskit Aer.
 
-```python
+```python notest
 geqie.simulate(
     circuit, n_shots,
     return_qiskit_result=False,
@@ -106,7 +106,7 @@ geqie.simulate(
 
 Executes the circuit on real hardware via IBM Quantum Platform (Qiskit Runtime `SamplerV2`).
 
-```python
+```python notest
 geqie.execute(
     circuit, n_shots,
     circuit_param_values={},
@@ -143,7 +143,7 @@ geqie.execute(
 
 **Example**
 
-```python
+```python notest
 counts = geqie.execute(circuit, n_shots=1024, credentials_name="my-ibm-credentials")
 ```
 
@@ -151,7 +151,7 @@ counts = geqie.execute(circuit, n_shots=1024, credentials_name="my-ibm-credentia
 
 Reconstructs the image from measurement counts using the encoding's retrieve function.
 
-```python
+```python notest
 geqie.retrieve(
     retrieve_function, results,
     image_dimensionality=2,

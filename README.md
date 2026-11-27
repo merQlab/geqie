@@ -14,10 +14,11 @@ GEQIE (from General Equation of Quantum Image Encoding [[1](#references)]) is a 
 - [Packages](#packages)
 - [Installation](#installation)
 - [Examples](#examples)
+  - [Python usage](#python-usage)
+  - [CLI usage](#cli-usage)
   - [Notebooks](#notebooks)
     - [GEQIE](#geqie)
     - [GEQIE QML](#geqie-qml)
-  - [CLI usage](#cli-usage)
 - [Citation](#citation)
 - [Related research](#related-research)
 - [Web Playground](#web-playground)
@@ -58,6 +59,38 @@ pip install geqie-qml/   # optional, for QML support
 
 ## Examples
 
+### Python usage
+
+```python
+import numpy as np
+from PIL import Image
+
+import geqie
+from geqie.encodings import frqi
+
+image = np.asarray(Image.open("assets/test_images/grayscale/test_image_4x4.png"))
+
+circuit = geqie.encode(frqi.init_function, frqi.data_function, frqi.map_function, image)
+counts = geqie.simulate(circuit, n_shots=1024)
+reconstructed = geqie.retrieve(frqi.retrieve_function, counts)
+```
+
+To run the circuit on IBM Quantum hardware instead of the simulator:
+
+```python notest
+counts = geqie.execute(circuit, n_shots=1024, credentials_name="my-ibm-credentials")
+```
+
+### CLI usage
+
+```bash
+geqie list-encodings
+geqie simulate --encoding frqi --image-path assets/test_images/grayscale/test_image.png --n-shots 1024 --return-padded-counts true
+geqie execute --encoding frqi --image-path assets/test_images/grayscale/test_image.png --n-shots 1024
+```
+
+See [geqie/README.md](geqie/README.md) for the full API and CLI reference.
+
 ### Notebooks
 
 See the [`examples/`](examples/) directory for iPython notebooks:
@@ -81,11 +114,6 @@ See the [`examples/`](examples/) directory for iPython notebooks:
 | [`geqie_qml_precompute.ipynb`](examples/geqie_qml_precompute.ipynb) | QML precomputation pipeline |
 | [`geqie_qml_training_precomputed.ipynb`](examples/geqie_qml_training_precomputed.ipynb) | QML training on precomputed data |
 | [`geqie_qml_training_live.ipynb`](examples/geqie_qml_training_live.ipynb) | QML training on live images |
-
-
-### CLI usage
-
-See [geqie/README.md](geqie/README.md) for full CLI reference.
 
 
 ## Citation

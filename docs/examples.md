@@ -107,7 +107,7 @@ image = np.asarray(ImageOps.grayscale(Image.open("assets/test_images/grayscale/t
 circuit = geqie.encode(frqi.init_function, frqi.data_function, frqi.map_function, image)
 
 qc = transpile(circuit, basis_gates=["cx", "u"], optimization_level=1)
-print(qc.num_qubits, qc.depth(), qc.count_ops()["cx"])
+cnot_count = qc.count_ops()["cx"]
 ```
 
 See [`circuit_cost_benchmark.ipynb`](https://github.com/merQlab/geqie/blob/main/experiments/circuit_cost_benchmark.ipynb) for the comparison with the gate-level FRQI construction and Qiskit `StatePreparation`.

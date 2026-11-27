@@ -70,17 +70,22 @@ docs-build:
 
 
 ## Tests
-test: test-geqie test-geqie-qml test-docs
-
 test-geqie:
 	pytest geqie/tests -W ignore::DeprecationWarning
 
 test-docs:
-	pytest docs --markdown-docs --markdown-docs-syntax=superfences -W ignore::DeprecationWarning
+	pytest \
+		README.md \
+		geqie/README.md \
+		geqie-qml/README.md \
+		docs \
+		--markdown-docs --markdown-docs-syntax=superfences -W ignore::DeprecationWarning
 
 # Exit code 5 means "no tests collected"; tolerate it while geqie-qml has no tests.
 test-geqie-qml:
 	pytest geqie-qml/tests -W ignore::DeprecationWarning
+
+test: test-geqie test-geqie-qml test-docs
 
 
 ## CI Setup
