@@ -19,10 +19,10 @@ GEQIE (from General Equation of Quantum Image Encoding [[1](#references)]) is a 
   - [Notebooks](#notebooks)
     - [GEQIE](#geqie)
     - [GEQIE QML](#geqie-qml)
-- [Citation](#citation)
-- [Related research](#related-research)
 - [Web Playground](#web-playground)
 - [Acknowledgements](#acknowledgements)
+- [Related research](#related-research)
+- [Citation](#citation)
 - [References](#references)
 
 Related documentation:
@@ -116,6 +116,26 @@ See the [`examples/`](examples/) directory for iPython notebooks:
 | [`geqie_qml_training_live.ipynb`](examples/geqie_qml_training_live.ipynb) | QML training on live images |
 
 
+## Web Playground
+
+Public GUI access: [https://web-staging-eb84.up.railway.app](https://web-staging-eb84.up.railway.app/) (Pending deployment on the university infrastructure).
+
+![geqie_gui_gif](assets/geqie_gui.gif)
+
+See the [gui/README.md](gui/README.md) for instructions on running the GEQIE GUI locally.
+
+
+## Acknowledgements
+
+The authors would like to acknowledge that this repository is maintained for the OptiQ project. This Project has received funding from the European Union’s Horizon Europe programme under the grant agreement No 101080374-OptiQ. Supplementarily, the Project is co-financed from the resources of the Polish Ministry of Science and Higher Education in a frame of programme International Co-financed Projects. Disclaimer Funded by the European Union. Views and opinions expressed are however those of the author(s) only and do not necessarily reflect those of the European Union or the European Research Executive Agency (REA–granting authority). Neither the European Union nor the granting authority can beheld responsible for them.
+
+
+## Related research
+
+- [Main paper - GEQIE Framework for Rapid Quantum Image Encoding](https://arxiv.org/abs/2512.24973)
+- [ICCS 2024 Poster](https://www.researchgate.net/publication/383184874_General_Quantum_Image_Representation_Model_and_Framework)
+
+
 ## Citation
 
 If you use this code in your research, please cite the main paper:
@@ -133,26 +153,6 @@ If you use this code in your research, please cite the main paper:
   url           = {https://arxiv.org/abs/2512.24973}
 }
 ```
-
-
-## Related research
-
-- [Main paper - GEQIE Framework for Rapid Quantum Image Encoding](https://arxiv.org/abs/2512.24973)
-- [ICCS 2024 Poster](https://www.researchgate.net/publication/383184874_General_Quantum_Image_Representation_Model_and_Framework)
-
-
-## Web Playground
-
-Public GUI access: [https://web-staging-eb84.up.railway.app](https://web-staging-eb84.up.railway.app/) (Pending deployment on the university infrastructure).
-
-![geqie_gui_gif](assets/geqie_gui.gif)
-
-See the [gui/README.md](gui/README.md) for instructions on running the GEQIE GUI locally.
-
-
-## Acknowledgements
-
-The authors would like to acknowledge that this repository is maintained for the OptiQ project. This Project has received funding from the European Union’s Horizon Europe programme under the grant agreement No 101080374-OptiQ. Supplementarily, the Project is co-financed from the resources of the Polish Ministry of Science and Higher Education in a frame of programme International Co-financed Projects. Disclaimer Funded by the European Union. Views and opinions expressed are however those of the author(s) only and do not necessarily reflect those of the European Union or the European Research Executive Agency (REA–granting authority). Neither the European Union nor the granting authority can beheld responsible for them.
 
 ## References
 
