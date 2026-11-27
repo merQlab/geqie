@@ -259,7 +259,7 @@ geqie execute --encoding frqi --image-path assets/test_image.png --n-shots 1024
 If you use GEQIE in your research, please cite the main paper:
 
 ```bibtex
-@misc{potempa2025geqieframeworkrapidquantum,
+@misc{potempa2025geqie,
   title         = {GEQIE Framework for Rapid Quantum Image Encoding},
   author        = {Rafał Potempa and Michał Kordasz and Józef P. Cyran and Kamil Wereszczyński and Krzysztof Simiński},
   year          = {2025},
